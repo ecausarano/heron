@@ -2,20 +2,36 @@ package eu.heronnet;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import eu.heronnet.cli.CLI;
 import il.technion.ewolf.dht.DHT;
 import il.technion.ewolf.dht.DHTStorage;
 import il.technion.ewolf.dht.SimpleDHTModule;
 import il.technion.ewolf.dht.storage.AgeLimitedDHTStorage;
 import il.technion.ewolf.kbr.KeybasedRouting;
 import il.technion.ewolf.kbr.openkad.KadNetModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: ecausarano
- * Date: 2/10/13
- * Time: 3:08 PM
- * To change this template use File | Settings | File Templates.
+ * This file is part of Heron
+ * Copyright (C) 2013 Edoardo Causarano
+ * <p/>
+ * Heron is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p/>
+ * Heron is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
        /*
@@ -49,6 +65,8 @@ import il.technion.ewolf.kbr.openkad.KadNetModule;
 
 public class Main {
 
+    public static final Logger logger = LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args) throws Exception {
 
         // TODO - jline CLI
@@ -58,7 +76,9 @@ public class Main {
         // manipulate commands: store index, search, fetch, add/delete DHTs
         // start with ARCHETYPE, PROTOTYPE
 
+        CLI cli = new CLI();
 
+//        cli.repl();
 
         // getting an instance and creating
         Injector injector = Guice.createInjector(
@@ -81,11 +101,11 @@ public class Main {
                 .setStorage(storage)
                 .create();
 
-//        List<URI> netBootStrap = new ArrayList<URI>();
-//        netBootStrap.add(new URI("openkad.udp://0.0.0.0:5555/"));
+        List<URI> netBootStrap = new ArrayList<URI>();
+        netBootStrap.add(new URI("openkad.udp://0.0.0.0:5555/"));
 
 //        kbr.join(netBootStrap);
 
-
     }
+
 }
