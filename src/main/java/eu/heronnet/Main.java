@@ -2,7 +2,8 @@ package eu.heronnet;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import eu.heronnet.cli.CLI;
+import eu.heronnet.core.cli.CLI;
+import eu.heronnet.core.dht.Tables;
 import il.technion.ewolf.dht.DHT;
 import il.technion.ewolf.dht.DHTStorage;
 import il.technion.ewolf.dht.SimpleDHTModule;
@@ -48,16 +49,16 @@ import java.util.List;
         * and their prototypes.
         *
         * Technically archetypes are the names of the DHTs available on the network, Archetypes are used to run queries,
-        * therefore they are indexes. If DHT does not allow for * queries, a root archetype is necessary.
+        * therefore they are indexes. If Tables does not allow for * queries, a root archetype is necessary.
         *
-        * (we need a meta DHT to track everything and add stuff manually)
+        * (we need a meta Tables to track everything and add stuff manually)
         *
-        * query the predefined "archetype" DHT to bootstrap the archetype table
+        * query the predefined "archetype" Tables to bootstrap the archetype table
         * archetypes such as version, user, data
         *
         * archetype -> A_UUID, name (the data)
         *
-        * hit the prototype DHT to bootstrap known prototypes, and classify them by archetype
+        * hit the prototype Tables to bootstrap known prototypes, and classify them by archetype
         *
         * prototype -> P_UUID, A_UUID, name (the data)
         *
@@ -76,35 +77,13 @@ public class Main {
         // manipulate commands: store index, search, fetch, add/delete DHTs
         // start with ARCHETYPE, PROTOTYPE
 
+        Tables tables = new Tables();
+        tables.init();
+        tables.start();
+
         CLI cli = new CLI();
-
-//        cli.repl();
-
-        // getting an instance and creating
-        Injector injector = Guice.createInjector(
-                new KadNetModule()
-                        .setProperty("openkad.net.udp.port", "5555"),
-
-                new SimpleDHTModule()
-        );
-
-        KeybasedRouting kbr = injector.getInstance(KeybasedRouting.class);
-        kbr.create();
-
-        // create a storage - add berkeley db
-        DHTStorage storage = injector.getInstance(AgeLimitedDHTStorage.class)
-                .create();
-
-        // create the dht and register the storage class
-        DHT dht = injector.getInstance(DHT.class)
-                .setName("schema")
-                .setStorage(storage)
-                .create();
-
-        List<URI> netBootStrap = new ArrayList<URI>();
-        netBootStrap.add(new URI("openkad.udp://0.0.0.0:5555/"));
-
-//        kbr.join(netBootStrap);
+        cli.init();
+        cli.start();
 
     }
 
