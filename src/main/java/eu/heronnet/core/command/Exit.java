@@ -1,7 +1,7 @@
 package eu.heronnet.core.command;
 
 import com.google.common.eventbus.EventBus;
-import eu.heronnet.core.module.CLI;
+import eu.heronnet.core.module.UI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class Exit implements Command {
     private static final String KEY = "EXIT";
 
     @Inject
-    CLI cli;
+    private UI cli;
 
     @Override
     public String getKey() {
