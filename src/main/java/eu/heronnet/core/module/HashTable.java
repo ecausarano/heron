@@ -1,4 +1,4 @@
-package eu.heronnet.core.dht;
+package eu.heronnet.core.module;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -34,9 +34,9 @@ import java.util.List;
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class Tables {
+public class HashTable {
 
-    private static Logger logger = LoggerFactory.getLogger(Tables.class);
+    private static Logger logger = LoggerFactory.getLogger(HashTable.class);
 
     private KeybasedRouting kbr = null;
     private DHTStorage storage = null;
@@ -50,8 +50,8 @@ public class Tables {
             @Override
             public void run() {
                 Injector injector = Guice.createInjector(
-                new KadNetModule().setProperty("openkad.net.udp.port", "5555"),
-                new SimpleDHTModule());
+                        new KadNetModule().setProperty("openkad.net.udp.port", "5555"),
+                        new SimpleDHTModule());
                 kbr = injector.getInstance(KeybasedRouting.class);
                 try {
                     kbr.create();
@@ -60,7 +60,7 @@ public class Tables {
                 }
 
                 storage = injector.getInstance(AgeLimitedDHTStorage.class)
-                .create();
+                        .create();
 
                 DHT dht = injector.getInstance(DHT.class)
                         .setName("schema")
@@ -79,9 +79,9 @@ public class Tables {
             logger.error(e.getLocalizedMessage());
         }
     }
+
     public void start() {
 //        kbr.join(netBootStrap);
         thread.start();
- }
-
+    }
 }
