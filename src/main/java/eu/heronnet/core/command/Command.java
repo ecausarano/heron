@@ -21,5 +21,7 @@ public interface Command {
 
     public String getKey();
 
-    void execute(String... varargs);
+    void execute();
+
+    void setArgs(String... varargs);
 }

@@ -1,6 +1,5 @@
 package eu.heronnet;
 
-import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.Service;
 import com.google.inject.AbstractModule;
@@ -10,11 +9,10 @@ import com.google.inject.Scopes;
 import com.google.inject.name.Names;
 import eu.heronnet.core.command.*;
 import eu.heronnet.core.module.CLI;
+import eu.heronnet.core.module.DHTService;
 import eu.heronnet.core.module.UI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.Executors;
 
 /**
  * This file is part of Heron
@@ -48,16 +46,16 @@ import java.util.concurrent.Executors;
         * and their prototypes.
         *
         * Technically archetypes are the names of the DHTs available on the network, Archetypes are used to run queries,
-        * therefore they are indexes. If HashTable does not allow for * queries, a root archetype is necessary.
+        * therefore they are indexes. If DHTService does not allow for * queries, a root archetype is necessary.
         *
-        * (we need a meta HashTable to track everything and add stuff manually)
+        * (we need a meta DHTService to track everything and add stuff manually)
         *
-        * query the predefined "archetype" HashTable to bootstrap the archetype table
+        * query the predefined "archetype" DHTService to bootstrap the archetype table
         * archetypes such as version, user, data
         *
         * archetype -> A_UUID, name (the data)
         *
-        * hit the prototype HashTable to bootstrap known prototypes, and classify them by archetype
+        * hit the prototype DHTService to bootstrap known prototypes, and classify them by archetype
         *
         * prototype -> P_UUID, A_UUID, name (the data)
         *
@@ -66,8 +64,6 @@ import java.util.concurrent.Executors;
 public class Main extends AbstractModule {
 
     public static final Logger logger = LoggerFactory.getLogger(Main.class);
-    public static final String MAIN_BUS = "MAIN_BUS";
-    public static final int N_THREADS = 5;
 
     public static void main(String[] args) throws Exception {
 
@@ -85,16 +81,21 @@ public class Main extends AbstractModule {
         );
 
         Service cli = injector.getInstance(UI.class);
-        cli.startAndWait();
+        cli.start();
+
+        Service dht = injector.getInstance(DHTService.class);
+        dht.start();
     }
 
     @Override
     protected void configure() {
 
-        EventBus eventBus = new AsyncEventBus(MAIN_BUS, Executors.newFixedThreadPool(N_THREADS));
-        bind(EventBus.class).toInstance(eventBus);
+        bind(EventBus.class).toProvider(EventBusProvider.class);
         bind(UI.class).to(CLI.class).in(Scopes.SINGLETON);
 
+        DHTService dhtService = new DHTService();
+        bind(DHTService.class).toInstance(dhtService);
+        // register
         bind(Command.class).annotatedWith(Names.named("EXIT")).to(Exit.class);
         bind(Command.class).annotatedWith(Names.named("FIND")).to(Find.class);
         bind(Command.class).annotatedWith(Names.named("GET")).to(Get.class);

@@ -32,7 +32,12 @@ public class Find implements Command {
     }
 
     @Override
-    public void execute(String... arguments) {
+    public void execute() {
         logger.debug("called {}", key);
+    }
+
+    @Override
+    public void setArgs(String... varargs) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 }

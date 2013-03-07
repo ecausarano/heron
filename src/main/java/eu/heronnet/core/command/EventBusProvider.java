@@ -1,9 +1,10 @@
 package eu.heronnet.core.command;
 
+import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
-import com.google.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.inject.Provider;
+
+import java.util.concurrent.Executors;
 
 /**
  * This file is part of heron
@@ -22,27 +23,15 @@ import org.slf4j.LoggerFactory;
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class Get implements Command {
+public class EventBusProvider implements Provider<EventBus> {
 
-    private static final Logger logger = LoggerFactory.getLogger(Get.class);
+    private final String MAIN_BUS = "MAIN_BUS";
+    private int N_THREADS = 5;
 
-    private static final String key = "GET";
-
-    @Override
-    public String getKey() {
-        return key;
-    }
+    EventBus eventBus = new AsyncEventBus(MAIN_BUS, Executors.newFixedThreadPool(N_THREADS));
 
     @Override
-    public void execute() {
-        logger.debug("called {}", key);
+    public EventBus get() {
+        return eventBus;
     }
-
-    @Override
-    public void setArgs(String... varargs) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Inject
-    private EventBus eventBus;
 }

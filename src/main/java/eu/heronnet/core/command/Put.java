@@ -1,7 +1,16 @@
 package eu.heronnet.core.command;
 
+import com.google.inject.Inject;
+import eu.heronnet.core.module.DHTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * This file is part of heron
@@ -25,13 +34,37 @@ public class Put implements Command {
     private static final Logger logger = LoggerFactory.getLogger(Put.class);
     private static final String key = "PUT";
 
+    @Inject
+    private DHTService dhtService;
+    private File file;
+
     @Override
     public String getKey() {
         return key;
     }
 
     @Override
-    public void execute(String... arguments) {
+    public void execute() {
         logger.debug("called {}", key);
+
+        logger.debug("putting stuff from {}", file.toPath());
+
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+
+        } catch (FileNotFoundException e) {
+            logger.error(e.getLocalizedMessage());
+        }
+        UUID uuid = dhtService.put(file);
+
+        List<Serializable> results = dhtService.get(uuid.toString());
+
+        logger.debug("fetched back {}", results.toString());
+
+    }
+
+    @Override
+    public void setArgs(String... varargs) {
+        file = new File(varargs[0]);
     }
 }

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -40,6 +41,10 @@ public class CLI extends AbstractExecutionThreadService implements UI {
     private static final Logger logger = LoggerFactory.getLogger(CLI.class);
     private static final String DEFAULT_PROMPT = "heron> ";
 
+    // TODO - get rid of this crap, commands should register themselves.
+    // This class should query the guice context for the list
+    private static final List<String> COMMANDS = Arrays.asList(
+            new String[]{"PUT", "GET", "FIND", "EXIT"});
     private ConsoleReader consoleReader = null;
     private List<Command> history = null;
 
@@ -63,7 +68,7 @@ public class CLI extends AbstractExecutionThreadService implements UI {
 
         // here get List<String>commandKeys...
         consoleReader.addCompleter(
-                new StringsCompleter("put", "get", "find", "exit")
+                new StringsCompleter(COMMANDS)
         );
 
         history = new ArrayList<Command>();
@@ -74,14 +79,25 @@ public class CLI extends AbstractExecutionThreadService implements UI {
         while (run) {
             try {
                 String line = consoleReader.readLine(DEFAULT_PROMPT);
-                StringTokenizer stringTokenizer = new StringTokenizer(line, "\\s");
-                String key = stringTokenizer.nextToken();
-                if (key != null) {
-                    key = key.toUpperCase();
-                    Command command = injector.getInstance(
-                            Key.get(Command.class, Names.named(key)));
-                    history.add(command);
-                    invoker.dispatch(command);
+                StringTokenizer stringTokenizer = new StringTokenizer(line);
+                while (stringTokenizer.hasMoreTokens()) {
+                    String key = stringTokenizer.nextToken();
+                    if (key != null && COMMANDS.contains(key.toUpperCase())) {
+                        key = key.toUpperCase();
+                        Command command = injector.getInstance(
+                                Key.get(Command.class, Names.named(key)));
+                        // tutta merda... ma voglio vede' se va...
+                        List<String> varargs = new ArrayList<String>();
+                        while (stringTokenizer.hasMoreTokens())
+                            varargs.add(
+                                    stringTokenizer.nextToken()
+                            );
+                        // porcheria
+                        command.setArgs(varargs.toArray(new String[]{}));
+                        history.add(command);
+                        invoker.dispatch(command);
+
+                    }
                 }
             } catch (IOException e) {
                 logger.error(e.getMessage());

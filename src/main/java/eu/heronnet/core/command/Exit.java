@@ -39,9 +39,14 @@ public class Exit implements Command {
     }
 
     @Override
-    public void execute(String... arguments) {
+    public void execute() {
         cli.stop();
         logger.debug("called {}", KEY);
+    }
+
+    @Override
+    public void setArgs(String... varargs) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Inject
