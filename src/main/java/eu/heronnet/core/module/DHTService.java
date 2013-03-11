@@ -66,10 +66,8 @@ public class DHTService extends AbstractExecutionThreadService {
                 .create();
     }
 
-    public UUID put(Serializable data) {
-        UUID uuid = UUID.randomUUID();
+    public void put(Serializable data, UUID uuid) {
         dht.put(data, uuid.toString());
-        return uuid;
     }
 
     public List<Serializable> get(String UUID) {

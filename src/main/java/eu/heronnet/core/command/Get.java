@@ -2,8 +2,13 @@ package eu.heronnet.core.command;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
+import eu.heronnet.core.model.FileStreamBinary;
+import eu.heronnet.core.module.DHTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * This file is part of heron
@@ -28,6 +33,12 @@ public class Get implements Command {
 
     private static final String key = "GET";
 
+    @Inject
+    private DHTService dhtService;
+    private String file;
+    private String uuid;
+
+
     @Override
     public String getKey() {
         return key;
@@ -36,11 +47,21 @@ public class Get implements Command {
     @Override
     public void execute() {
         logger.debug("called {}", key);
+        List<Serializable> results = dhtService.get(uuid);
+
+        if (results.isEmpty() == false) {
+            logger.debug("GET UUID: {}", uuid);
+        }
+
+        FileStreamBinary fetched = (FileStreamBinary) results.get(0);
+        fetched.setPath(file);
+
     }
 
     @Override
     public void setArgs(String... varargs) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        this.file = varargs[0];
+        this.uuid = varargs[1];
     }
 
     @Inject

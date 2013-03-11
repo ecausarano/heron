@@ -1,15 +1,11 @@
 package eu.heronnet.core.command;
 
 import com.google.inject.Inject;
+import eu.heronnet.core.model.FileStreamBinary;
 import eu.heronnet.core.module.DHTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -36,7 +32,7 @@ public class Put implements Command {
 
     @Inject
     private DHTService dhtService;
-    private File file;
+    private String file;
 
     @Override
     public String getKey() {
@@ -46,25 +42,18 @@ public class Put implements Command {
     @Override
     public void execute() {
         logger.debug("called {}", key);
+        FileStreamBinary binary = new FileStreamBinary();
+        binary.setPath(file);
+        binary.setUuid(UUID.randomUUID());
 
-        logger.debug("putting stuff from {}", file.toPath());
+        dhtService.put(binary, binary.getUuid());
 
-        try {
-            FileInputStream fileInputStream = new FileInputStream(file);
-
-        } catch (FileNotFoundException e) {
-            logger.error(e.getLocalizedMessage());
-        }
-        UUID uuid = dhtService.put(file);
-
-        List<Serializable> results = dhtService.get(uuid.toString());
-
-        logger.debug("fetched back {}", results.toString());
+        logger.debug("PUT {} with UUID: {}", file, binary.getUuid());
 
     }
 
     @Override
     public void setArgs(String... varargs) {
-        file = new File(varargs[0]);
+        file = varargs[0];
     }
 }
