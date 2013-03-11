@@ -46,6 +46,7 @@ public class Put implements Command {
         binary.setPath(file);
         binary.setUuid(UUID.randomUUID());
 
+        binary.loadData();
         dhtService.put(binary, binary.getUuid());
 
         logger.debug("PUT {} with UUID: {}", file, binary.getUuid());

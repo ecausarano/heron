@@ -29,6 +29,7 @@ public class FileStreamBinary implements Serializable {
 
     private String path;
     private UUID uuid;
+    public byte[] data;
 
     public String getPath() {
         return path;
@@ -46,32 +47,58 @@ public class FileStreamBinary implements Serializable {
         this.uuid = uuid;
     }
 
-    public void writeObject(ObjectOutputStream outputStream) throws IOException {
-        outputStream.defaultWriteObject();
-        outputStream.writeChars(uuid.toString());
+    public void loadData() {
+        try {
 
-        byte[] buffer = new byte[1024 * 32];
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(
-                new FileInputStream(path));
-        while (bufferedInputStream.read(buffer) != -1)
-            outputStream.write(buffer);
+            byte[] buffer = new byte[1024 * 32];
+            File file = new File(path);
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(
+                    new FileInputStream(file)
+            );
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            while (bufferedInputStream.read(buffer) != -1)
+                byteArrayOutputStream.write(buffer);
 
-    }
+            byteArrayOutputStream.flush();
+            data = byteArrayOutputStream.toByteArray();
+            byteArrayOutputStream.close();
 
-    public void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
-
-        if (path == null) {
-            throw new IOException("destination path not specified");
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         }
-
-        inputStream.defaultReadObject();
-        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-                new FileOutputStream(path)
-        );
-
-        byte[] buffer = new byte[1024 * 32];
-        while (inputStream.read(buffer) != -1)
-            bufferedOutputStream.write(buffer);
-        logger.debug("Wrote temp file: {}", path);
     }
+
+
+//    private void writeObject(ObjectOutputStream outputStream) throws IOException {
+//        logger.debug("serializing {} to {}", path, uuid.toString());
+//        outputStream.defaultWriteObject();
+//        outputStream.writeChars(uuid.toString());
+//
+//        byte[] buffer = new byte[1024 * 32];
+//        BufferedInputStream bufferedInputStream = new BufferedInputStream(
+//                new FileInputStream(path));
+//        while (bufferedInputStream.read(buffer) != -1)
+//            outputStream.write(buffer);
+//
+//    }
+//
+//    private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
+//        inputStream.defaultReadObject();
+//        logger.debug("deserializing object");
+////        if (path == null) {
+////            throw new IOException("destination path not specified");
+////        }
+//
+//        File tempFile = File.createTempFile("Heron", "dat");
+//        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+//                new FileOutputStream(tempFile)
+//        );
+//
+//        byte[] buffer = new byte[1024 * 32];
+//        while (inputStream.read(buffer) != -1)
+//            bufferedOutputStream.write(buffer);
+//        bufferedOutputStream.flush();
+//        bufferedOutputStream.close();
+//        logger.debug("Wrote temp file: {}", tempFile);
+//    }
 }

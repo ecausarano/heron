@@ -7,7 +7,7 @@ import eu.heronnet.core.module.DHTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -56,6 +56,18 @@ public class Get implements Command {
         FileStreamBinary fetched = (FileStreamBinary) results.get(0);
         fetched.setPath(file);
 
+        try {
+            File tempFile = new File(file);
+            ByteArrayInputStream bif = new ByteArrayInputStream(fetched.data);
+            BufferedOutputStream bof = new BufferedOutputStream(new FileOutputStream(tempFile));
+            byte[] buffer = new byte[4 * 1024];
+            while (bif.read(buffer) != -1)
+                bof.write(buffer);
+            bof.flush();
+            bof.close();
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     @Override
