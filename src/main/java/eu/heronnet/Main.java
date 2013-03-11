@@ -100,5 +100,7 @@ public class Main extends AbstractModule {
         bind(Command.class).annotatedWith(Names.named("FIND")).to(Find.class);
         bind(Command.class).annotatedWith(Names.named("GET")).to(Get.class);
         bind(Command.class).annotatedWith(Names.named("PUT")).to(Put.class);
+        bind(Command.class).annotatedWith(Names.named("JOIN")).to(Join.class);
+
     }
 }

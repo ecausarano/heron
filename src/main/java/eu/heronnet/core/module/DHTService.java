@@ -73,4 +73,9 @@ public class DHTService extends AbstractExecutionThreadService {
     public List<Serializable> get(String UUID) {
         return dht.get(UUID);
     }
+
+    public KeybasedRouting getKbr() {
+        return kbr;
+    }
+
 }

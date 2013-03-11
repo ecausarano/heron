@@ -44,7 +44,7 @@ public class CLI extends AbstractExecutionThreadService implements UI {
     // TODO - get rid of this crap, commands should register themselves.
     // This class should query the guice context for the list
     private static final List<String> COMMANDS = Arrays.asList(
-            new String[]{"PUT", "GET", "FIND", "EXIT"});
+            new String[]{"PUT", "GET", "FIND", "EXIT", "JOIN"});
     private ConsoleReader consoleReader = null;
     private List<Command> history = null;
 
