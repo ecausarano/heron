@@ -1,31 +1,33 @@
 package eu.heronnet.core.command;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.List;
+
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
-import eu.heronnet.core.model.FileStreamBinary;
-import eu.heronnet.core.module.DHTService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.util.List;
+import eu.heronnet.core.model.FileStreamBinary;
+import eu.heronnet.core.module.network.dht.KadServiceImpl;
 
 /**
- * This file is part of heron
- * Copyright (C) 2013-2013 edoardocausarano
+ * This file is part of heron Copyright (C) 2013-2013 edoardocausarano
  * <p/>
- * heron is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * heron is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * <p/>
- * heron is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * heron is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  * <p/>
- * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with Foobar.  If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 public class Get implements Command {
 
@@ -34,7 +36,7 @@ public class Get implements Command {
     private static final String key = "GET";
 
     @Inject
-    private DHTService dhtService;
+    private KadServiceImpl dhtService;
     private String file;
     private String uuid;
 
@@ -61,8 +63,9 @@ public class Get implements Command {
             ByteArrayInputStream bif = new ByteArrayInputStream(fetched.data);
             BufferedOutputStream bof = new BufferedOutputStream(new FileOutputStream(tempFile));
             byte[] buffer = new byte[4 * 1024];
-            while (bif.read(buffer) != -1)
+            while (bif.read(buffer) != -1) {
                 bof.write(buffer);
+            }
             bof.flush();
             bof.close();
         } catch (IOException e) {

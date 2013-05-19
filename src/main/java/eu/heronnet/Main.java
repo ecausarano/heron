@@ -7,29 +7,32 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
 import com.google.inject.name.Names;
-import eu.heronnet.core.command.*;
-import eu.heronnet.core.module.CLI;
-import eu.heronnet.core.module.DHTService;
-import eu.heronnet.core.module.UI;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.heronnet.core.command.Command;
+import eu.heronnet.core.command.EventBusProvider;
+import eu.heronnet.core.command.Exit;
+import eu.heronnet.core.command.Find;
+import eu.heronnet.core.command.Get;
+import eu.heronnet.core.command.Join;
+import eu.heronnet.core.command.Put;
+import eu.heronnet.core.module.CLI;
+import eu.heronnet.core.module.UI;
+import eu.heronnet.core.module.network.dht.KadServiceImpl;
+
 /**
- * This file is part of Heron
- * Copyright (C) 2013 Edoardo Causarano
+ * This file is part of Heron Copyright (C) 2013 Edoardo Causarano
  * <p/>
- * Heron is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Heron is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * <p/>
- * Heron is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Heron is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  * <p/>
- * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with Foobar.  If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 
        /*
@@ -46,21 +49,27 @@ import org.slf4j.LoggerFactory;
         * and their prototypes.
         *
         * Technically archetypes are the names of the DHTs available on the network, Archetypes are used to run queries,
-        * therefore they are indexes. If DHTService does not allow for * queries, a root archetype is necessary.
+        * therefore they are indexes. If KadServiceImpl does not allow for * queries, a root archetype is necessary.
         *
-        * (we need a meta DHTService to track everything and add stuff manually)
+        * (we need a meta KadServiceImpl to track everything and add stuff manually)
         *
-        * query the predefined "archetype" DHTService to bootstrap the archetype table
+        * query the predefined "archetype" KadServiceImpl to bootstrap the archetype table
         * archetypes such as version, user, data
         *
         * archetype -> A_UUID, name (the data)
         *
-        * hit the prototype DHTService to bootstrap known prototypes, and classify them by archetype
+        * hit the prototype KadServiceImpl to bootstrap known prototypes, and classify them by archetype
         *
         * prototype -> P_UUID, A_UUID, name (the data)
         *
         */
 
+    /*
+    serialization framework options:
+
+    https://code.google.com/p/kryo/#Quickstart
+    http://avro.apache.org/docs/current/
+     */
 public class Main extends AbstractModule {
 
     public static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -83,7 +92,7 @@ public class Main extends AbstractModule {
         Service cli = injector.getInstance(UI.class);
         cli.start();
 
-        Service dht = injector.getInstance(DHTService.class);
+        Service dht = injector.getInstance(KadServiceImpl.class);
         dht.start();
     }
 
@@ -93,8 +102,8 @@ public class Main extends AbstractModule {
         bind(EventBus.class).toProvider(EventBusProvider.class);
         bind(UI.class).to(CLI.class).in(Scopes.SINGLETON);
 
-        DHTService dhtService = new DHTService();
-        bind(DHTService.class).toInstance(dhtService);
+        KadServiceImpl kadServiceImpl = new KadServiceImpl();
+        bind(KadServiceImpl.class).toInstance(kadServiceImpl);
         // register
         bind(Command.class).annotatedWith(Names.named("EXIT")).to(Exit.class);
         bind(Command.class).annotatedWith(Names.named("FIND")).to(Find.class);

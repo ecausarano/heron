@@ -1,0 +1,10 @@
+{"namespace": "example.avro",
+ "type": "record",
+ "name": "User",
+ "fields": [
+     {"name": "name", "type": "string"},
+     {"name": "num_likes",  "type": ["int", "null"]},
+     {"name": "num_groups",  "type": ["int", "null"]},
+     {"name": "num_photos",  "type": ["int", "null"]}
+ ]
+}

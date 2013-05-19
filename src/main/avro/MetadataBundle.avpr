@@ -1,0 +1,37 @@
+{
+"namespace": "eu.heronnet",
+"protocol": "data",
+"types": [
+
+{
+"type": "record",
+"name": "MetadataBundle",
+"fields": [
+    {"name": "key", "type": "string"},
+    {"name": "target", "type": "string"},
+    {"name": "metadata", "type": {
+       "namespace": "eu.heronnet.data",
+       "type": "map", "values": "string"}
+    },
+    {"name": "signature", "type": "bytes"}
+]
+}
+
+{
+"type": "array",
+"name": "BundleArray",
+"items": "MetadataBundle",
+}
+
+{
+"type": "record",
+"name": "Document",
+"fields": [
+    {"name": "key", "type": "string"},
+    {"name": "referringBundles", "type": "BundleArray"},
+    {"name": "data", "type": "bytes"}
+    ]
+}
+
+}
+

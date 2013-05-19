@@ -17,11 +17,51 @@ package eu.heronnet.core.command;
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+ * UI modules translate user input into dispatchable implementation of this interface
+ */
 public interface Command {
 
+    /**
+     * Every command is uniquely identified by this key.
+     *
+     * @return String
+     */
     public String getKey();
 
+    /**
+     * This is the "callback" body that an executor calls to process the user request
+     */
     void execute();
 
+    /**
+     * The arguments - if any - that parametrize the user command request
+     *
+     * @param varargs String
+     */
+    @Deprecated
     void setArgs(String... varargs);
+
+    /**
+     *
+     * The arguments - use this!
+     */
+    // void setArgs(Map<String, String> args);
+    /**
+     *
+     * A list with the arguments that this command understands
+     *
+     * @return List
+     */
+    // List<String> getArgumentKeys();
+
+    /**
+     *
+     * Useful attributes for the command (eg, required, optional, the default value, etc...)
+     *
+     * @param argument
+     * @return
+     */
+    // List<String> getArgumentMetadata(String argument);
 }
