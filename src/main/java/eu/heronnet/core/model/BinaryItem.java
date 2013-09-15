@@ -1,11 +1,10 @@
-package eu.heronnet.core.command;
+package eu.heronnet.core.model;
 
-import com.google.common.eventbus.EventBus;
-import eu.heronnet.core.module.UI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+import java.io.*;
+import java.util.UUID;
 
 /**
  * This file is part of heron
@@ -24,32 +23,29 @@ import javax.inject.Inject;
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class Exit implements Command {
 
-    private static final Logger logger = LoggerFactory.getLogger(Exit.class);
+public class BinaryItem implements Serializable {
 
-    private static final String KEY = "EXIT";
+    private final Logger logger = LoggerFactory.getLogger(BinaryItem.class);
 
-    @Inject
-    private UI cli;
+    private UUID uuid;
+    public byte[] data;
 
-    @Override
-    public String getKey() {
-        return KEY;
+    public byte[] getData() {
+        return data;
     }
 
-    @Override
-    public void execute() {
-        logger.debug("called {}", KEY);
-        cli.stop();
-        System.exit(0);
+    public void setData(final byte[] data) {
+        this.data = data;
     }
 
-    @Override
-    public void setArgs(String... varargs) {
-        //To change body of implemented methods use File | Settings | File Templates.
+
+    public UUID getUUID() {
+        return uuid;
     }
 
-    @Inject
-    private EventBus eventBus;
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
 }

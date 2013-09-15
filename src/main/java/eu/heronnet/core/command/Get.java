@@ -1,12 +1,11 @@
 package eu.heronnet.core.command;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.List;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.RandomAccess;
+import java.util.UUID;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
@@ -14,8 +13,8 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.heronnet.core.model.FileStreamBinary;
-import eu.heronnet.core.module.network.dht.KadServiceImpl;
+import eu.heronnet.core.model.BinaryItem;
+import eu.heronnet.core.module.network.dht.DHTService;
 
 /**
  * This file is part of heron Copyright (C) 2013-2013 edoardocausarano
@@ -36,9 +35,10 @@ public class Get implements Command {
     private static final String key = "GET";
 
     @Inject
-    private KadServiceImpl dhtService;
+    private DHTService dhtService;
     private String file;
-    private String uuid;
+
+    private UUID uuid;
 
 
     @Override
@@ -49,34 +49,23 @@ public class Get implements Command {
     @Override
     public void execute() {
         logger.debug("called {}", key);
-        List<Serializable> results = dhtService.get(uuid);
-
-        if (results.isEmpty() == false) {
-            logger.debug("GET UUID: {}", uuid);
-        }
-
-        FileStreamBinary fetched = (FileStreamBinary) results.get(0);
-        fetched.setPath(file);
+        BinaryItem result = dhtService.findByID(uuid);
 
         try {
             File tempFile = new File(file);
-            ByteArrayInputStream bif = new ByteArrayInputStream(fetched.data);
-            BufferedOutputStream bof = new BufferedOutputStream(new FileOutputStream(tempFile));
-            byte[] buffer = new byte[4 * 1024];
-            while (bif.read(buffer) != -1) {
-                bof.write(buffer);
-            }
-            bof.flush();
-            bof.close();
+            final RandomAccessFile randomAccessFile = new RandomAccessFile(tempFile, "rw");
+            final FileChannel fileChannel = randomAccessFile.getChannel();
+            fileChannel.write(ByteBuffer.wrap(result.getData()));
+            fileChannel.close();
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
     }
 
     @Override
-    public void setArgs(String... varargs) {
+    public void setArgs(String ... varargs) {
         this.file = varargs[0];
-        this.uuid = varargs[1];
+        this.uuid = UUID.fromString(varargs[1]);
     }
 
     @Inject

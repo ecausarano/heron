@@ -9,11 +9,10 @@ import com.google.inject.name.Names;
 import eu.heronnet.core.command.Command;
 import eu.heronnet.core.command.Invoker;
 import jline.console.ConsoleReader;
-import jline.console.completer.StringsCompleter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,14 +38,13 @@ import java.util.StringTokenizer;
 public class CLI extends AbstractExecutionThreadService implements UI {
 
     private static final Logger logger = LoggerFactory.getLogger(CLI.class);
-    private static final String DEFAULT_PROMPT = "heron> ";
 
     // TODO - get rid of this crap, commands should register themselves.
+
     // This class should query the guice context for the list
     private static final List<String> COMMANDS = Arrays.asList(
-            new String[]{"PUT", "GET", "FIND", "EXIT", "JOIN"});
-    private ConsoleReader consoleReader = null;
-    private List<Command> history = null;
+            "PUT", "GET", "FIND", "EXIT", "JOIN", "PING");
+    private List<Command> history = new ArrayList<Command>();
 
     private boolean run = true;
 
@@ -55,60 +53,46 @@ public class CLI extends AbstractExecutionThreadService implements UI {
 
     @Inject
     private Injector injector = null;
-
-    public CLI() {
-        logger.debug("Creating new CLI object: {}", this);
-
-        try {
-            consoleReader = new ConsoleReader();
-        } catch (IOException e) {
-            logger.error("Error creating CLI");
-        }
-        consoleReader.setPrompt(DEFAULT_PROMPT);
-
-        // here get List<String>commandKeys...
-        consoleReader.addCompleter(
-                new StringsCompleter(COMMANDS)
-        );
-
-        history = new ArrayList<Command>();
-    }
-
-    @Override
-    public void run() {
-        while (run) {
-            try {
-                String line = consoleReader.readLine(DEFAULT_PROMPT);
-                StringTokenizer stringTokenizer = new StringTokenizer(line);
-                while (stringTokenizer.hasMoreTokens()) {
-                    String key = stringTokenizer.nextToken();
-                    if (key != null && COMMANDS.contains(key.toUpperCase())) {
-                        key = key.toUpperCase();
-                        Command command = injector.getInstance(
-                                Key.get(Command.class, Names.named(key)));
-                        // tutta merda... ma voglio vede' se va...
-                        List<String> varargs = new ArrayList<String>();
-                        while (stringTokenizer.hasMoreTokens())
-                            varargs.add(
-                                    stringTokenizer.nextToken()
-                            );
-                        // porcheria
-                        command.setArgs(varargs.toArray(new String[]{}));
-                        history.add(command);
-                        invoker.dispatch(command);
-
-                    }
-                }
-            } catch (IOException e) {
-                logger.error(e.getMessage());
-            }
-        }
-    }
+    private ConsoleReader console;
 
     @Override
     protected void triggerShutdown() {
+        super.triggerShutdown();
         logger.debug("Shutting down the CLI module");
-        run = false;
+    }
+
+    @Override
+    protected void startUp() throws Exception {
+        console = new ConsoleReader();
+    }
+
+    @Override
+    protected void run() throws Exception {
+        while (isRunning()) {
+            final String line = console.readLine("Heron:\t");
+            StringTokenizer stringTokenizer = new StringTokenizer(line);
+
+            while (stringTokenizer.hasMoreTokens()) {
+                String key = stringTokenizer.nextToken();
+                if (key != null && COMMANDS.contains(key.toUpperCase())) {
+                    key = key.toUpperCase();
+                    Command command = injector.getInstance(
+                            Key.get(Command.class, Names.named(key)));
+                    // tutta merda... ma voglio vede' se va...
+                    List<String> varargs = new ArrayList<String>();
+                    while (stringTokenizer.hasMoreTokens())
+                        varargs.add(
+                                stringTokenizer.nextToken()
+                        );
+                    // porcheria
+                    command.setArgs(varargs.toArray(new String[]{}));
+                    history.add(command);
+                    invoker.dispatch(command);
+
+                }
+            }
+            console.accept();
+        }
     }
 
     @Inject

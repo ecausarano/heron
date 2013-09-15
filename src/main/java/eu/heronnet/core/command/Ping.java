@@ -1,11 +1,9 @@
 package eu.heronnet.core.command;
 
 import com.google.inject.Inject;
-
+import eu.heronnet.core.module.network.dht.DHTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import eu.heronnet.core.module.network.dht.DHTService;
 
 /**
  * This file is part of heron Copyright (C) 2013-2013 edoardocausarano
@@ -19,36 +17,28 @@ import eu.heronnet.core.module.network.dht.DHTService;
  * You should have received a copy of the GNU General Public License along with Foobar.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
-public class Join implements Command {
+public class Ping implements Command {
 
-    private static final Logger logger = LoggerFactory.getLogger(Join.class);
-
-    private static final String key = "join";
-
+    private static final String KEY = "PING";
+    private final Logger logger = LoggerFactory.getLogger(Ping.class);
 
     @Inject
     private DHTService dhtService;
 
+
     @Override
     public String getKey() {
-        return key;
+        return KEY;
     }
 
     @Override
     public void execute() {
+        logger.debug("Called PING command");
+        dhtService.ping();
     }
 
     @Override
-    public void setArgs(String... varargs) {
-//        KeybasedRouting keybasedRouting = dhtService.getKbr();
-//        List<URI> uriList = new ArrayList<URI>();
-//        for (String arg : varargs) {
-//            try {
-//                uriList.add(new URI(arg));
-//            } catch (URISyntaxException e) {
-//                logger.error(e.getMessage());
-//            }
-//        }
-//        keybasedRouting.join(uriList);
+    public void setArgs(final String... varargs) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 }

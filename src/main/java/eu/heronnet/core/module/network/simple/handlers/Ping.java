@@ -1,11 +1,10 @@
-package eu.heronnet.core.command;
+package eu.heronnet.core.module.network.simple.handlers;
 
-import com.google.common.eventbus.EventBus;
-import eu.heronnet.core.module.UI;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 
 /**
  * This file is part of heron
@@ -24,32 +23,17 @@ import javax.inject.Inject;
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class Exit implements Command {
+public class Ping extends ChannelInboundHandlerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(Exit.class);
-
-    private static final String KEY = "EXIT";
-
-    @Inject
-    private UI cli;
-
+    private static final Logger logger = LoggerFactory.getLogger(Ping.class);
     @Override
-    public String getKey() {
-        return KEY;
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof String) {
+            String message = (String)msg;
+            logger.debug("Received PING");
+//            ctx.write(new String("PONG"));
+            ctx.flush();
+        }
+        super.channelRead(ctx, msg);    //To change body of overridden methods use File | Settings | File Templates.
     }
-
-    @Override
-    public void execute() {
-        logger.debug("called {}", KEY);
-        cli.stop();
-        System.exit(0);
-    }
-
-    @Override
-    public void setArgs(String... varargs) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Inject
-    private EventBus eventBus;
 }

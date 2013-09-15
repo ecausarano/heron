@@ -8,19 +8,19 @@ import com.google.inject.Injector;
 import com.google.inject.Scopes;
 import com.google.inject.name.Names;
 
+import eu.heronnet.core.command.*;
+import eu.heronnet.core.module.network.simple.NettyClientImpl;
+import eu.heronnet.core.module.storage.DBStorage;
+import eu.heronnet.core.module.storage.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.heronnet.core.command.Command;
-import eu.heronnet.core.command.EventBusProvider;
-import eu.heronnet.core.command.Exit;
-import eu.heronnet.core.command.Find;
-import eu.heronnet.core.command.Get;
-import eu.heronnet.core.command.Join;
-import eu.heronnet.core.command.Put;
+import eu.heronnet.core.command.Ping;
+import eu.heronnet.core.application.bus.EventBusProvider;
 import eu.heronnet.core.module.CLI;
 import eu.heronnet.core.module.UI;
-import eu.heronnet.core.module.network.dht.KadServiceImpl;
+import eu.heronnet.core.module.network.dht.DHTService;
+import eu.heronnet.core.module.network.simple.NettyServerImpl;
 
 /**
  * This file is part of Heron Copyright (C) 2013 Edoardo Causarano
@@ -49,16 +49,16 @@ import eu.heronnet.core.module.network.dht.KadServiceImpl;
         * and their prototypes.
         *
         * Technically archetypes are the names of the DHTs available on the network, Archetypes are used to run queries,
-        * therefore they are indexes. If KadServiceImpl does not allow for * queries, a root archetype is necessary.
+        * therefore they are indexes. If KadDHTServiceImpl does not allow for * queries, a root archetype is necessary.
         *
-        * (we need a meta KadServiceImpl to track everything and add stuff manually)
+        * (we need a meta KadDHTServiceImpl to track everything and add stuff manually)
         *
-        * query the predefined "archetype" KadServiceImpl to bootstrap the archetype table
+        * query the predefined "archetype" KadDHTServiceImpl to bootstrap the archetype table
         * archetypes such as version, user, data
         *
         * archetype -> A_UUID, name (the data)
         *
-        * hit the prototype KadServiceImpl to bootstrap known prototypes, and classify them by archetype
+        * hit the prototype KadDHTServiceImpl to bootstrap known prototypes, and classify them by archetype
         *
         * prototype -> P_UUID, A_UUID, name (the data)
         *
@@ -92,8 +92,11 @@ public class Main extends AbstractModule {
         Service cli = injector.getInstance(UI.class);
         cli.start();
 
-        Service dht = injector.getInstance(KadServiceImpl.class);
+        Service dht = injector.getInstance(DHTService.class);
         dht.start();
+
+        Service server = injector.getInstance(NettyServerImpl.class);
+        server.start();
     }
 
     @Override
@@ -102,14 +105,21 @@ public class Main extends AbstractModule {
         bind(EventBus.class).toProvider(EventBusProvider.class);
         bind(UI.class).to(CLI.class).in(Scopes.SINGLETON);
 
-        KadServiceImpl kadServiceImpl = new KadServiceImpl();
-        bind(KadServiceImpl.class).toInstance(kadServiceImpl);
-        // register
+        DHTService kadServiceImpl = new NettyClientImpl();
+        bind(DHTService.class).toInstance(kadServiceImpl);
+
+        NettyServerImpl server = new NettyServerImpl();
+        bind(NettyServerImpl.class).toInstance(server);
+
+        Persistence storage = new DBStorage();
+        bind(Persistence.class).toInstance(storage);
+
         bind(Command.class).annotatedWith(Names.named("EXIT")).to(Exit.class);
         bind(Command.class).annotatedWith(Names.named("FIND")).to(Find.class);
         bind(Command.class).annotatedWith(Names.named("GET")).to(Get.class);
         bind(Command.class).annotatedWith(Names.named("PUT")).to(Put.class);
         bind(Command.class).annotatedWith(Names.named("JOIN")).to(Join.class);
+        bind(Command.class).annotatedWith(Names.named("PING")).to(Ping.class);
 
     }
 }

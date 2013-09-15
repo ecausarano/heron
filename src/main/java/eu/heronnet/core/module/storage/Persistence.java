@@ -1,5 +1,10 @@
 package eu.heronnet.core.module.storage;
 
+import com.google.common.util.concurrent.Service;
+import eu.heronnet.core.model.BinaryItem;
+import io.netty.channel.ChannelHandler;
+import java.util.UUID;
+
 /**
  * This file is part of heron
  * Copyright (C) 2013-2013 edoardocausarano
@@ -17,5 +22,15 @@ package eu.heronnet.core.module.storage;
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class BerkeleyDBStorage {
+public interface Persistence {
+
+    UUID persist(BinaryItem data);
+
+    BinaryItem findByID(UUID id);
+
+    void deleteByID(UUID id);
+
+    Service getService();
+
+    ChannelHandler getHandler();
 }

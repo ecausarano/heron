@@ -1,4 +1,4 @@
-package eu.heronnet.core.command;
+package eu.heronnet.core.application.bus;
 
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;

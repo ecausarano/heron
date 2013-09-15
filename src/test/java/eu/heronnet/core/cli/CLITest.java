@@ -1,6 +1,7 @@
 package eu.heronnet.core.cli;
 
-import org.testng.annotations.Test;
+
+import org.junit.Test;
 
 /**
  * This file is part of Heron

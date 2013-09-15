@@ -10,13 +10,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.Encoder;
-import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.util.Utf8;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,21 +43,21 @@ public class AvroTest {
             String schemaDescription = Charset.defaultCharset().decode(bb).toString();
             logger.debug(schemaDescription);
 
-            Schema s = Schema.parse(schemaDescription);
+//            Schema s = Schema.parse(schemaDescription);
             FileOutputStream outputStream = new FileOutputStream(File.createTempFile("test-", ".hro"));
-            Encoder encoder = EncoderFactory.get().binaryEncoder(outputStream, null);
-            GenericDatumWriter writer = new GenericDatumWriter(s);
+//            Encoder encoder = EncoderFactory.get().binaryEncoder(outputStream, null);
+//            GenericDatumWriter writer = new GenericDatumWriter(s);
 
             // Populate data
-            GenericRecord r = new GenericData.Record(s);
-            r.put("name", new Utf8("Doctor Who"));
-            r.put("num_likes", 1);
-            r.put("num_groups", 423);
-            r.put("num_photos", 0);
+//            GenericRecord r = new GenericData.Record(s);
+//            r.put("name", new Utf8("Doctor Who"));
+//            r.put("num_likes", 1);
+//            r.put("num_groups", 423);
+//            r.put("num_photos", 0);
 
             // Encode
-            writer.write(r, encoder);
-            encoder.flush();
+//            writer.write(r, encoder);
+//            encoder.flush();
         } finally {
             stream.close();
         }

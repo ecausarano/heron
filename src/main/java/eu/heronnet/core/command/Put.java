@@ -1,14 +1,19 @@
 package eu.heronnet.core.command;
 
-import java.util.UUID;
-
 import com.google.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.heronnet.core.model.FileStreamBinary;
-import eu.heronnet.core.module.network.dht.KadServiceImpl;
+import eu.heronnet.core.model.BinaryItem;
+import eu.heronnet.core.module.network.dht.DHTService;
+
+import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
 
 /**
  * This file is part of heron Copyright (C) 2013-2013 edoardocausarano
@@ -28,7 +33,7 @@ public class Put implements Command {
     private static final String key = "PUT";
 
     @Inject
-    private KadServiceImpl dhtService;
+    private DHTService dhtService;
     private String file;
 
     @Override
@@ -39,14 +44,18 @@ public class Put implements Command {
     @Override
     public void execute() {
         logger.debug("called {}", key);
-        FileStreamBinary binary = new FileStreamBinary();
-        binary.setPath(file);
+        BinaryItem binary = new BinaryItem();
+
         binary.setUuid(UUID.randomUUID());
 
-        binary.loadData();
-        dhtService.put(binary, binary.getUuid());
-
-        logger.debug("PUT {} with UUID: {}", file, binary.getUuid());
+        Path path = FileSystems.getDefault().getPath(file);
+        try {
+            byte[] buf = Files.readAllBytes(path);
+            binary.setData(buf);
+            dhtService.persist(binary);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
 
     }
 

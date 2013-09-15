@@ -1,10 +1,11 @@
 package eu.heronnet.core.module.network.dht;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.UUID;
+import com.google.common.util.concurrent.AbstractIdleService;
+import eu.heronnet.core.model.BinaryItem;
 
-import com.google.common.util.concurrent.AbstractExecutionThreadService;
+import java.io.Serializable;
+import java.net.InetSocketAddress;
+import java.util.UUID;
 
 /**
  * This file is part of heron Copyright (C) 2013-2013 edoardocausarano
@@ -18,11 +19,14 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService;
  * You should have received a copy of the GNU General Public License along with Foobar.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
-public abstract class Service extends AbstractExecutionThreadService {
+public abstract class DHTService extends AbstractIdleService {
 
-    protected abstract void run();
 
-    public abstract void put(Serializable data, UUID uuid);
+    public abstract UUID persist(BinaryItem data);
 
-    public abstract List<Serializable> get(String UUID);
+    public abstract BinaryItem findByID(UUID id);
+
+    public abstract void deleteByID(UUID id);
+
+    public abstract void ping();
 }
