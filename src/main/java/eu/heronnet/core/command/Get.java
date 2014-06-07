@@ -1,33 +1,34 @@
-package eu.heronnet.core.command;
+/*
+ * Copyright (C) 2014 edoardocausarano
+ *
+ * heron is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * heron is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with heron. If not, see http://www.gnu.org/licenses
+ */
 
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.RandomAccess;
-import java.util.UUID;
+package eu.heronnet.core.command;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
-
+import eu.heronnet.core.model.MetadataCollection;
+import eu.heronnet.core.module.network.dht.DHTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.heronnet.core.model.BinaryItem;
-import eu.heronnet.core.module.network.dht.DHTService;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 
-/**
- * This file is part of heron Copyright (C) 2013-2013 edoardocausarano
- * <p/>
- * heron is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
- * <p/>
- * heron is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU General Public License along with Foobar.  If not, see
- * <http://www.gnu.org/licenses/>.
- */
 public class Get implements Command {
 
     private static final Logger logger = LoggerFactory.getLogger(Get.class);
@@ -38,8 +39,9 @@ public class Get implements Command {
     private DHTService dhtService;
     private String file;
 
-    private UUID uuid;
-
+    private byte[] id;
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public String getKey() {
@@ -49,13 +51,13 @@ public class Get implements Command {
     @Override
     public void execute() {
         logger.debug("called {}", key);
-        BinaryItem result = dhtService.findByID(uuid);
+        MetadataCollection result = dhtService.findByID(id);
 
         try {
             File tempFile = new File(file);
             final RandomAccessFile randomAccessFile = new RandomAccessFile(tempFile, "rw");
             final FileChannel fileChannel = randomAccessFile.getChannel();
-            fileChannel.write(ByteBuffer.wrap(result.getData()));
+//            fileChannel.write(ByteBuffer.wrap(result.getData()));
             fileChannel.close();
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -63,11 +65,8 @@ public class Get implements Command {
     }
 
     @Override
-    public void setArgs(String ... varargs) {
+    public void setArgs(String... varargs) {
         this.file = varargs[0];
-        this.uuid = UUID.fromString(varargs[1]);
+        this.id = varargs[1].getBytes();
     }
-
-    @Inject
-    private EventBus eventBus;
 }

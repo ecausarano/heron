@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2014 edoardocausarano
+ *
+ * heron is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * heron is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with heron. If not, see http://www.gnu.org/licenses
+ */
+
 package eu.heronnet.core.module;
 
 import com.google.common.eventbus.EventBus;
@@ -12,29 +29,11 @@ import jline.console.ConsoleReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
-/**
- * This file is part of Heron
- * Copyright (C) 2013 Edoardo Causarano
- * <p/>
- * Heron is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * <p/>
- * Heron is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
- */
 public class CLI extends AbstractExecutionThreadService implements UI {
 
     private static final Logger logger = LoggerFactory.getLogger(CLI.class);
@@ -54,6 +53,8 @@ public class CLI extends AbstractExecutionThreadService implements UI {
     @Inject
     private Injector injector = null;
     private ConsoleReader console;
+    @Inject
+    private EventBus eventBus;
 
     @Override
     protected void triggerShutdown() {
@@ -94,7 +95,4 @@ public class CLI extends AbstractExecutionThreadService implements UI {
             console.accept();
         }
     }
-
-    @Inject
-    private EventBus eventBus;
 }

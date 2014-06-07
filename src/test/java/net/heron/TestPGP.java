@@ -15,14 +15,38 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.core.cli;
+package net.heron;
 
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
-public class CLITest {
+/**
+ *
+ * Spunti...
+ *
+ * http://thinkinginsoftware.blogspot.nl/2012/01/portable-pgp-encryption-with-bouncy.html
+ * http://cephas.net/blog/2004/04/01/pgp-encryption-using-bouncy-castle/
+ */
+public class TestPGP {
 
     @Test
-    public void testRepl() throws Exception {
+    public void generatePGPKey() {
+
+    }
+
+    @Test
+    public void generatePGPKeyring() throws IOException {
+//        PGPKeyPair keyPair = new BcPGPKeyPair(PGPPublicKey.ECDSA, )
+
+    }
+
+    @Test
+    public void signData() {
+
     }
 }

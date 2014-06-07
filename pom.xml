@@ -1,4 +1,21 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<!--
+  ~ Copyright (C) 2014 edoardocausarano
+  ~
+  ~ heron is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ heron is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with heron. If not, see http://www.gnu.org/licenses
+  -->
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +31,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>4.11</junit.version>
         <guice.version>3.0</guice.version>
-        <guava.version>14.0.1</guava.version>
         <bcprov-ext-jdk15on.version>1.49</bcprov-ext-jdk15on.version>
         <netty.version>4.0.9.Final</netty.version>
         <kyotocabinet-java.version>1.24</kyotocabinet-java.version>
@@ -23,10 +39,11 @@
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
 
@@ -44,12 +61,12 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>${guice.version}</version>
+            <version>3.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
+            <version>15.0</version>
         </dependency>
 
         <dependency>
@@ -58,36 +75,11 @@
             <version>${bcprov-ext-jdk15on.version}</version>
         </dependency>
 
-        <!--<dependency>-->
-        <!--<groupId>il.technion.ewolf</groupId>-->
-        <!--<artifactId>kbn</artifactId>-->
-        <!--<version>1.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>il.technion.ewolf</groupId>-->
-        <!--<artifactId>dht</artifactId>-->
-        <!--<version>1.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>il.technion.ewolf</groupId>-->
-        <!--<artifactId>chunkeeper</artifactId>-->
-        <!--<version>1.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>il.technion.ewolf</groupId>-->
-        <!--<artifactId>chunkeeper-core</artifactId>-->
-        <!--<version>1.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
-
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>${netty.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>jline</groupId>
@@ -95,20 +87,35 @@
             <version>${jline.version}</version>
         </dependency>
 
-
         <dependency>
-            <groupId>org.iq80.leveldb</groupId>
-            <artifactId>leveldb</artifactId>
-            <version>0.6</version>
+            <groupId>berkeleydb</groupId>
+            <artifactId>berkeleydb</artifactId>
+            <version>1.5.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>de.undercouch</groupId>
+            <artifactId>bson4jackson</artifactId>
+            <version>2.3.1</version>
+        </dependency>
 
-        <!--<dependency>-->
-        <!--<groupId>org.apache.avro</groupId>-->
-        <!--<artifactId>avro</artifactId>-->
-        <!--<version>1.7.4</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.jgoodies</groupId>
+            <artifactId>jgoodies-forms</artifactId>
+            <version>1.7.2</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.0-api</artifactId>
+            <version>1.0.1.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>1.8.0.10</version>
+        </dependency>
 
     </dependencies>
     <build>
@@ -126,24 +133,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.apache.avro</groupId>-->
-            <!--<artifactId>avro-maven-plugin</artifactId>-->
-            <!--<version>1.7.4</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<phase>generate-sources</phase>-->
-            <!--<goals>-->
-            <!--<goal>schema</goal>-->
-            <!--<goal>protocol</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-            <!--<sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>-->
-            <!--<outputDirectory>${project.basedir}/src/main/java/</outputDirectory>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

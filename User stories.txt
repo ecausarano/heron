@@ -1,0 +1,16 @@
+First login story:
+
+a USER opens HERON and the application presents the GETTING STARTED screen. The screen contains the following text:
+
+"Welcome to Heron, you haven't trusted any source, therefore you won't be able to use trust as a criteria for your searches. You may want to go over to the "Trust network" screen to build your own trust network. You can add people or institutions you know, or explore the trust graph and see the members that have been trusted by other members already, or been active for the longest time.
+
+Remember to cross check the metadata of their identity before trusting a member. Many publish their key ID on their institutional, or social network homepage. You can also check how long has the identity been know on the network; watch out for thighs such as unexpectedly short age, which may indicate the identity has been tampered with, or signs of inactivity which may indicate the identity has been lost."
+
+As the USER CLICKS the "next" BUTTON and is taken to the "Trust network" PANEL where she can explore the WOT with the most trusted IDENTITIES shown.
+
+Exploring the WOT story:
+
+The TRUST RELATIONS of the most TRUSTED identities coming from their most TRUSTED parties are also shown to orient the new user in the EMERGENT TRUST NETWORK.
+
+When a USER CLICKS the "i" button on the IDENTITY node, a dropdown popups showing IDENTITY METADATA such as: "created", "last active", "inbound trusts", "outbound trusts" and quick buttons to actions such as: "zoom on the IDENTITY in/out WOT", "go to the ACTIVITY TIMELINE of the IDENTITY"
+

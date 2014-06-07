@@ -17,33 +17,60 @@
 
 package eu.heronnet.core.model;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
+@Entity
 public class MetadataCollection {
 
-
+    ListMultimap<String, String> metadata = ArrayListMultimap.create();
+    @Id
+    private byte[] id;
+    //    @OneToMany(mappedBy = )
     private byte[] referencedBinary;
+    private boolean dirty = true;
 
-    private Map<String, String> metadata = new HashMap<>();
+    public byte[] getId() {
+        if (dirty) {
+            try {
+                final MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+                messageDigest.reset();
+                for (Map.Entry<String, String> entry : metadata.entries()) {
+                    messageDigest.digest((entry.getKey() + entry.getValue()).getBytes());
+                }
+                id = messageDigest.digest(null);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+            dirty = false;
+        }
 
-    public Map<String, String> getMetadata() {
+        return id;
+    }
+
+    public ListMultimap<String, String> getMetadata() {
         return metadata;
     }
 
-    public String put(String key, String value) {
-        return metadata.put(key, value);
+    public void put(String key, String value) {
+        metadata.put(key, value);
+        dirty = true;
     }
 
-    public String get(String key) {
+    public List<String> get(String key) {
         return metadata.get(key);
     }
 
-    public String remove(String key) {
-        return metadata.remove(key);
+    public void remove(String key) {
+        metadata.removeAll(key);
+        dirty = true;
     }
 
     public byte[] getReferencedBinary() {

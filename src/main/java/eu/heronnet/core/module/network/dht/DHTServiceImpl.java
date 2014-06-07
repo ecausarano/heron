@@ -17,44 +17,34 @@
 
 package eu.heronnet.core.module.network.dht;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import eu.heronnet.core.model.BinaryItem;
-import eu.heronnet.core.model.MetadataItem;
+import eu.heronnet.core.model.MetadataCollection;
+import eu.heronnet.kad.net.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
+import javax.inject.Inject;
 
 public class DHTServiceImpl extends DHTService {
 
     private static Logger logger = LoggerFactory.getLogger(DHTServiceImpl.class);
 
-    List<URI> netBootStrap = null;
-
-    public void run() {
-        Injector injector = Guice.createInjector(
-        );
-
-    }
-
+    @Inject
+    Client client;
 
     @Override
-    public UUID persist(BinaryItem data) {
+    public byte[] persist(BinaryItem data) {
         return null;
     }
 
     @Override
-    public MetadataItem findByID(UUID id) {
+    public MetadataCollection findByID(byte[] id) {
         return null;
     }
 
 
     @Override
-    public void deleteByID(final UUID id) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void deleteByID(final byte[] id) {
     }
 
     @Override

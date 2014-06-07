@@ -1,36 +1,39 @@
-package eu.heronnet.core.module.storage;
-
-import com.google.common.util.concurrent.Service;
-import eu.heronnet.core.model.BinaryItem;
-import io.netty.channel.ChannelHandler;
-import java.util.UUID;
-
-/**
- * This file is part of heron
- * Copyright (C) 2013-2013 edoardocausarano
- * <p/>
+/*
+ * Copyright (C) 2014 edoardocausarano
+ *
  * heron is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * <p/>
+ *
  * heron is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * <p/>
+ *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with heron. If not, see http://www.gnu.org/licenses
  */
-public interface Persistence {
 
-    UUID persist(BinaryItem data);
+package eu.heronnet.core.module.storage;
 
-    BinaryItem findByID(UUID id);
+import com.google.common.util.concurrent.Service;
+import eu.heronnet.core.model.BinaryItem;
+import eu.heronnet.core.model.MetadataCollection;
 
-    void deleteByID(UUID id);
+import java.io.IOException;
+import java.util.List;
 
-    Service getService();
+public interface Persistence extends Service {
 
-    ChannelHandler getHandler();
+    void persistBinary(BinaryItem item) throws IOException;
+
+    MetadataCollection findByID(byte[] id);
+
+    List<MetadataCollection> fetchAllMedatadaItems();
+
+    void persistMetadata(List<MetadataCollection> metadataCollections);
+
+    void deleteByID(byte[] id);
+
 }
