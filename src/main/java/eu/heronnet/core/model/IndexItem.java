@@ -21,7 +21,7 @@ public class IndexItem {
 
     private byte[] id;
 
-    private MetadataCollection referencedItem;
+    private MetadataBundle referencedItem;
 
     private String key;
 
@@ -35,11 +35,11 @@ public class IndexItem {
         this.id = id;
     }
 
-    public MetadataCollection getReferencedItem() {
+    public MetadataBundle getReferencedItem() {
         return referencedItem;
     }
 
-    public void setReferencedItem(MetadataCollection referencedItem) {
+    public void setReferencedItem(MetadataBundle referencedItem) {
         this.referencedItem = referencedItem;
     }
 

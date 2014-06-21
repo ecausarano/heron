@@ -36,6 +36,6 @@ public class StoreValueRequestHandler extends SimpleChannelInboundHandler<StoreV
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, StoreValueRequest msg) throws Exception {
         logger.debug("persisting item with id: {}", msg.getItem().getId());
-        persistece.persistBinary(msg.getItem());
+        persistece.putBinary(msg.getItem(), null);
     }
 }

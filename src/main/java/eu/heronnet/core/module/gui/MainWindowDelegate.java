@@ -17,9 +17,9 @@
 
 package eu.heronnet.core.module.gui;
 
-import com.google.common.collect.ImmutableList;
-import eu.heronnet.core.model.BinaryItem;
-import eu.heronnet.core.model.MetadataCollection;
+import eu.heronnet.core.model.Binary;
+import eu.heronnet.core.model.MetadataBundle;
+import eu.heronnet.core.model.MetadataDescriptor;
 import eu.heronnet.core.module.storage.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,30 +37,29 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainWindowDelegate implements ActionListener, DocumentListener {
 
+    private static final Logger logger = LoggerFactory.getLogger(MainWindowDelegate.class);
+    ExecutorService executorService = Executors.newCachedThreadPool();
     @Inject
     private Persistence persistence;
-
-    private static final Logger logger = LoggerFactory.getLogger(MainWindowDelegate.class);
-
-    ExecutorService executorService = Executors.newCachedThreadPool();
-
     private File selectedFile;
     private String searchTerms;
 
     private AbstractTableModel resultsTable = new AbstractTableModel() {
 
         private String[] columnNames = {"Filename"};
+        private List<MetadataBundle> metadataBundles;
 
         @Override
         public int getRowCount() {
-            return persistence.fetchAllMedatadaItems().size();
+            metadataBundles = persistence.fetchAllMetadataItems();
+            return metadataBundles.size();
         }
 
         @Override
@@ -70,9 +69,8 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            final List<MetadataCollection> metadataCollections = persistence.fetchAllMedatadaItems();
-            final MetadataCollection item = metadataCollections.get(rowIndex);
-            return item.get("name");
+            final MetadataBundle item = metadataBundles.get(rowIndex);
+            return item.getMetadataItem("name");
         }
 
         @Override
@@ -110,25 +108,19 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
                     @Override
                     protected Object doInBackground() throws Exception {
                         logger.debug("Selected file {}", selectedFile);
-                        final BinaryItem binaryItem = new BinaryItem();
 
                         final ByteArrayOutputStream binaryOutputStream = new ByteArrayOutputStream(1048576);
                         byte[] allBytes = Files.readAllBytes(Paths.get(selectedFile.toURI()));
-                        binaryItem.setData(allBytes);
 
-                        final MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-                        messageDigest.reset();
-                        messageDigest.update(allBytes);
-                        final byte[] digest = messageDigest.digest();
-                        binaryItem.setId(digest);
+                        Binary binary = new Binary(allBytes);
 
-                        final MetadataCollection metadataCollection = new MetadataCollection();
-                        metadataCollection.put("filename", selectedFile.getPath());
-                        metadataCollection.setReferencedBinary(digest);
-                        binaryItem.putMetadataItem(metadataCollection);
+                        final MetadataDescriptor basicDescriptor = persistence.getMetadataDescriptorByName("basic");
+                        final MetadataBundle bundle = new MetadataBundle(Arrays.asList(basicDescriptor));
 
-                        persistence.persistBinary(binaryItem);
-                        persistence.persistMetadata(ImmutableList.of(metadataCollection));
+                        binary.setMetadataBundle(bundle);
+                        bundle.setMetadata("filename", selectedFile.getPath());
+
+                        persistence.putBinary(binary, bundle);
                         return null;
                     }
                 };

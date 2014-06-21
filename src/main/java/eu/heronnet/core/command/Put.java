@@ -18,7 +18,7 @@
 package eu.heronnet.core.command;
 
 import com.google.inject.Inject;
-import eu.heronnet.core.model.BinaryItem;
+import eu.heronnet.core.model.Binary;
 import eu.heronnet.core.module.network.dht.DHTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,14 +27,12 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Random;
+import java.security.NoSuchAlgorithmException;
 
 public class Put implements Command {
 
     private static final Logger logger = LoggerFactory.getLogger(Put.class);
     private static final String key = "PUT";
-
-    private final Random random = new Random();
 
     @Inject
     private DHTService dhtService;
@@ -48,21 +46,20 @@ public class Put implements Command {
     @Override
     public void execute() {
         logger.debug("called {}", key);
-        BinaryItem binary = new BinaryItem();
-
-        final byte[] id = new byte[20];
-        random.nextBytes(id);
-        binary.setId(id);
 
         Path path = FileSystems.getDefault().getPath(file);
         try {
             byte[] buf = Files.readAllBytes(path);
-            binary.setData(buf);
-            dhtService.persist(binary);
+            final Binary binary;
+            try {
+                binary = new Binary(buf);
+                dhtService.persist(binary);
+            } catch (NoSuchAlgorithmException e) {
+                logger.error("should never happen, apparently SHA-1 is not supported");
+            }
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
-
     }
 
     @Override

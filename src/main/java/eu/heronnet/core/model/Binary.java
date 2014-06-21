@@ -17,32 +17,33 @@
 
 package eu.heronnet.core.model;
 
-import com.google.common.collect.ImmutableList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.persistence.ElementCollection;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.OneToOne;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 @Entity
-public class BinaryItem {
+public class Binary {
 
-    private final Logger logger = LoggerFactory.getLogger(BinaryItem.class);
-    public byte[] data;
     @Id
     private byte[] id;
-    @ElementCollection
-    private List<MetadataCollection> metadataCollections = new ArrayList<>();
 
-    public List<MetadataCollection> getMetadataCollections() {
-        return ImmutableList.copyOf(metadataCollections);
+    private byte[] data;
+
+    @OneToOne(cascade = CascadeType.DETACH)
+    private MetadataBundle metadataBundle;
+
+    protected Binary() {
     }
 
-    public void putMetadataItem(MetadataCollection item) {
-        metadataCollections.add(item);
+    public Binary(byte[] data) throws NoSuchAlgorithmException {
+        this.data = data;
+        final MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+        messageDigest.reset();
+        messageDigest.update(data);
+        this.id = messageDigest.digest();
     }
 
     public byte[] getData() {
@@ -57,9 +58,11 @@ public class BinaryItem {
         return id;
     }
 
-    public void setId(byte[] id) {
-        this.id = id;
+    public MetadataBundle getMetadataBundle() {
+        return metadataBundle;
     }
 
-
+    public void setMetadataBundle(MetadataBundle metadataBundle) {
+        this.metadataBundle = metadataBundle;
+    }
 }

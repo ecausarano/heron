@@ -17,17 +17,17 @@
 
 package eu.heronnet.kad.model.rpc.message;
 
-import eu.heronnet.core.model.BinaryItem;
+import eu.heronnet.core.model.Binary;
 
 public class StoreValueRequest extends KadMessage {
 
-    private BinaryItem item;
+    private Binary item;
 
-    public BinaryItem getItem() {
+    public Binary getItem() {
         return item;
     }
 
-    public void setItem(BinaryItem item) {
+    public void setItem(Binary item) {
         this.item = item;
     }
 }

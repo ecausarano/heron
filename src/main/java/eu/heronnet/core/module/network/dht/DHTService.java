@@ -17,15 +17,15 @@
 
 package eu.heronnet.core.module.network.dht;
 
-import eu.heronnet.core.model.BinaryItem;
-import eu.heronnet.core.model.MetadataCollection;
+import eu.heronnet.core.model.Binary;
+import eu.heronnet.core.model.MetadataBundle;
 
 public abstract class DHTService {
 
 
-    public abstract byte[] persist(BinaryItem data);
+    public abstract byte[] persist(Binary data);
 
-    public abstract MetadataCollection findByID(byte[] id);
+    public abstract MetadataBundle findByID(byte[] id);
 
     public abstract void deleteByID(byte[] id);
 

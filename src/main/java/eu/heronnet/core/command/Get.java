@@ -19,7 +19,7 @@ package eu.heronnet.core.command;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
-import eu.heronnet.core.model.MetadataCollection;
+import eu.heronnet.core.model.MetadataBundle;
 import eu.heronnet.core.module.network.dht.DHTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class Get implements Command {
     @Override
     public void execute() {
         logger.debug("called {}", key);
-        MetadataCollection result = dhtService.findByID(id);
+        MetadataBundle result = dhtService.findByID(id);
 
         try {
             File tempFile = new File(file);

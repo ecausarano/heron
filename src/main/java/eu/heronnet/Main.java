@@ -33,7 +33,7 @@ import eu.heronnet.core.module.gui.MainWindow;
 import eu.heronnet.core.module.gui.MainWindowDelegate;
 import eu.heronnet.core.module.network.dht.DHTService;
 import eu.heronnet.core.module.network.dht.DHTServiceImpl;
-import eu.heronnet.core.module.storage.BerkeleyImpl;
+import eu.heronnet.core.module.storage.JPAImpl;
 import eu.heronnet.core.module.storage.Persistence;
 import eu.heronnet.kad.model.Node;
 import eu.heronnet.kad.model.RadixTree;
@@ -141,7 +141,7 @@ public class Main extends AbstractModule {
         Client client = new ClientImpl();
         bind(Client.class).toInstance(client);
 
-        Persistence storage = new BerkeleyImpl();
+        Persistence storage = new JPAImpl();
         bind(Persistence.class).toInstance(storage);
 
         MainWindowDelegate mainWindowDelegate = new MainWindowDelegate();

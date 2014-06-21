@@ -17,8 +17,8 @@
 
 package eu.heronnet.core.module.network.dht;
 
-import eu.heronnet.core.model.BinaryItem;
-import eu.heronnet.core.model.MetadataCollection;
+import eu.heronnet.core.model.Binary;
+import eu.heronnet.core.model.MetadataBundle;
 import eu.heronnet.kad.net.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,12 +33,12 @@ public class DHTServiceImpl extends DHTService {
     Client client;
 
     @Override
-    public byte[] persist(BinaryItem data) {
+    public byte[] persist(Binary data) {
         return null;
     }
 
     @Override
-    public MetadataCollection findByID(byte[] id) {
+    public MetadataBundle findByID(byte[] id) {
         return null;
     }
 
