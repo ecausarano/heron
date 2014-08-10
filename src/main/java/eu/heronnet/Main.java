@@ -25,7 +25,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
-import eu.heronnet.core.command.Invoker_;
+import eu.heronnet.core.command.Invoker;
 import eu.heronnet.core.module.GUI;
 import eu.heronnet.core.module.UI;
 import eu.heronnet.core.module.gui.MainWindow;
@@ -134,10 +134,10 @@ public class Main extends AbstractModule {
     protected void configure() {
 
         final EventBus eventBus = new AsyncEventBus("MAIN_BUS", Executors.newFixedThreadPool(5));
-        final Invoker_ invoker = new Invoker_();
+        final Invoker invoker = new Invoker();
         eventBus.register(invoker);
         bind(EventBus.class).toInstance(eventBus);
-        bind(Invoker_.class).toInstance(invoker);
+        bind(Invoker.class).toInstance(invoker);
 
         final Random random = new Random();
         byte[] selfId = new byte[20];

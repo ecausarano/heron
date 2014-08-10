@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class Invoker_ {
+public class Invoker {
 
-    private static final Logger logger = LoggerFactory.getLogger(Invoker_.class);
+    private static final Logger logger = LoggerFactory.getLogger(Invoker.class);
 
     @Inject
     Persistence persistence;
