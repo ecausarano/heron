@@ -15,19 +15,33 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.core.command;
+package eu.heronnet.core.module.storage;
 
-import com.google.common.eventbus.Subscribe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-public class Invoker {
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
-    private static final Logger logger = LoggerFactory.getLogger(eu.heronnet.core.command.Invoker.class);
+public class BerkeleyImplTest {
 
-    @Subscribe
-    public void dispatch(Command command) {
-        logger.debug(command.getKey());
-        command.execute();
+    private final BerkeleyImpl berkeley = new BerkeleyImpl();
+
+    @BeforeClass
+    public void setUp() throws Exception {
+        berkeley.startUp();
+        assertNotNull(berkeley.primaryData);
     }
+
+    @Test
+    public void testInitalize() {
+    }
+
+    @AfterClass
+    public void shutDown() throws Exception {
+        berkeley.shutDown();
+        assertNull(berkeley.environment);
+    }
+
 }

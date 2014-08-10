@@ -17,15 +17,16 @@
 
 package eu.heronnet.core.module.network.dht;
 
-import eu.heronnet.core.model.Binary;
-import eu.heronnet.core.model.MetadataBundle;
+import java.util.Map;
 
+/**
+ * Represents the essential API of a distributed hash table as described in the Kad paper
+ */
 public abstract class DHTService {
 
+    public abstract byte[] persist(Map<String, byte[]> data);
 
-    public abstract byte[] persist(Binary data);
-
-    public abstract MetadataBundle findByID(byte[] id);
+    public abstract Map<String, byte[]> findByID(byte[] id);
 
     public abstract void deleteByID(byte[] id);
 

@@ -17,6 +17,7 @@
 
 package eu.heronnet;
 
+import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
@@ -24,16 +25,14 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
-import com.google.inject.name.Names;
-import eu.heronnet.core.application.bus.EventBusProvider;
-import eu.heronnet.core.command.*;
+import eu.heronnet.core.command.Invoker_;
 import eu.heronnet.core.module.GUI;
 import eu.heronnet.core.module.UI;
 import eu.heronnet.core.module.gui.MainWindow;
 import eu.heronnet.core.module.gui.MainWindowDelegate;
 import eu.heronnet.core.module.network.dht.DHTService;
 import eu.heronnet.core.module.network.dht.DHTServiceImpl;
-import eu.heronnet.core.module.storage.JPAImpl;
+import eu.heronnet.core.module.storage.BerkeleyImpl;
 import eu.heronnet.core.module.storage.Persistence;
 import eu.heronnet.kad.model.Node;
 import eu.heronnet.kad.model.RadixTree;
@@ -47,6 +46,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
    /*
     * The Heron network bootstraps from the "archetype" table where <em>fundamental</em> UUIDs are given a name;
@@ -84,25 +86,27 @@ public class Main extends AbstractModule {
     public static void main(String[] args) throws Exception {
 
         final Injector injector = Guice.createInjector(new Main());
-        final HashSet<Service> services = new HashSet<Service>();
+
+        final HashSet<Service> services = new HashSet<>();
         final ServerImpl server = injector.getInstance(ServerImpl.class);
         services.add(server);
         final ClientImpl client = injector.getInstance(ClientImpl.class);
         services.add(client);
         final Service persistence = injector.getInstance(Persistence.class);
         services.add(persistence);
-        UI ui = injector.getInstance(UI.class);
+        final UI ui = injector.getInstance(UI.class);
         services.add(ui);
-        ServiceManager manager = new ServiceManager(services);
+        final ServiceManager manager = new ServiceManager(services);
         manager.addListener(new ServiceManager.Listener() {
             @Override
             public void failure(Service service) {
                 logger.error("bootstrap failure");
             }
 
-
             @Override
             public void healthy() {
+                MainWindow mainWindow = ((GUI) ui).getMainWindow();
+                mainWindow.getDelegate().init();
                 logger.debug("all services boostrapped correctly");
             }
 
@@ -113,12 +117,27 @@ public class Main extends AbstractModule {
         });
 
         manager.startAsync();
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                try {
+                    manager.stopAsync().awaitStopped(60, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    logger.error("Timed out waiting for shutdown");
+                }
+            }
+        });
     }
 
     @Override
     protected void configure() {
 
-        bind(EventBus.class).toProvider(EventBusProvider.class);
+        final EventBus eventBus = new AsyncEventBus("MAIN_BUS", Executors.newFixedThreadPool(5));
+        final Invoker_ invoker = new Invoker_();
+        eventBus.register(invoker);
+        bind(EventBus.class).toInstance(eventBus);
+        bind(Invoker_.class).toInstance(invoker);
 
         final Random random = new Random();
         byte[] selfId = new byte[20];
@@ -141,7 +160,7 @@ public class Main extends AbstractModule {
         Client client = new ClientImpl();
         bind(Client.class).toInstance(client);
 
-        Persistence storage = new JPAImpl();
+        Persistence storage = new BerkeleyImpl();
         bind(Persistence.class).toInstance(storage);
 
         MainWindowDelegate mainWindowDelegate = new MainWindowDelegate();
@@ -151,11 +170,5 @@ public class Main extends AbstractModule {
 
         MainWindow mainWindow = new MainWindow();
         bind(MainWindow.class).toInstance(mainWindow);
-
-        bind(Command.class).annotatedWith(Names.named("FIND")).to(Find.class);
-        bind(Command.class).annotatedWith(Names.named("GET")).to(Get.class);
-        bind(Command.class).annotatedWith(Names.named("PUT")).to(Put.class);
-        bind(Command.class).annotatedWith(Names.named("JOIN")).to(Join.class);
-        bind(Command.class).annotatedWith(Names.named("PING")).to(Ping.class);
     }
 }

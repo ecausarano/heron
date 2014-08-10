@@ -15,27 +15,40 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.kad.net.handler;
+package eu.heronnet.core.command;
 
+import com.google.common.eventbus.Subscribe;
+import com.google.inject.Inject;
+import eu.heronnet.core.module.network.dht.DHTService;
 import eu.heronnet.core.module.storage.Persistence;
-import eu.heronnet.kad.model.rpc.message.StoreValueRequest;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+import java.io.IOException;
 
-public class StoreValueRequestHandler extends SimpleChannelInboundHandler<StoreValueRequest> {
+public class Invoker_ {
 
-    private static final Logger logger = LoggerFactory.getLogger(StoreValueRequestHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(Invoker_.class);
 
     @Inject
-    Persistence persistece;
+    Persistence persistence;
 
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, StoreValueRequest msg) throws Exception {
-//        logger.debug("persisting item with id: {}", msg.getItem().getId());
-//        persistece.putBinary(msg.getItem(), null);
+    @Inject
+    DHTService dhtService;
+
+    @Subscribe
+    public void handlePut(Put command) {
+        logger.debug("called put");
+        try {
+            persistence.put(command.getPayload());
+        } catch (IOException e) {
+            logger.error("Error persisting payload");
+        }
+    }
+
+    @Subscribe
+    public void handlePing(Ping command) {
+        logger.debug("Called PING command");
+        dhtService.ping();
     }
 }

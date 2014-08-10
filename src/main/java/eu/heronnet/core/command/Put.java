@@ -17,53 +17,19 @@
 
 package eu.heronnet.core.command;
 
-import com.google.inject.Inject;
-import eu.heronnet.core.model.Binary;
-import eu.heronnet.core.module.network.dht.DHTService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Map;
 
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.NoSuchAlgorithmException;
+public class Put {
 
-public class Put implements Command {
-
-    private static final Logger logger = LoggerFactory.getLogger(Put.class);
     private static final String key = "PUT";
 
-    @Inject
-    private DHTService dhtService;
-    private String file;
+    final Map<String, byte[]> payload;
 
-    @Override
-    public String getKey() {
-        return key;
+    public Put(Map<String, byte[]> payload) {
+        this.payload = payload;
     }
 
-    @Override
-    public void execute() {
-        logger.debug("called {}", key);
-
-        Path path = FileSystems.getDefault().getPath(file);
-        try {
-            byte[] buf = Files.readAllBytes(path);
-            final Binary binary;
-            try {
-                binary = new Binary(buf);
-                dhtService.persist(binary);
-            } catch (NoSuchAlgorithmException e) {
-                logger.error("should never happen, apparently SHA-1 is not supported");
-            }
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-    }
-
-    @Override
-    public void setArgs(String... varargs) {
-        file = varargs[0];
+    public Map<String, byte[]> getPayload() {
+        return payload;
     }
 }

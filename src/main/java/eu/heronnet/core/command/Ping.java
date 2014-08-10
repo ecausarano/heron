@@ -22,28 +22,11 @@ import eu.heronnet.core.module.network.dht.DHTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Ping implements Command {
+public class Ping {
 
     private static final String KEY = "PING";
     private final Logger logger = LoggerFactory.getLogger(Ping.class);
 
     @Inject
     private DHTService dhtService;
-
-
-    @Override
-    public String getKey() {
-        return KEY;
-    }
-
-    @Override
-    public void execute() {
-        logger.debug("Called PING command");
-        dhtService.ping();
-    }
-
-    @Override
-    public void setArgs(final String... varargs) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
 }

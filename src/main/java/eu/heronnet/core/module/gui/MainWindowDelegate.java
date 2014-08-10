@@ -17,9 +17,8 @@
 
 package eu.heronnet.core.module.gui;
 
-import eu.heronnet.core.model.Binary;
-import eu.heronnet.core.model.MetadataBundle;
-import eu.heronnet.core.model.MetadataDescriptor;
+import com.google.common.eventbus.EventBus;
+import eu.heronnet.core.command.Put;
 import eu.heronnet.core.module.storage.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,33 +32,33 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainWindowDelegate implements ActionListener, DocumentListener {
 
     private static final Logger logger = LoggerFactory.getLogger(MainWindowDelegate.class);
-    ExecutorService executorService = Executors.newCachedThreadPool();
-    @Inject
-    private Persistence persistence;
-    private File selectedFile;
-    private String searchTerms;
-
+    private static final String FILE_NAME = "filename";
     private AbstractTableModel resultsTable = new AbstractTableModel() {
 
         private String[] columnNames = {"Filename"};
-        private List<MetadataBundle> metadataBundles;
 
         @Override
         public int getRowCount() {
-            metadataBundles = persistence.fetchAllMetadataItems();
-            return metadataBundles.size();
+            // sucks! need to cache this intelligently when the app modules are all healthy
+            try {
+                return persistence.getAllMetadata().size();
+            } catch (IOException e) {
+                logger.error("Error fetching metadata count: {}", e.getMessage());
+                return 0;
+            }
         }
 
         @Override
@@ -69,8 +68,13 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            final MetadataBundle item = metadataBundles.get(rowIndex);
-            return item.getMetadataItem("name");
+            try {
+                final List<Map<String, String>> allMetadata = persistence.getAllMetadata();
+                return allMetadata.get(rowIndex).get(FILE_NAME);
+            } catch (IOException e) {
+                logger.error("Error fetching metadata for item no={}, error={}", rowIndex, e.getMessage());
+                return "<failed to retrieve file name>";
+            }
         }
 
         @Override
@@ -78,9 +82,30 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
             return columnNames[column];
         }
     };
+    private static final String METADATA_LIST = "metadataList";
+    ExecutorService executorService = Executors.newCachedThreadPool();
+    @Inject
+    private Persistence persistence;
+    @Inject
+    private EventBus eventBus;
+    private File selectedFile;
+    private String searchTerms;
+    private Map<String, Object> viewState = new HashMap<>();
 
     public MainWindowDelegate() {
         logger.debug("ctor {}", this);
+    }
+
+    public void init() {
+
+        if (persistence != null) {
+            try {
+                final List<Map<String, String>> allMetadata = persistence.getAllMetadata();
+                viewState.put(METADATA_LIST, allMetadata);
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
+        }
     }
 
     @Override
@@ -108,19 +133,13 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
                     @Override
                     protected Object doInBackground() throws Exception {
                         logger.debug("Selected file {}", selectedFile);
-
-                        final ByteArrayOutputStream binaryOutputStream = new ByteArrayOutputStream(1048576);
                         byte[] allBytes = Files.readAllBytes(Paths.get(selectedFile.toURI()));
 
-                        Binary binary = new Binary(allBytes);
+                        final Map<String, byte[]> item = new HashMap<>();
+                        item.put("filename", selectedFile.getPath().getBytes());
+                        item.put("data", allBytes);
 
-                        final MetadataDescriptor basicDescriptor = persistence.getMetadataDescriptorByName("basic");
-                        final MetadataBundle bundle = new MetadataBundle(Arrays.asList(basicDescriptor));
-
-                        binary.setMetadataBundle(bundle);
-                        bundle.setMetadata("filename", selectedFile.getPath());
-
-                        persistence.putBinary(binary, bundle);
+                        eventBus.post(new Put(item));
                         return null;
                     }
                 };

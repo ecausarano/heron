@@ -27,10 +27,14 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LoggingHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
 public class ClientImpl extends AbstractIdleService implements Client {
+
+    private static final Logger logger = LoggerFactory.getLogger(ClientImpl.class);
 
     private Bootstrap boostrap;
     private EventLoopGroup workerGroup;
@@ -56,6 +60,7 @@ public class ClientImpl extends AbstractIdleService implements Client {
 
     @Override
     protected void shutDown() throws Exception {
+        logger.debug("Shutting down network client");
         workerGroup.shutdownGracefully();
     }
 

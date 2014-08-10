@@ -17,41 +17,13 @@
 
 package eu.heronnet.core.command;
 
-import com.google.inject.Inject;
-import eu.heronnet.core.module.network.dht.DHTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Join implements Command {
+public class Join {
 
     private static final Logger logger = LoggerFactory.getLogger(Join.class);
 
     private static final String key = "join";
 
-
-    @Inject
-    private DHTService dhtService;
-
-    @Override
-    public String getKey() {
-        return key;
-    }
-
-    @Override
-    public void execute() {
-    }
-
-    @Override
-    public void setArgs(String... varargs) {
-//        KeybasedRouting keybasedRouting = dhtService.getKbr();
-//        List<URI> uriList = new ArrayList<URI>();
-//        for (String arg : varargs) {
-//            try {
-//                uriList.add(new URI(arg));
-//            } catch (URISyntaxException e) {
-//                logger.error(e.getMessage());
-//            }
-//        }
-//        keybasedRouting.join(uriList);
-    }
 }

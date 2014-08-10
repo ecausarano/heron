@@ -104,9 +104,11 @@ public class MainWindow {
         searchButton.addActionListener(delegate);
         searchText.getDocument().addDocumentListener(delegate);
         addFileMenuItem.addActionListener(new ActionListener() {
+            {
+                addFileChooser.addActionListener(delegate);
+            }
             @Override
             public void actionPerformed(ActionEvent e) {
-                addFileChooser.addActionListener(delegate);
                 int choiceResult = addFileChooser.showOpenDialog(mainWindow);
             }
         });

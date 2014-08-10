@@ -17,13 +17,12 @@
 
 package eu.heronnet.core.module.network.dht;
 
-import eu.heronnet.core.model.Binary;
-import eu.heronnet.core.model.MetadataBundle;
 import eu.heronnet.kad.net.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.Map;
 
 public class DHTServiceImpl extends DHTService {
 
@@ -32,19 +31,20 @@ public class DHTServiceImpl extends DHTService {
     @Inject
     Client client;
 
+
     @Override
-    public byte[] persist(Binary data) {
+    public byte[] persist(Map<String, byte[]> data) {
+        return new byte[0];
+    }
+
+    @Override
+    public Map<String, byte[]> findByID(byte[] id) {
         return null;
     }
 
     @Override
-    public MetadataBundle findByID(byte[] id) {
-        return null;
-    }
+    public void deleteByID(byte[] id) {
 
-
-    @Override
-    public void deleteByID(final byte[] id) {
     }
 
     @Override

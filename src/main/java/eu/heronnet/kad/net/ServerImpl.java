@@ -36,10 +36,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 
 public class ServerImpl extends AbstractIdleService {
+    private static final Logger logger = LoggerFactory.getLogger(ServerImpl.class);
     private NioEventLoopGroup bossGroup;
     private NioEventLoopGroup workerGroup;
-
-    private static final Logger logger = LoggerFactory.getLogger(ServerImpl.class);
     private ServerBootstrap bootstrap;
 
     @Inject
@@ -78,6 +77,7 @@ public class ServerImpl extends AbstractIdleService {
 
     @Override
     protected void shutDown() throws Exception {
+        logger.debug("Shutting down network server");
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
     }

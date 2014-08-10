@@ -48,4 +48,10 @@ public class GUI extends AbstractIdleService implements UI {
     protected void shutDown() throws Exception {
 
     }
+
+    public MainWindow getMainWindow() {
+        return mainWindow;
+    }
+
+
 }
