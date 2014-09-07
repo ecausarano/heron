@@ -19,17 +19,11 @@ package eu.heronnet.core.command;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
-import eu.heronnet.core.model.MetadataBundle;
 import eu.heronnet.core.module.network.dht.DHTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
-
-public class Get implements Command {
+public class Get {
 
     private static final Logger logger = LoggerFactory.getLogger(Get.class);
 
@@ -43,30 +37,19 @@ public class Get implements Command {
     @Inject
     private EventBus eventBus;
 
-    @Override
-    public String getKey() {
-        return key;
-    }
-
-    @Override
-    public void execute() {
-        logger.debug("called {}", key);
-        MetadataBundle result = dhtService.findByID(id);
-
-        try {
-            File tempFile = new File(file);
-            final RandomAccessFile randomAccessFile = new RandomAccessFile(tempFile, "rw");
-            final FileChannel fileChannel = randomAccessFile.getChannel();
-//            fileChannel.write(ByteBuffer.wrap(result.getData()));
-            fileChannel.close();
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-    }
-
-    @Override
-    public void setArgs(String... varargs) {
-        this.file = varargs[0];
-        this.id = varargs[1].getBytes();
-    }
+//    @Override
+//    public void handle() {
+//        logger.debug("called {}", key);
+////        MetadataBundle result = dhtService.findByID(id);
+//
+//        try {
+//            File tempFile = new File(file);
+//            final RandomAccessFile randomAccessFile = new RandomAccessFile(tempFile, "rw");
+//            final FileChannel fileChannel = randomAccessFile.getChannel();
+////            fileChannel.write(ByteBuffer.wrap(result.getData()));
+//            fileChannel.close();
+//        } catch (IOException e) {
+//            logger.error(e.getMessage());
+//        }
+//    }
 }

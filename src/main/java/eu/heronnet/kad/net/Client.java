@@ -19,8 +19,6 @@ package eu.heronnet.kad.net;
 
 import eu.heronnet.kad.model.rpc.message.KadMessage;
 
-import java.net.InetSocketAddress;
-
 public interface Client {
-    void send(KadMessage message, InetSocketAddress address);
+    void send(KadMessage message);
 }

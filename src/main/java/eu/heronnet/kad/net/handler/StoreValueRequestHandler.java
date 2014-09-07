@@ -17,25 +17,30 @@
 
 package eu.heronnet.kad.net.handler;
 
+import eu.heronnet.core.model.Keys;
 import eu.heronnet.core.module.storage.Persistence;
 import eu.heronnet.kad.model.rpc.message.StoreValueRequest;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.Map;
 
+@ChannelHandler.Sharable
 public class StoreValueRequestHandler extends SimpleChannelInboundHandler<StoreValueRequest> {
 
     private static final Logger logger = LoggerFactory.getLogger(StoreValueRequestHandler.class);
 
     @Inject
-    Persistence persistece;
+    Persistence persistence;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, StoreValueRequest msg) throws Exception {
-        logger.debug("persisting item with id: {}", msg.getItem().getId());
-        persistece.putBinary(msg.getItem(), null);
+        final Map<String, byte[]> item = msg.getItem();
+        logger.debug("Received StoreValueRequest message with id: {}", item.get(Keys.ID));
+        persistence.put(item);
     }
 }

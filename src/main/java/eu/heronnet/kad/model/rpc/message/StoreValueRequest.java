@@ -17,17 +17,22 @@
 
 package eu.heronnet.kad.model.rpc.message;
 
-import eu.heronnet.core.model.Binary;
+import java.util.Map;
 
 public class StoreValueRequest extends KadMessage {
 
-    private Binary item;
+    private Map<String, byte[]> item;
 
-    public Binary getItem() {
-        return item;
+    // Only for JSON
+    @SuppressWarnings("unused")
+    public StoreValueRequest() {
     }
 
-    public void setItem(Binary item) {
+    public StoreValueRequest(Map<String, byte[]> item) {
         this.item = item;
+    }
+
+    public Map<String, byte[]> getItem() {
+        return item;
     }
 }

@@ -15,19 +15,10 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.core.command;
+package eu.heronnet.core.model;
 
-import com.google.common.eventbus.Subscribe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class Invoker {
-
-    private static final Logger logger = LoggerFactory.getLogger(eu.heronnet.core.command.Invoker.class);
-
-    @Subscribe
-    public void dispatch(Command command) {
-        logger.debug(command.getKey());
-        command.execute();
-    }
+public interface Keys {
+    static final String ID = "ID";
+    static final String DATA = "data";
+    static final String METADATA = "metadata";
 }

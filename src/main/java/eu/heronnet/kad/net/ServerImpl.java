@@ -18,11 +18,12 @@
 package eu.heronnet.kad.net;
 
 import com.google.common.util.concurrent.AbstractIdleService;
+import com.google.inject.Singleton;
 import eu.heronnet.kad.net.codec.KadMessageCodec;
 import eu.heronnet.kad.net.handler.FindNodeRequestHandler;
 import eu.heronnet.kad.net.handler.PingRequestHandler;
+import eu.heronnet.kad.net.handler.StoreValueRequestHandler;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -35,11 +36,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
+@Singleton
 public class ServerImpl extends AbstractIdleService {
+    private static final Logger logger = LoggerFactory.getLogger(ServerImpl.class);
     private NioEventLoopGroup bossGroup;
     private NioEventLoopGroup workerGroup;
-
-    private static final Logger logger = LoggerFactory.getLogger(ServerImpl.class);
     private ServerBootstrap bootstrap;
 
     @Inject
@@ -48,9 +49,12 @@ public class ServerImpl extends AbstractIdleService {
     private PingRequestHandler pingRequestHandler;
     @Inject
     private FindNodeRequestHandler findNodeRequestHandler;
+    @Inject
+    private StoreValueRequestHandler storeValueRequestHandler;
 
     @Override
     protected void startUp() throws Exception {
+        logger.debug("calling startUp for ServerImpl instance={}", this);
         bootstrap = new ServerBootstrap();
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
@@ -65,12 +69,13 @@ public class ServerImpl extends AbstractIdleService {
                         pipeline.addLast("Kad message codec", kadMessageCodec);
                         pipeline.addLast("PING request handler", pingRequestHandler);
                         pipeline.addLast("FIND request handler", findNodeRequestHandler);
+                        pipeline.addLast("STORE request handle", storeValueRequestHandler);
                     }
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
         try {
-            ChannelFuture future = bootstrap.bind().sync();
+            bootstrap.bind().sync();
         } catch (InterruptedException e) {
             logger.error("An error has occurred", e);
         }
@@ -78,6 +83,7 @@ public class ServerImpl extends AbstractIdleService {
 
     @Override
     protected void shutDown() throws Exception {
+        logger.debug("Shutting down network server");
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
     }

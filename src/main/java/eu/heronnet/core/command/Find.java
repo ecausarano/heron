@@ -20,24 +20,9 @@ package eu.heronnet.core.command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Find implements Command {
+public class Find {
 
     private static final Logger logger = LoggerFactory.getLogger(Find.class);
 
     private static final String key = "FIND";
-
-    @Override
-    public String getKey() {
-        return key;
-    }
-
-    @Override
-    public void execute() {
-        logger.debug("called {}", key);
-    }
-
-    @Override
-    public void setArgs(String... varargs) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
 }

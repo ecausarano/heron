@@ -15,23 +15,33 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.core.application.bus;
+package eu.heronnet.core.module.storage;
 
-import com.google.common.eventbus.AsyncEventBus;
-import com.google.common.eventbus.EventBus;
-import com.google.inject.Provider;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-import java.util.concurrent.Executors;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
-public class EventBusProvider implements Provider<EventBus> {
+public class BerkeleyImplTest {
 
-    private final String MAIN_BUS = "MAIN_BUS";
-    private int N_THREADS = 5;
+    private final BerkeleyImpl berkeley = new BerkeleyImpl();
 
-    EventBus eventBus = new AsyncEventBus(MAIN_BUS, Executors.newFixedThreadPool(N_THREADS));
-
-    @Override
-    public EventBus get() {
-        return eventBus;
+    @BeforeClass
+    public void setUp() throws Exception {
+        berkeley.startUp();
+        assertNotNull(berkeley.primaryData);
     }
+
+    @Test
+    public void testInitalize() {
+    }
+
+    @AfterClass
+    public void shutDown() throws Exception {
+        berkeley.shutDown();
+        assertNull(berkeley.environment);
+    }
+
 }

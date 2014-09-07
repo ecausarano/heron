@@ -36,6 +36,7 @@ public class MainWindow {
     private JTextField searchText;
     private JButton searchButton;
     private JTable resultsTable;
+    private JTable localItemsTable;
     private JFrame mainWindow;
     private JMenuBar menuBar;
 
@@ -63,8 +64,11 @@ public class MainWindow {
         mainWindow.getContentPane().add(tabbedPane);
 
         JPanel searchPanel = new JPanel();
+        JPanel localStorage = new JPanel();
         JPanel identityPanel = new JPanel();
+
         tabbedPane.addTab("Search Panel", searchPanel);
+        tabbedPane.addTab("Local Storage", localStorage);
         tabbedPane.addTab("Identity", identityPanel);
 
         searchText = new JTextField("search terms...");
@@ -76,10 +80,15 @@ public class MainWindow {
         searchPanel.add(searchButton);
 
         resultsTable = new JTable();
-        resultsTable.setModel(delegate.getResultsTable());
-        JScrollPane jScrollPane = new JScrollPane(resultsTable);
+        JScrollPane resultsTableScrollPane = new JScrollPane(resultsTable);
         resultsTable.setFillsViewportHeight(true);
-        searchPanel.add(jScrollPane);
+        searchPanel.add(resultsTableScrollPane);
+
+        localItemsTable = new JTable();
+        localItemsTable.setModel(delegate.getResultsTable());
+        JScrollPane localItemsTableScrollPane = new JScrollPane(localItemsTable);
+        localItemsTable.setFillsViewportHeight(true);
+        localStorage.add(localItemsTableScrollPane);
 
         createMenu();
         mainWindow.setJMenuBar(menuBar);
@@ -104,10 +113,13 @@ public class MainWindow {
         searchButton.addActionListener(delegate);
         searchText.getDocument().addDocumentListener(delegate);
         addFileMenuItem.addActionListener(new ActionListener() {
+            {
+                addFileChooser.addActionListener(delegate);
+            }
+
             @Override
             public void actionPerformed(ActionEvent e) {
-                addFileChooser.addActionListener(delegate);
-                int choiceResult = addFileChooser.showOpenDialog(mainWindow);
+                addFileChooser.showOpenDialog(mainWindow);
             }
         });
     }

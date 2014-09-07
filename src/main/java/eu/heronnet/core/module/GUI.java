@@ -18,6 +18,7 @@
 package eu.heronnet.core.module;
 
 import com.google.common.util.concurrent.AbstractIdleService;
+import com.google.inject.Singleton;
 import eu.heronnet.core.module.gui.MainWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import javax.inject.Inject;
 import javax.swing.*;
 
 
+@Singleton
 public class GUI extends AbstractIdleService implements UI {
 
     private static final Logger logger = LoggerFactory.getLogger(GUI.class);
@@ -48,4 +50,10 @@ public class GUI extends AbstractIdleService implements UI {
     protected void shutDown() throws Exception {
 
     }
+
+    public MainWindow getMainWindow() {
+        return mainWindow;
+    }
+
+
 }

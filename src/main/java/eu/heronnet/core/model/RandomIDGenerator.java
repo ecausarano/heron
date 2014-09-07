@@ -17,45 +17,20 @@
 
 package eu.heronnet.core.model;
 
-public class IndexItem {
+import com.google.inject.Singleton;
 
-    private byte[] id;
+import java.util.Map;
+import java.util.Random;
 
-    private MetadataBundle referencedItem;
+@Singleton
+public class RandomIDGenerator implements IDGenerator {
 
-    private String key;
+    Random random = new Random();
 
-    private String value;
-
-    public byte[] getId() {
+    @Override
+    public byte[] generateId(Map<String, byte[]> data) {
+        byte[] id = new byte[IDGenerator.KEY_LENGTH];
+        random.nextBytes(id);
         return id;
-    }
-
-    public void setId(byte[] id) {
-        this.id = id;
-    }
-
-    public MetadataBundle getReferencedItem() {
-        return referencedItem;
-    }
-
-    public void setReferencedItem(MetadataBundle referencedItem) {
-        this.referencedItem = referencedItem;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
     }
 }

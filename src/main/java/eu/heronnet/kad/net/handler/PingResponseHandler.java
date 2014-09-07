@@ -18,11 +18,13 @@
 package eu.heronnet.kad.net.handler;
 
 import eu.heronnet.kad.model.rpc.message.PingResponse;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ChannelHandler.Sharable
 public class PingResponseHandler extends SimpleChannelInboundHandler<PingResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(PingResponseHandler.class);

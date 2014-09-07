@@ -18,31 +18,11 @@
 package eu.heronnet.core.module.storage;
 
 import com.google.common.util.concurrent.Service;
-import eu.heronnet.core.model.Binary;
-import eu.heronnet.core.model.MetadataBundle;
-import eu.heronnet.core.model.MetadataDescriptor;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 
 public interface Persistence extends Service {
 
-    void putBinary(Binary item, MetadataBundle bundle) throws IOException;
-
-    Binary getBinaryById(byte[] id);
-
-    MetadataBundle findByID(byte[] id);
-
-    List<MetadataBundle> fetchAllMetadataItems();
-
-    List<MetadataDescriptor> fetchAllMetadataDescriptors();
-
-    void putMetadataDescriptor(MetadataDescriptor descriptor);
-
-    MetadataDescriptor getMetadataDescriptorByName(String name);
-
-    void putMetadata(List<MetadataBundle> metadataBundles);
-
-    void deleteBinaryById(byte[] id);
-
+    void put(Map<String, byte[]> item) throws IOException;
 }

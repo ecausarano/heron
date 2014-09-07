@@ -17,14 +17,16 @@
 
 package eu.heronnet.core.module.network.dht;
 
-import eu.heronnet.core.model.Binary;
-import eu.heronnet.core.model.MetadataBundle;
+import com.google.inject.Singleton;
+import eu.heronnet.kad.model.rpc.message.StoreValueRequest;
 import eu.heronnet.kad.net.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.Map;
 
+@Singleton
 public class DHTServiceImpl extends DHTService {
 
     private static Logger logger = LoggerFactory.getLogger(DHTServiceImpl.class);
@@ -32,19 +34,21 @@ public class DHTServiceImpl extends DHTService {
     @Inject
     Client client;
 
+
     @Override
-    public byte[] persist(Binary data) {
+    public void persist(Map<String, byte[]> data) {
+        final StoreValueRequest storeValueRequest = new StoreValueRequest(data);
+        client.send(storeValueRequest);
+    }
+
+    @Override
+    public Map<String, byte[]> findByID(byte[] id) {
         return null;
     }
 
     @Override
-    public MetadataBundle findByID(byte[] id) {
-        return null;
-    }
+    public void deleteByID(byte[] id) {
 
-
-    @Override
-    public void deleteByID(final byte[] id) {
     }
 
     @Override

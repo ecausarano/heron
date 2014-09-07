@@ -15,20 +15,26 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.core.module.network.dht;
+package eu.heronnet.core.command;
 
-import java.util.Map;
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
+import com.google.inject.Provider;
 
-/**
- * Represents the essential API of a distributed hash table as described in the Kad paper
- */
-public abstract class DHTService {
+import javax.inject.Inject;
+import java.util.concurrent.Executors;
 
-    public abstract void persist(Map<String, byte[]> data);
+public class EventBusProvider implements Provider<EventBus> {
 
-    public abstract Map<String, byte[]> findByID(byte[] id);
+    private EventBus eventBus = new AsyncEventBus("MAIN_BUS", Executors.newFixedThreadPool(5));
 
-    public abstract void deleteByID(byte[] id);
+    @Inject
+    public EventBusProvider(Invoker invoker) {
+        eventBus.register(invoker);
+    }
 
-    public abstract void ping();
+    @Override
+    public EventBus get() {
+        return eventBus;
+    }
 }

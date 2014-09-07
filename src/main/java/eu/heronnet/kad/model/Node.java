@@ -17,16 +17,14 @@
 
 package eu.heronnet.kad.model;
 
-import com.sun.istack.internal.NotNull;
-
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.BitSet;
 
 public class Node implements Comparable<Node> {
 
     private byte[] id;
 
-    private InetAddress address;
+    private InetSocketAddress address;
 
     private int port;
 
@@ -38,11 +36,11 @@ public class Node implements Comparable<Node> {
         this.id = id;
     }
 
-    public InetAddress getAddress() {
+    public InetSocketAddress getAddress() {
         return address;
     }
 
-    public void setAddress(InetAddress address) {
+    public void setAddress(InetSocketAddress address) {
         this.address = address;
     }
 
@@ -55,7 +53,7 @@ public class Node implements Comparable<Node> {
     }
 
     @Override
-    public int compareTo(@NotNull Node that) {
+    public int compareTo(Node that) {
         BitSet thatBitSet = BitSet.valueOf(that.getId());
         final BitSet thisBitSet = BitSet.valueOf(id);
 
