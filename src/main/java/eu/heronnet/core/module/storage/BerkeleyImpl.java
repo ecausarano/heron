@@ -17,15 +17,21 @@
 
 package eu.heronnet.core.module.storage;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.AbstractIdleService;
 import com.google.inject.Singleton;
 import com.sleepycat.je.*;
+import de.undercouch.bson4jackson.BsonFactory;
+import de.undercouch.bson4jackson.BsonGenerator;
 import eu.heronnet.core.model.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Map;
 
 /**
@@ -36,10 +42,20 @@ public class BerkeleyImpl extends AbstractIdleService implements Persistence {
 
     private static final Logger logger = LoggerFactory.getLogger(BerkeleyImpl.class);
 
-    String path = "herondb";
+//    @Inject @Named("berkeleyDbEnvHome")
+//    File dbEnvHome;
+    String dbEnvHome = "herondb";
+
     Environment environment;
     Database primaryData;
-    SecondaryDatabase filenameIndex;
+    Database metaStore;
+
+    private final BsonFactory bsonFactory = new BsonFactory();
+    private final ObjectMapper mapper = new ObjectMapper();
+    {
+        bsonFactory.enable(BsonGenerator.Feature.ENABLE_STREAMING);
+    }
+
 
     public BerkeleyImpl() {
         logger.debug("BerkeleyImpl ctor={}", this);
@@ -57,7 +73,8 @@ public class BerkeleyImpl extends AbstractIdleService implements Persistence {
         config.setAllowCreate(true);
         config.setTransactional(true);
 
-        final File envHome = new File(path);
+//        environment = new Environment(dbEnvHome, config);
+        final File envHome = new File(dbEnvHome);
         if (!envHome.exists()) {
             envHome.mkdir();
         }
@@ -70,6 +87,8 @@ public class BerkeleyImpl extends AbstractIdleService implements Persistence {
         primaryData = environment.openDatabase(null, "PrimaryData", databaseConfig);
         logger.debug("Opened primary name=PrimaryData, count={}", primaryData.count());
 
+        metaStore = environment.openDatabase(null, "MetadataStore", databaseConfig);
+        logger.debug("Opened primary name=MetadataStore, count={}", metaStore.count());
 
         // indexes
 //        final SecondaryConfig indexConfig = new SecondaryConfig();
@@ -105,22 +124,27 @@ public class BerkeleyImpl extends AbstractIdleService implements Persistence {
     @Override
     protected void shutDown() throws Exception {
         logger.debug("Shutting down BerkeleyDB");
-        filenameIndex.close();
+        metaStore.close();
         primaryData.close();
 
         environment.close();
 
-        filenameIndex = null;
+        metaStore = null;
         primaryData = null;
         environment = null;
     }
 
     @Override
     public void put(Map<String, byte[]> item) throws IOException {
-        logger.debug("Persisting item with id={}", item.get(Keys.ID));
+        /// DATA
+        byte[] rawId = item.get(Keys.ID);
+        logger.debug("Persisting item with id={}", Base64.getEncoder().encodeToString(rawId));
         final byte[] dataBytes = item.get(Keys.DATA);
-        final DatabaseEntry key = new DatabaseEntry(item.get(Keys.ID));
+        final DatabaseEntry key = new DatabaseEntry(rawId);
         final DatabaseEntry value = new DatabaseEntry(dataBytes);
         primaryData.put(null, key, value);
+
+        /// METADATA
+        logger.debug("Persisting metadata for item with id={}", Base64.getEncoder().encodeToString(rawId));
     }
 }
