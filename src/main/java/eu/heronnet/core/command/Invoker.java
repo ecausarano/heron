@@ -35,9 +35,6 @@ public class Invoker {
     private static final Logger logger = LoggerFactory.getLogger(Invoker.class);
 
     @Inject
-    Persistence persistence;
-
-    @Inject
     DHTService dhtService;
 
     @Inject
