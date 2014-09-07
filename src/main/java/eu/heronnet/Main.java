@@ -17,19 +17,18 @@
 
 package eu.heronnet;
 
-import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Scopes;
-import eu.heronnet.core.command.Invoker;
+import eu.heronnet.core.command.EventBusProvider;
+import eu.heronnet.core.model.IDGenerator;
+import eu.heronnet.core.model.RandomIDGenerator;
 import eu.heronnet.core.module.GUI;
 import eu.heronnet.core.module.UI;
 import eu.heronnet.core.module.gui.MainWindow;
-import eu.heronnet.core.module.gui.MainWindowDelegate;
 import eu.heronnet.core.module.network.dht.DHTService;
 import eu.heronnet.core.module.network.dht.DHTServiceImpl;
 import eu.heronnet.core.module.storage.BerkeleyImpl;
@@ -44,9 +43,9 @@ import eu.heronnet.kad.net.ServerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Random;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -133,11 +132,8 @@ public class Main extends AbstractModule {
     @Override
     protected void configure() {
 
-        final EventBus eventBus = new AsyncEventBus("MAIN_BUS", Executors.newFixedThreadPool(5));
-        final Invoker invoker = new Invoker();
-        eventBus.register(invoker);
-        bind(EventBus.class).toInstance(eventBus);
-        bind(Invoker.class).toInstance(invoker);
+        bind(EventBus.class).toProvider(EventBusProvider.class);
+        bind(IDGenerator.class).to(RandomIDGenerator.class);
 
         final Random random = new Random();
         byte[] selfId = new byte[20];
@@ -145,6 +141,7 @@ public class Main extends AbstractModule {
 
         Node self = new Node();
         self.setId(selfId);
+        self.setAddress(new InetSocketAddress("localhost", 6565));
         bind(Node.class).annotatedWith(Self.class).toInstance(self);
 
         RadixTreeImpl network = new RadixTreeImpl();
@@ -152,23 +149,10 @@ public class Main extends AbstractModule {
 
         bind(RadixTree.class).toInstance(network);
 
-        bind(DHTService.class).toInstance(new DHTServiceImpl());
+        bind(DHTService.class).to(DHTServiceImpl.class);
 
-        ServerImpl server = new ServerImpl();
-        bind(ServerImpl.class).toInstance(server);
-
-        Client client = new ClientImpl();
-        bind(Client.class).toInstance(client);
-
-        Persistence storage = new BerkeleyImpl();
-        bind(Persistence.class).toInstance(storage);
-
-        MainWindowDelegate mainWindowDelegate = new MainWindowDelegate();
-        bind(MainWindowDelegate.class).toInstance(mainWindowDelegate);
-
-        bind(UI.class).to(GUI.class).in(Scopes.SINGLETON);
-
-        MainWindow mainWindow = new MainWindow();
-        bind(MainWindow.class).toInstance(mainWindow);
+        bind(Client.class).to(ClientImpl.class);
+        bind(Persistence.class).to(BerkeleyImpl.class);
+        bind(UI.class).to(GUI.class);
     }
 }

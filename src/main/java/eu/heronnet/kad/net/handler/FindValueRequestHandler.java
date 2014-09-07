@@ -21,11 +21,13 @@ import eu.heronnet.kad.model.Node;
 import eu.heronnet.kad.model.RadixTree;
 import eu.heronnet.kad.model.Self;
 import eu.heronnet.kad.model.rpc.message.FindValueRequest;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import javax.inject.Inject;
 
+@ChannelHandler.Sharable
 public class FindValueRequestHandler extends SimpleChannelInboundHandler<FindValueRequest> {
 
     @Inject

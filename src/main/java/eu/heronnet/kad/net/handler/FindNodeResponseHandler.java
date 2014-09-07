@@ -18,11 +18,13 @@
 package eu.heronnet.kad.net.handler;
 
 import eu.heronnet.kad.model.rpc.message.FindNodeResponse;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ChannelHandler.Sharable
 public class FindNodeResponseHandler extends SimpleChannelInboundHandler<FindNodeResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(FindNodeResponseHandler.class);

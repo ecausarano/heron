@@ -15,20 +15,13 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.core.module.network.dht;
+package eu.heronnet.core.model;
 
 import java.util.Map;
 
-/**
- * Represents the essential API of a distributed hash table as described in the Kad paper
- */
-public abstract class DHTService {
+public interface IDGenerator {
 
-    public abstract void persist(Map<String, byte[]> data);
+    int KEY_LENGTH = 256;
 
-    public abstract Map<String, byte[]> findByID(byte[] id);
-
-    public abstract void deleteByID(byte[] id);
-
-    public abstract void ping();
+    byte[] generateId(Map<String, byte[]> data);
 }

@@ -21,12 +21,10 @@ import java.util.Map;
 
 public class Put {
 
-    private static final String key = "PUT";
-
     final Map<String, byte[]> payload;
 
-    public Put(Map<String, byte[]> payload) {
-        this.payload = payload;
+    public Put(Map<String, byte[]> data) {
+        this.payload = data;
     }
 
     public Map<String, byte[]> getPayload() {

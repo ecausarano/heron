@@ -18,6 +18,9 @@
 package eu.heronnet.kad.net;
 
 import com.google.common.util.concurrent.AbstractIdleService;
+import com.google.inject.Singleton;
+import eu.heronnet.kad.model.Node;
+import eu.heronnet.kad.model.RadixTree;
 import eu.heronnet.kad.model.rpc.message.KadMessage;
 import eu.heronnet.kad.net.codec.KadMessageCodec;
 import eu.heronnet.kad.net.handler.PingResponseHandler;
@@ -30,14 +33,24 @@ import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.net.InetSocketAddress;
+import java.util.List;
 
+@Singleton
 public class ClientImpl extends AbstractIdleService implements Client {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientImpl.class);
 
     private Bootstrap boostrap;
     private EventLoopGroup workerGroup;
+
+    @Inject
+    RadixTree routingTable;
+
+    public ClientImpl() {
+        logger.debug("ClientImpl ctor id={}", this);
+    }
 
     @Override
     protected void startUp() throws Exception {
@@ -55,7 +68,6 @@ public class ClientImpl extends AbstractIdleService implements Client {
                         pipeline.addLast(new PingResponseHandler());
                     }
                 });
-
     }
 
     @Override
@@ -65,10 +77,16 @@ public class ClientImpl extends AbstractIdleService implements Client {
     }
 
     @Override
-    public void send(KadMessage message, InetSocketAddress address) {
-        final ChannelFuture future = boostrap.connect(address);
-        final Channel channel = future.awaitUninterruptibly().channel();
-        final ChannelFuture write = channel.writeAndFlush(message);
+    public void send(KadMessage message) {
+        final byte[] messageId = message.getMessageId();
+
+        final List<Node> nodes = routingTable.find(messageId);
+        for (Node node : nodes) {
+            InetSocketAddress address = node.getAddress();
+            final ChannelFuture future = boostrap.connect(address);
+            final Channel channel = future.awaitUninterruptibly().channel();
+            channel.writeAndFlush(message);
+        }
     }
 
 }

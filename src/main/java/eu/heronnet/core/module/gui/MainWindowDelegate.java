@@ -18,7 +18,9 @@
 package eu.heronnet.core.module.gui;
 
 import com.google.common.eventbus.EventBus;
+import com.google.inject.Singleton;
 import eu.heronnet.core.command.Put;
+import eu.heronnet.core.model.Keys;
 import eu.heronnet.core.module.storage.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,15 +35,16 @@ import javax.swing.text.Document;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Singleton
 public class MainWindowDelegate implements ActionListener, DocumentListener {
 
     private static final Logger logger = LoggerFactory.getLogger(MainWindowDelegate.class);
@@ -52,13 +55,7 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
 
         @Override
         public int getRowCount() {
-            // sucks! need to cache this intelligently when the app modules are all healthy
-            try {
-                return persistence.getAllMetadata().size();
-            } catch (IOException e) {
-                logger.error("Error fetching metadata count: {}", e.getMessage());
-                return 0;
-            }
+            return 0;
         }
 
         @Override
@@ -68,13 +65,7 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            try {
-                final List<Map<String, String>> allMetadata = persistence.getAllMetadata();
-                return allMetadata.get(rowIndex).get(FILE_NAME);
-            } catch (IOException e) {
-                logger.error("Error fetching metadata for item no={}, error={}", rowIndex, e.getMessage());
-                return "<failed to retrieve file name>";
-            }
+            return new Object();
         }
 
         @Override
@@ -97,14 +88,9 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
     }
 
     public void init() {
-
         if (persistence != null) {
-            try {
-                final List<Map<String, String>> allMetadata = persistence.getAllMetadata();
-                viewState.put(METADATA_LIST, allMetadata);
-            } catch (IOException e) {
-                logger.error(e.getMessage());
-            }
+            final List<Map<String, String>> allMetadata = Collections.emptyList();
+            viewState.put(METADATA_LIST, allMetadata);
         }
     }
 
@@ -136,8 +122,7 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
                         byte[] allBytes = Files.readAllBytes(Paths.get(selectedFile.toURI()));
 
                         final Map<String, byte[]> item = new HashMap<>();
-                        item.put("filename", selectedFile.getPath().getBytes());
-                        item.put("data", allBytes);
+                        item.put(Keys.DATA, allBytes);
 
                         eventBus.post(new Put(item));
                         return null;

@@ -17,6 +17,8 @@
 
 package eu.heronnet.core.module.network.dht;
 
+import com.google.inject.Singleton;
+import eu.heronnet.kad.model.rpc.message.StoreValueRequest;
 import eu.heronnet.kad.net.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.Map;
 
+@Singleton
 public class DHTServiceImpl extends DHTService {
 
     private static Logger logger = LoggerFactory.getLogger(DHTServiceImpl.class);
@@ -33,8 +36,9 @@ public class DHTServiceImpl extends DHTService {
 
 
     @Override
-    public byte[] persist(Map<String, byte[]> data) {
-        return new byte[0];
+    public void persist(Map<String, byte[]> data) {
+        final StoreValueRequest storeValueRequest = new StoreValueRequest(data);
+        client.send(storeValueRequest);
     }
 
     @Override

@@ -18,11 +18,12 @@
 package eu.heronnet.kad.model;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,6 +47,7 @@ public class RadixTreeImpl implements RadixTree {
 
     public void setSelf(Node self) {
         ZERO_NODE.setId(self.getId());
+        ZERO_NODE.setAddress(self.getAddress());
     }
 
     @Override
@@ -131,7 +133,8 @@ public class RadixTreeImpl implements RadixTree {
                     logger.debug("couldn't find desired key {}, returning bucket", new String(key));
                     return ImmutableList.copyOf(bucket);
                 } else {
-                    return Collections.emptyList();
+                    // We have an empty tree, return self
+                    return Arrays.asList(ZERO_NODE);
                 }
             } else {
                 // not a leaf node, search appropriate subtree

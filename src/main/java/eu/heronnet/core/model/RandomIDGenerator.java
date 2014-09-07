@@ -15,20 +15,22 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.core.module.network.dht;
+package eu.heronnet.core.model;
+
+import com.google.inject.Singleton;
 
 import java.util.Map;
+import java.util.Random;
 
-/**
- * Represents the essential API of a distributed hash table as described in the Kad paper
- */
-public abstract class DHTService {
+@Singleton
+public class RandomIDGenerator implements IDGenerator {
 
-    public abstract void persist(Map<String, byte[]> data);
+    Random random = new Random();
 
-    public abstract Map<String, byte[]> findByID(byte[] id);
-
-    public abstract void deleteByID(byte[] id);
-
-    public abstract void ping();
+    @Override
+    public byte[] generateId(Map<String, byte[]> data) {
+        byte[] id = new byte[IDGenerator.KEY_LENGTH];
+        random.nextBytes(id);
+        return id;
+    }
 }

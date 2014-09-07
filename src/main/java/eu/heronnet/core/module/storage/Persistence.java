@@ -20,22 +20,9 @@ package eu.heronnet.core.module.storage;
 import com.google.common.util.concurrent.Service;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 public interface Persistence extends Service {
 
-    List<Map<String, byte[]>> getAll() throws IOException;
-
-    Map<String, byte[]> getById(byte[] id) throws IOException;
-
     void put(Map<String, byte[]> item) throws IOException;
-
-    void delete(byte[] id) throws IOException;
-
-    Map<String, String> getMetadataForID(byte[] id);
-
-    List<Map<String, String>> getAllMetadata() throws IOException;
-
-    long count();
 }

@@ -23,11 +23,16 @@ public class StoreValueRequest extends KadMessage {
 
     private Map<String, byte[]> item;
 
-    public Map<String, byte[]> getItem() {
-        return item;
+    // Only for JSON
+    @SuppressWarnings("unused")
+    public StoreValueRequest() {
     }
 
-    public void setItem(Map<String, byte[]> item) {
+    public StoreValueRequest(Map<String, byte[]> item) {
         this.item = item;
+    }
+
+    public Map<String, byte[]> getItem() {
+        return item;
     }
 }
