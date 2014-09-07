@@ -42,7 +42,7 @@ public class ClientImpl extends AbstractIdleService implements Client {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientImpl.class);
 
-    private Bootstrap boostrap;
+    private Bootstrap bootstrap;
     private EventLoopGroup workerGroup;
 
     @Inject
@@ -54,10 +54,10 @@ public class ClientImpl extends AbstractIdleService implements Client {
 
     @Override
     protected void startUp() throws Exception {
-        boostrap = new Bootstrap();
+        bootstrap = new Bootstrap();
         workerGroup = new NioEventLoopGroup();
 
-        boostrap.group(workerGroup)
+        bootstrap.group(workerGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -83,7 +83,7 @@ public class ClientImpl extends AbstractIdleService implements Client {
         final List<Node> nodes = routingTable.find(messageId);
         for (Node node : nodes) {
             InetSocketAddress address = node.getAddress();
-            final ChannelFuture future = boostrap.connect(address);
+            final ChannelFuture future = bootstrap.connect(address);
             final Channel channel = future.awaitUninterruptibly().channel();
             channel.writeAndFlush(message);
         }
