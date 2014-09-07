@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.Base64;
 import java.util.Map;
 
 @ChannelHandler.Sharable
@@ -40,7 +41,8 @@ public class StoreValueRequestHandler extends SimpleChannelInboundHandler<StoreV
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, StoreValueRequest msg) throws Exception {
         final Map<String, byte[]> item = msg.getItem();
-        logger.debug("Received StoreValueRequest message with id: {}", item.get(Keys.ID));
+        byte[] rawId = item.get(Keys.ID);
+        logger.debug("Received StoreValueRequest message with id={}", Base64.getEncoder().encodeToString(rawId));
         persistence.put(item);
     }
 }
