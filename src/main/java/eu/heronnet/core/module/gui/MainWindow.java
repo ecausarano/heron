@@ -122,6 +122,15 @@ public class MainWindow {
                 addFileChooser.showOpenDialog(mainWindow);
             }
         });
+
+//        addFileChooser.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                MetadataDialog metadataDialog = new MetadataDialog(mainWindow, true);
+//                metadataDialog.setVisible(true);
+//            }
+//        });
+//
     }
 
     public MainWindowDelegate getDelegate() {
