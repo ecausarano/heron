@@ -15,7 +15,7 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.core.module.gui;
+package eu.heronnet.core.module.gui.swing;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Singleton;
@@ -49,6 +49,8 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
 
     private static final Logger logger = LoggerFactory.getLogger(MainWindowDelegate.class);
     private static final String FILE_NAME = "filename";
+    private static final String METADATA_LIST = "metadataList";
+    ExecutorService executorService = Executors.newCachedThreadPool();
     private AbstractTableModel resultsTable = new AbstractTableModel() {
 
         private String[] columnNames = {"Filename"};
@@ -73,8 +75,6 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
             return columnNames[column];
         }
     };
-    private static final String METADATA_LIST = "metadataList";
-    ExecutorService executorService = Executors.newCachedThreadPool();
     @Inject
     private Persistence persistence;
     @Inject

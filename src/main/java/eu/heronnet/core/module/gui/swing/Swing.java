@@ -15,11 +15,11 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.core.module;
+package eu.heronnet.core.module.gui.swing;
 
 import com.google.common.util.concurrent.AbstractIdleService;
 import com.google.inject.Singleton;
-import eu.heronnet.core.module.gui.MainWindow;
+import eu.heronnet.core.module.gui.UI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +28,9 @@ import javax.swing.*;
 
 
 @Singleton
-public class GUI extends AbstractIdleService implements UI {
+public class Swing extends AbstractIdleService implements UI {
 
-    private static final Logger logger = LoggerFactory.getLogger(GUI.class);
+    private static final Logger logger = LoggerFactory.getLogger(Swing.class);
 
     @Inject
     private MainWindow mainWindow;

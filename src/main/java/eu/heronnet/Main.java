@@ -26,9 +26,9 @@ import com.google.inject.Injector;
 import eu.heronnet.core.command.EventBusProvider;
 import eu.heronnet.core.model.IDGenerator;
 import eu.heronnet.core.model.RandomIDGenerator;
-import eu.heronnet.core.module.GUI;
-import eu.heronnet.core.module.UI;
-import eu.heronnet.core.module.gui.MainWindow;
+import eu.heronnet.core.module.gui.UI;
+import eu.heronnet.core.module.gui.swing.MainWindow;
+import eu.heronnet.core.module.gui.swing.Swing;
 import eu.heronnet.core.module.network.dht.DHTService;
 import eu.heronnet.core.module.network.dht.DHTServiceImpl;
 import eu.heronnet.core.module.storage.BerkeleyImpl;
@@ -104,7 +104,7 @@ public class Main extends AbstractModule {
 
             @Override
             public void healthy() {
-                MainWindow mainWindow = ((GUI) ui).getMainWindow();
+                MainWindow mainWindow = ((Swing) ui).getMainWindow();
                 mainWindow.getDelegate().init();
                 logger.debug("all services boostrapped correctly");
             }
@@ -153,6 +153,6 @@ public class Main extends AbstractModule {
 
         bind(Client.class).to(ClientImpl.class);
         bind(Persistence.class).to(BerkeleyImpl.class);
-        bind(UI.class).to(GUI.class);
+        bind(UI.class).to(Swing.class);
     }
 }

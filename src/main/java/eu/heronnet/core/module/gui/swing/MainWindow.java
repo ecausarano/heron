@@ -15,7 +15,7 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.core.module.gui;
+package eu.heronnet.core.module.gui.swing;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

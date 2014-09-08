@@ -38,9 +38,15 @@
         <logback.version>1.0.13</logback.version>
     </properties>
 
-    <dependencies>
+    <repositories>
+        <repository>
+            <id>swt-repo</id>
+            <url>https://swt-repo.googlecode.com/svn/repo/</url>
+        </repository>
+    </repositories>
 
-        <dependency>
+    <dependencies>
+    <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.8.7</version>
@@ -99,12 +105,6 @@
             <groupId>de.undercouch</groupId>
             <artifactId>bson4jackson</artifactId>
             <version>2.4.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jgoodies</groupId>
-            <artifactId>jgoodies-forms</artifactId>
-            <version>1.7.2</version>
         </dependency>
 
         <dependency>

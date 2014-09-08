@@ -1,4 +1,4 @@
-package eu.heronnet.core.module.gui;
+package eu.heronnet.core.module.gui.swing;
 
 import javax.swing.*;
 import java.awt.*;

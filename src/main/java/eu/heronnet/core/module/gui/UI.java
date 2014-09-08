@@ -15,7 +15,7 @@
  * along with heron. If not, see http://www.gnu.org/licenses
  */
 
-package eu.heronnet.core.module;
+package eu.heronnet.core.module.gui;
 
 import com.google.common.util.concurrent.Service;
 
