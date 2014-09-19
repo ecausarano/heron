@@ -17,7 +17,7 @@
 
 package eu.heronnet.kad.net.handler;
 
-import eu.heronnet.core.model.Keys;
+import eu.heronnet.core.model.rdf.Triple;
 import eu.heronnet.core.module.storage.Persistence;
 import eu.heronnet.kad.model.rpc.message.StoreValueRequest;
 import io.netty.channel.ChannelHandler;
@@ -27,8 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.Base64;
-import java.util.Map;
+import java.io.IOException;
 
 @ChannelHandler.Sharable
 public class StoreValueRequestHandler extends SimpleChannelInboundHandler<StoreValueRequest> {
@@ -40,9 +39,24 @@ public class StoreValueRequestHandler extends SimpleChannelInboundHandler<StoreV
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, StoreValueRequest msg) throws Exception {
-        final Map<String, byte[]> item = msg.getItem();
-        byte[] rawId = item.get(Keys.ID);
-        logger.debug("Received StoreValueRequest message with id={}", Base64.getEncoder().encodeToString(rawId));
-        persistence.put(item);
+        byte[] binary = msg.getBinary();
+        Triple triple = msg.getTriple();
+
+        if (binary != null) {
+            logger.debug("Received StoreValueRequest message for binary item");
+            try {
+                persistence.putBinary(binary);
+            } catch (IOException e) {
+                logger.error("IO Error persisting binary", e);
+            }
+        }
+
+        if (triple != null) {
+            try {
+                persistence.putMetadata(triple);
+            } catch (IOException e) {
+                logger.error("IO Error persisting metadata item", e);
+            }
+        }
     }
 }

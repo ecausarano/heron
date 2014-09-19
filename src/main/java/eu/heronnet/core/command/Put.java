@@ -17,17 +17,23 @@
 
 package eu.heronnet.core.command;
 
-import java.util.Map;
+import eu.heronnet.core.model.rdf.Triple;
 
 public class Put {
 
-    final Map<String, byte[]> payload;
+    private byte[] binary;
+    private Triple triple;
 
-    public Put(Map<String, byte[]> data) {
-        this.payload = data;
+    public Put(byte[] binary, Triple triple) {
+        this.binary = binary;
+        this.triple = triple;
     }
 
-    public Map<String, byte[]> getPayload() {
-        return payload;
+    public byte[] getBinary() {
+        return binary;
+    }
+
+    public Triple getTriple() {
+        return triple;
     }
 }

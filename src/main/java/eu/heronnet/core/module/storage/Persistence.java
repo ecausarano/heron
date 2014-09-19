@@ -18,11 +18,13 @@
 package eu.heronnet.core.module.storage;
 
 import com.google.common.util.concurrent.Service;
+import eu.heronnet.core.model.rdf.Triple;
 
 import java.io.IOException;
-import java.util.Map;
 
 public interface Persistence extends Service {
 
-    void put(Map<String, byte[]> item) throws IOException;
+    void putBinary(byte[] item) throws IOException;
+
+    void putMetadata(Triple item) throws IOException;
 }

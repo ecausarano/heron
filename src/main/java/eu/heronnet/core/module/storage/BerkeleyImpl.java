@@ -17,22 +17,27 @@
 
 package eu.heronnet.core.module.storage;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.AbstractIdleService;
 import com.google.inject.Singleton;
 import com.sleepycat.je.*;
 import de.undercouch.bson4jackson.BsonFactory;
 import de.undercouch.bson4jackson.BsonGenerator;
-import eu.heronnet.core.model.Keys;
+import eu.heronnet.core.model.rdf.Resource;
+import eu.heronnet.core.model.rdf.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.Map;
+
+import static eu.heronnet.core.model.rdf.Predicate.*;
+import static eu.heronnet.core.model.rdf.Resource.*;
+import static java.security.MessageDigest.getInstance;
 
 /**
  * BerlekeyDB implementation of the Persistence API
@@ -41,20 +46,19 @@ import java.util.Map;
 public class BerkeleyImpl extends AbstractIdleService implements Persistence {
 
     private static final Logger logger = LoggerFactory.getLogger(BerkeleyImpl.class);
-
-//    @Inject @Named("berkeleyDbEnvHome")
-//    File dbEnvHome;
-    String dbEnvHome = "herondb";
-
-    Environment environment;
-    Database primaryData;
-    Database metaStore;
-
     private final BsonFactory bsonFactory = new BsonFactory();
     private final ObjectMapper mapper = new ObjectMapper();
     {
         bsonFactory.enable(BsonGenerator.Feature.ENABLE_STREAMING);
     }
+
+    //    @Inject @Named("berkeleyDbEnvHome")
+//    File dbEnvHome;
+    String dbEnvHome = "herondb";
+    Environment environment;
+    Database primaryData;
+    Database metaStore;
+    private byte[] predicates = {0x1, 0x2, 0x3, 0x4};
 
 
     public BerkeleyImpl() {
@@ -89,6 +93,10 @@ public class BerkeleyImpl extends AbstractIdleService implements Persistence {
 
         metaStore = environment.openDatabase(null, "MetadataStore", databaseConfig);
         logger.debug("Opened primary name=MetadataStore, count={}", metaStore.count());
+        if (metaStore.count() == 0) {
+            logger.debug("initializing empty metaStore");
+            init();
+        }
 
         // indexes
 //        final SecondaryConfig indexConfig = new SecondaryConfig();
@@ -135,16 +143,55 @@ public class BerkeleyImpl extends AbstractIdleService implements Persistence {
     }
 
     @Override
-    public void put(Map<String, byte[]> item) throws IOException {
-        /// DATA
-        byte[] rawId = item.get(Keys.ID);
-        logger.debug("Persisting item with id={}", Base64.getEncoder().encodeToString(rawId));
-        final byte[] dataBytes = item.get(Keys.DATA);
-        final DatabaseEntry key = new DatabaseEntry(rawId);
-        final DatabaseEntry value = new DatabaseEntry(dataBytes);
-        primaryData.put(null, key, value);
+    public void putBinary(byte[] item) throws IOException {
+        try {
+            MessageDigest digest = getInstance("SHA-256");
+            digest.reset();
+            byte[] rawId = digest.digest(item);
+            logger.debug("Persisting item with id={}", Base64.getEncoder().encodeToString(rawId));
 
-        /// METADATA
-        logger.debug("Persisting metadata for item with id={}", Base64.getEncoder().encodeToString(rawId));
+            final DatabaseEntry key = new DatabaseEntry(rawId);
+            final DatabaseEntry value = new DatabaseEntry(item);
+            primaryData.put(null, key, value);
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("Ohi, no SHA-256?!");
+        }
+    }
+
+    @Override
+    public void putMetadata(Triple item) throws JsonProcessingException {
+        Triple triple = new Triple(item, ISA, METADATA_ITEM);
+        logger.debug("Persisting metadata={}", mapper.writeValueAsString(triple));
+        putResource(triple);
+    }
+
+    private void init() throws JsonProcessingException, NoSuchAlgorithmException {
+        putResource(PROTOTYPE);
+        putResource(METADATA_ITEM);
+        putResource(FIELD);
+        putResource(SIGNATURE);
+        putResource(BINARY);
+        /// describe metadataItem
+        putResource(new Triple(METADATA_ITEM, ISA, PROTOTYPE));
+        putResource(new Triple(METADATA_ITEM, HAS, FIELD));
+        putResource(new Triple(METADATA_ITEM, SIGNED_BY, SIGNATURE));
+        putResource(new Triple(METADATA_ITEM, DESCRIBES, BINARY));
+    }
+
+    private OperationStatus putResource(Resource resource) throws JsonProcessingException {
+        try {
+            MessageDigest digest = getInstance("SHA-256");
+            logger.debug("persisting resource={}", resource.toString());
+            byte[] resourceAsBytes = mapper.writeValueAsBytes(resource);
+            digest.reset();
+            byte[] resourceHash = digest.digest(resourceAsBytes);
+
+            return metaStore.put(null,
+                    new DatabaseEntry(resourceHash),
+                    new DatabaseEntry(resourceAsBytes));
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("Oh my, this cannot ever happen");
+            return OperationStatus.NOTFOUND;
+        }
     }
 }

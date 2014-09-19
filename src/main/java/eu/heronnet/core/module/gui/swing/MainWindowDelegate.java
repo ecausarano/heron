@@ -20,7 +20,6 @@ package eu.heronnet.core.module.gui.swing;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Singleton;
 import eu.heronnet.core.command.Put;
-import eu.heronnet.core.model.Keys;
 import eu.heronnet.core.module.storage.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,11 +119,8 @@ public class MainWindowDelegate implements ActionListener, DocumentListener {
                     protected Object doInBackground() throws Exception {
                         logger.debug("Selected file {}", selectedFile);
                         byte[] allBytes = Files.readAllBytes(Paths.get(selectedFile.toURI()));
-
-                        final Map<String, byte[]> item = new HashMap<>();
-                        item.put(Keys.DATA, allBytes);
-
-                        eventBus.post(new Put(item));
+                        Put put = new Put(allBytes, null);
+                        eventBus.post(put);
                         return null;
                     }
                 };

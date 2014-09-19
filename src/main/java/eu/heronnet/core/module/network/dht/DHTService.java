@@ -17,6 +17,8 @@
 
 package eu.heronnet.core.module.network.dht;
 
+import eu.heronnet.core.model.rdf.Triple;
+
 import java.util.Map;
 
 /**
@@ -24,7 +26,7 @@ import java.util.Map;
  */
 public abstract class DHTService {
 
-    public abstract void persist(Map<String, byte[]> data);
+    public abstract void persist(byte[] binary, Triple triple);
 
     public abstract Map<String, byte[]> findByID(byte[] id);
 

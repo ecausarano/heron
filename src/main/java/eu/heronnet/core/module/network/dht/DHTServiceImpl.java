@@ -18,6 +18,7 @@
 package eu.heronnet.core.module.network.dht;
 
 import com.google.inject.Singleton;
+import eu.heronnet.core.model.rdf.Triple;
 import eu.heronnet.kad.model.rpc.message.StoreValueRequest;
 import eu.heronnet.kad.net.Client;
 import org.slf4j.Logger;
@@ -36,8 +37,8 @@ public class DHTServiceImpl extends DHTService {
 
 
     @Override
-    public void persist(Map<String, byte[]> data) {
-        final StoreValueRequest storeValueRequest = new StoreValueRequest(data);
+    public void persist(byte[] binary, Triple triple) {
+        final StoreValueRequest storeValueRequest = new StoreValueRequest(binary, triple);
         client.send(storeValueRequest);
     }
 

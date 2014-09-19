@@ -20,14 +20,9 @@ package eu.heronnet.core.command;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import eu.heronnet.core.model.IDGenerator;
-import eu.heronnet.core.model.Keys;
 import eu.heronnet.core.module.network.dht.DHTService;
-import eu.heronnet.core.module.storage.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 @Singleton
 public class Invoker {
@@ -37,26 +32,13 @@ public class Invoker {
     @Inject
     DHTService dhtService;
 
-    @Inject
-    IDGenerator idGenerator;
-
     public Invoker() {
         logger.debug("Invoker ctor");
     }
 
     @Subscribe
     public void handlePut(Put command) {
-        final Map<String, byte[]> payload = command.getPayload();
-
-        logger.debug("Handling 'put' event for item with id={}", payload.get(Keys.ID));
-
-        // I guess this should always happen...
-        byte[] id = payload.get(Keys.ID);
-        if (id == null) {
-            id = idGenerator.generateId(payload);
-            payload.put(Keys.ID, id);
-        }
-        dhtService.persist(payload);
+        dhtService.persist(command.getBinary(), command.getTriple());
     }
 
     @Subscribe
