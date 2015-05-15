@@ -17,27 +17,22 @@
 
 package eu.heronnet.kad.model.rpc.message;
 
+import java.util.Random;
+
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import eu.heronnet.kad.model.Node;
 
-import java.util.Random;
-
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.MINIMAL_CLASS,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "type"
-)
+@JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.PROPERTY, property = "type")
 public class KadMessage {
 
     private static final Random randomGenerator = new Random();
 
     private byte[] messageId = new byte[20];
+    private Node origin;
 
     {
         randomGenerator.nextBytes(messageId);
     }
-
-    private Node origin;
 
     public Node getOrigin() {
         return origin;

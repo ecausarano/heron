@@ -17,6 +17,8 @@
 
 package eu.heronnet.kad.net.handler;
 
+import javax.inject.Inject;
+
 import eu.heronnet.kad.model.Node;
 import eu.heronnet.kad.model.RadixTree;
 import eu.heronnet.kad.model.Self;
@@ -24,8 +26,6 @@ import eu.heronnet.kad.model.rpc.message.FindValueRequest;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
-import javax.inject.Inject;
 
 @ChannelHandler.Sharable
 public class FindValueRequestHandler extends SimpleChannelInboundHandler<FindValueRequest> {
@@ -36,7 +36,6 @@ public class FindValueRequestHandler extends SimpleChannelInboundHandler<FindVal
     @Inject
     @Self
     Node self;
-
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FindValueRequest msg) throws Exception {

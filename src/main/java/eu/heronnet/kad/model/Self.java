@@ -17,13 +17,10 @@
 
 package eu.heronnet.kad.model;
 
-import com.google.inject.BindingAnnotation;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 @Retention(RUNTIME)
-@BindingAnnotation
 public @interface Self {
 }

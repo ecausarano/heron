@@ -17,36 +17,41 @@
 
 package eu.heronnet.kad.net;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.util.concurrent.AbstractIdleService;
-import com.google.inject.Singleton;
+
 import eu.heronnet.kad.model.Node;
 import eu.heronnet.kad.model.RadixTree;
 import eu.heronnet.kad.model.rpc.message.KadMessage;
 import eu.heronnet.kad.net.codec.KadMessageCodec;
 import eu.heronnet.kad.net.handler.PingResponseHandler;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LoggingHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.net.InetSocketAddress;
-import java.util.List;
 
 @Singleton
 public class ClientImpl extends AbstractIdleService implements Client {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientImpl.class);
-
-    private Bootstrap bootstrap;
-    private EventLoopGroup workerGroup;
-
     @Inject
     RadixTree routingTable;
+    private Bootstrap bootstrap;
+    private EventLoopGroup workerGroup;
 
     public ClientImpl() {
         logger.debug("ClientImpl ctor id={}", this);
@@ -57,17 +62,15 @@ public class ClientImpl extends AbstractIdleService implements Client {
         bootstrap = new Bootstrap();
         workerGroup = new NioEventLoopGroup();
 
-        bootstrap.group(workerGroup)
-                .channel(NioSocketChannel.class)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        final ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast(new LoggingHandler());
-                        pipeline.addLast(new KadMessageCodec());
-                        pipeline.addLast(new PingResponseHandler());
-                    }
-                });
+        bootstrap.group(workerGroup).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            protected void initChannel(SocketChannel ch) throws Exception {
+                final ChannelPipeline pipeline = ch.pipeline();
+                pipeline.addLast(new LoggingHandler());
+                pipeline.addLast(new KadMessageCodec());
+                pipeline.addLast(new PingResponseHandler());
+            }
+        });
     }
 
     @Override

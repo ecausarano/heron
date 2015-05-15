@@ -17,8 +17,14 @@
 
 package eu.heronnet.kad.net;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.util.concurrent.AbstractIdleService;
-import com.google.inject.Singleton;
+
 import eu.heronnet.kad.net.codec.KadMessageCodec;
 import eu.heronnet.kad.net.handler.FindNodeRequestHandler;
 import eu.heronnet.kad.net.handler.PingRequestHandler;
@@ -31,13 +37,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LoggingHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 
 @Singleton
-public class ServerImpl extends AbstractIdleService {
+public class ServerImpl extends AbstractIdleService implements Server {
     private static final Logger logger = LoggerFactory.getLogger(ServerImpl.class);
     private NioEventLoopGroup bossGroup;
     private NioEventLoopGroup workerGroup;
@@ -58,25 +60,21 @@ public class ServerImpl extends AbstractIdleService {
         bootstrap = new ServerBootstrap();
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
-        bootstrap.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
-                .localAddress(6565)
-                .childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        final ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast("Logger", new LoggingHandler());
-                        pipeline.addLast("Kad message codec", kadMessageCodec);
-                        pipeline.addLast("PING request handler", pingRequestHandler);
-                        pipeline.addLast("FIND request handler", findNodeRequestHandler);
-                        pipeline.addLast("STORE request handle", storeValueRequestHandler);
-                    }
-                })
-                .option(ChannelOption.SO_BACKLOG, 128)
-                .childOption(ChannelOption.SO_KEEPALIVE, true);
+        bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).localAddress(6565).childHandler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            protected void initChannel(SocketChannel ch) throws Exception {
+                final ChannelPipeline pipeline = ch.pipeline();
+                pipeline.addLast("Logger", new LoggingHandler());
+                pipeline.addLast("Kad message codec", kadMessageCodec);
+                pipeline.addLast("PING request handler", pingRequestHandler);
+                pipeline.addLast("FIND request handler", findNodeRequestHandler);
+                pipeline.addLast("STORE request handle", storeValueRequestHandler);
+            }
+        }).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
         try {
             bootstrap.bind().sync();
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e) {
             logger.error("An error has occurred", e);
         }
     }

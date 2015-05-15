@@ -17,6 +17,13 @@
 
 package eu.heronnet.kad.net.handler;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.heronnet.kad.model.Node;
 import eu.heronnet.kad.model.RadixTree;
 import eu.heronnet.kad.model.Self;
@@ -25,11 +32,6 @@ import eu.heronnet.kad.model.rpc.message.FindNodeResponse;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.util.List;
 
 @ChannelHandler.Sharable
 public class FindNodeRequestHandler extends SimpleChannelInboundHandler<FindNodeRequest> {

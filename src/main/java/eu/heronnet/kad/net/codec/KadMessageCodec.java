@@ -17,8 +17,16 @@
 
 package eu.heronnet.kad.net.codec;
 
+import java.util.List;
+
+import javax.inject.Singleton;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.undercouch.bson4jackson.BsonFactory;
 import de.undercouch.bson4jackson.BsonGenerator;
 import eu.heronnet.kad.model.rpc.message.KadMessage;
@@ -28,11 +36,8 @@ import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
+@Singleton
 @ChannelHandler.Sharable
 public class KadMessageCodec extends ByteToMessageCodec<KadMessage> {
 
@@ -58,7 +63,8 @@ public class KadMessageCodec extends ByteToMessageCodec<KadMessage> {
         try {
             final KadMessage message = mapper.readValue(inputStream, KadMessage.class);
             out.add(message);
-        } catch (JsonParseException e) {
+        }
+        catch (JsonParseException e) {
             logger.debug("Unable to decode incoming message");
         }
     }

@@ -17,6 +17,11 @@
 
 package eu.heronnet.kad.net.handler;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.heronnet.kad.model.Node;
 import eu.heronnet.kad.model.Self;
 import eu.heronnet.kad.model.rpc.message.PingRequest;
@@ -24,10 +29,6 @@ import eu.heronnet.kad.model.rpc.message.PingResponse;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 
 @ChannelHandler.Sharable
 public class PingRequestHandler extends SimpleChannelInboundHandler<PingRequest> {

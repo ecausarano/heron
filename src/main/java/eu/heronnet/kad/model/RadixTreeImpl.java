@@ -17,33 +17,32 @@
 
 package eu.heronnet.kad.model;
 
-import com.google.common.collect.ImmutableList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
+
 public class RadixTreeImpl implements RadixTree {
 
     private static final Logger logger = LoggerFactory.getLogger(RadixTreeImpl.class);
-
-    InternalNode root = new InternalNode();
-
-    @Inject
-    @Self
-    Node self;
-
-
-    private static Node ZERO_NODE = new Node();
     private static final int BUCKET_SIZE = 32;
+    private static Node ZERO_NODE = new Node();
 
     static {
         ZERO_NODE.setId(new byte[20]);
     }
+
+    InternalNode root = new InternalNode();
+    @Inject
+    @Self
+    Node self;
 
     public void setSelf(Node self) {
         ZERO_NODE.setId(self.getId());
@@ -90,7 +89,8 @@ public class RadixTreeImpl implements RadixTree {
                 if (bucket.size() < BUCKET_SIZE) {
                     bucket.add(node);
                     logger.debug("added node to bucket {}, current size {}", bucket, bucket.size());
-                } else {
+                }
+                else {
                     logger.debug("split bucket {}", bucket);
                     // time to split the bucket
                     Collections.sort(bucket);
@@ -107,11 +107,13 @@ public class RadixTreeImpl implements RadixTree {
                     // and reattempt insertion
                     this.insert(node);
                 }
-            } else {
+            }
+            else {
                 // means there are a left and a right (possibly empty) nodes
                 if (node.compareTo(midpoint) == -1) {
                     left.insert(node);
-                } else {
+                }
+                else {
                     right.insert(node);
                 }
             }
@@ -130,17 +132,20 @@ public class RadixTreeImpl implements RadixTree {
                             return Collections.singletonList(node);
                         }
                     }
-                    logger.debug("couldn't find desired key {}, returning bucket", new String(key));
+                    logger.debug("couldn't findByStringKey desired key {}, returning bucket", new String(key));
                     return ImmutableList.copyOf(bucket);
-                } else {
+                }
+                else {
                     // We have an empty tree, return self
                     return Arrays.asList(ZERO_NODE);
                 }
-            } else {
+            }
+            else {
                 // not a leaf node, search appropriate subtree
                 if (dummy.compareTo(midpoint) == 1) {
                     return right.find(key);
-                } else {
+                }
+                else {
                     return left.find(key);
                 }
             }
@@ -159,10 +164,12 @@ public class RadixTreeImpl implements RadixTree {
                         bucket.remove(node);
                     }
                 }
-            } else {
+            }
+            else {
                 if (dummy.compareTo(midpoint) == 1) {
                     right.delete(key);
-                } else {
+                }
+                else {
                     left.delete(key);
                 }
             }

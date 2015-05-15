@@ -17,12 +17,13 @@
 
 package eu.heronnet.kad.net.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.heronnet.kad.model.rpc.message.FindNodeResponse;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ChannelHandler.Sharable
 public class FindNodeResponseHandler extends SimpleChannelInboundHandler<FindNodeResponse> {
