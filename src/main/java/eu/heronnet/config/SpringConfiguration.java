@@ -1,22 +1,20 @@
 package eu.heronnet.config;
 
+import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import eu.heronnet.kad.model.Node;
-import eu.heronnet.kad.model.RadixTree;
-import eu.heronnet.kad.model.RadixTreeImpl;
-import eu.heronnet.kad.net.Client;
-import eu.heronnet.kad.net.ClientImpl;
-import eu.heronnet.kad.net.Server;
-import eu.heronnet.kad.net.ServerImpl;
-import eu.heronnet.kad.net.codec.KadMessageCodec;
-import eu.heronnet.kad.net.handler.FindNodeRequestHandler;
-import eu.heronnet.kad.net.handler.PingRequestHandler;
-import eu.heronnet.kad.net.handler.StoreValueRequestHandler;
-import eu.heronnet.module.network.dht.DHTService;
-import eu.heronnet.module.network.dht.DHTServiceImpl;
+import com.google.common.util.concurrent.Service;
+import com.google.common.util.concurrent.ServiceManager;
 
 /**
  * @author edoardocausarano
@@ -25,49 +23,31 @@ import eu.heronnet.module.network.dht.DHTServiceImpl;
 @ComponentScan(basePackages = "eu.heronnet")
 public class SpringConfiguration {
 
+    private static final Logger logger = LoggerFactory.getLogger(SpringConfiguration.class);
+
+    @Inject
+    ApplicationContext applicationContext;
+
     @Bean
-    DHTService dhtService() {
-        return new DHTServiceImpl();
+    Executor executor() {
+        return Executors.newWorkStealingPool();
     }
 
     @Bean
-    Client client() {
-        return new ClientImpl();
-    }
+    ServiceManager serviceManager() {
+        Map<String, Service> services = applicationContext.getBeansOfType(Service.class);
+        ServiceManager manager = new ServiceManager(services.values());
 
-    @Bean
-    Server server() {
-        return new ServerImpl();
-    }
+        manager.addListener(new ServiceManager.Listener() {
+            public void stopped() {}
+            public void healthy() {
+                logger.debug("Done initializing services, Heron application up");
+            }
+            public void failure(Service service) {
+                logger.error("Service={} has failed to bootstrap, exiting", service.getClass());
+            }
+        }, executor());
 
-    @Bean
-    RadixTree radixTree() {
-        return new RadixTreeImpl();
+        return manager;
     }
-
-    @Bean
-    Node node() {
-        return new Node();
-    }
-
-    @Bean
-    KadMessageCodec kadMessageCodec() {
-        return new KadMessageCodec();
-    }
-
-    @Bean
-    PingRequestHandler pingRequestHandler() {
-        return new PingRequestHandler();
-    }
-
-    @Bean
-    FindNodeRequestHandler findNodeRequestHandler() {
-        return new FindNodeRequestHandler();
-    }
-
-    @Bean
-    StoreValueRequestHandler storeValueRequestHandler() {
-        return new StoreValueRequestHandler();
-    }
-
 }

@@ -11,7 +11,7 @@ import org.apache.poi.openxml4j.opc.PackageProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.heronnet.core.model.Field;
+import eu.heronnet.module.gui.model.FieldRow;
 
 /**
  * @author edoardocausarano
@@ -22,13 +22,13 @@ public class MSMetadataProcessor implements MetadataProcessor {
     Logger logger = LoggerFactory.getLogger(MSMetadataProcessor.class);
 
     @Override
-    public List<Field> process(File file) {
+    public List<FieldRow> process(File file) {
         try (OPCPackage opcPackage = OPCPackage.open(file)) {
-            List<Field> fields = new ArrayList<>();
+            List<FieldRow> fields = new ArrayList<>();
 
             PackageProperties properties = opcPackage.getPackageProperties();
-            fields.add(new Field("title", properties.getTitleProperty().getValue()));
-            fields.add(new Field("author", properties.getCreatorProperty().getValue()));
+            fields.add(new FieldRow("title", properties.getTitleProperty().getValue()));
+            fields.add(new FieldRow("author", properties.getCreatorProperty().getValue()));
 
             return fields;
         }

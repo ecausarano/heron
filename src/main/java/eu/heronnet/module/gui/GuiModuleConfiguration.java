@@ -21,24 +21,9 @@ public class GuiModuleConfiguration {
     @Inject
     ApplicationContext applicationContext;
 
-    // @Bean
-    // @Scope("prototype")
-    // FXMLLoader fxmlLoader() {
-    // FXMLLoader fxmlLoader = new FXMLLoader();
-    // fxmlLoader.setControllerFactory(
-    // getControllerFactory()
-    // );
-    // return fxmlLoader;
-    // }
-
     @Bean
     public Callback<Class<?>, Object> getControllerFactory() {
-        return new Callback<Class<?>, Object>() {
-            @Override
-            public Object call(Class<?> param) {
-                return applicationContext.getBean(param);
-            }
-        };
+        return param -> applicationContext.getBean(param);
     }
 
     @Bean

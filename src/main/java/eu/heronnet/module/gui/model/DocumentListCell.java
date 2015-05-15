@@ -22,7 +22,7 @@ public class DocumentListCell extends ListCell<Document> {
             Set<Field> fields = item.getMeta();
             StringBuilder builder = new StringBuilder();
             for (Field field : fields) {
-                builder.append(field.getName()).append("=").append(field.getValue()).append(" ");
+                builder.append(field.getName()).append("=").append(field.getValue()).append(" ").append("\n");
             }
             setText(builder.toString());
         }

@@ -18,6 +18,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -29,8 +30,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 
 import eu.heronnet.core.model.DocumentBuilder;
-import eu.heronnet.core.model.Field;
 import eu.heronnet.module.bus.command.Put;
+import eu.heronnet.module.gui.model.FieldRow;
 import eu.heronnet.module.gui.model.metadata.FieldProcessorFactory;
 
 /**
@@ -53,11 +54,11 @@ public class FileUploadWindowController {
     @FXML
     private Button confirmBtn;
     @FXML
-    private TableView<Field> metaTableView;
+    private TableView<FieldRow> metaTableView;
     @FXML
-    private TableColumn<Field, String> nameColumn;
+    private TableColumn<FieldRow, String> nameColumn;
     @FXML
-    private TableColumn<Field, String> valueColumn;
+    private TableColumn<FieldRow, String> valueColumn;
     @FXML
     private TextField newKey;
     @FXML
@@ -80,21 +81,26 @@ public class FileUploadWindowController {
 
         String contentType = Files.probeContentType(path);
 
-        // TODO - replace with Spring strategy factory
-        ObservableList<Field> metaItems = metaTableView.getItems();
-        List<Field> fields = processorFactory.getProcessor(contentType).process(file);
+        ObservableList<FieldRow> metaItems = metaTableView.getItems();
+        List<FieldRow> fields = processorFactory.getProcessor(contentType).process(file);
         metaItems.addAll(fields);
 
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        nameColumn.setOnEditCommit(t -> t.getTableView().getItems().get(t.getTablePosition().getRow()).setName(t.getNewValue()));
+
         valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+        valueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        valueColumn.setOnEditCommit(t -> t.getTableView().getItems().get(t.getTablePosition().getRow()).setValue(t.getNewValue()));
+
     }
 
     @FXML
     private void addMetaItem(ActionEvent event) {
         logger.debug("Adding metadata item: {}={}", newKey.getText(), newValue.getText());
-        Field field = null;
+        FieldRow field = null;
         try {
-            field = new Field(newKey.getText(), newValue.getText());
+            field = new FieldRow(newKey.getText(), newValue.getText());
             metaTableView.getItems().addAll(field);
         }
         catch (Exception e) {
@@ -106,8 +112,10 @@ public class FileUploadWindowController {
     private void confirm(ActionEvent event) throws IOException, NoSuchAlgorithmException {
         logger.debug("confirming");
         DocumentBuilder documentBuilder = DocumentBuilder.newInstance();
-        ObservableList<Field> items = metaTableView.getItems();
-        items.forEach(documentBuilder::withField);
+        ObservableList<FieldRow> items = metaTableView.getItems();
+        for (FieldRow item : items) {
+            documentBuilder.withField(item.getName(), item.getValue());
+        }
 
         byte[] allBytes = Files.readAllBytes(path);
         documentBuilder.withBinary(allBytes);

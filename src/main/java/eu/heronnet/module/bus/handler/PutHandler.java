@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -18,6 +19,7 @@ import eu.heronnet.module.storage.Persistence;
 /**
  * @author edoardocausarano
  */
+@Component
 public class PutHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(PutHandler.class);

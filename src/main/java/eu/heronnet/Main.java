@@ -1,11 +1,14 @@
 package eu.heronnet;
 
-import javafx.application.Application;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import eu.heronnet.module.gui.fx.HeronApplication;
+import com.google.common.util.concurrent.ServiceManager;
 
 /*
  * The Heron network bootstraps from the "archetype" table where <em>fundamental</em> UUIDs are given a name;
@@ -37,6 +40,7 @@ import eu.heronnet.module.gui.fx.HeronApplication;
  */
 public class Main {
 
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
     private static final ApplicationContext applicationContext;
 
     static {
@@ -48,6 +52,25 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Application.launch(HeronApplication.class, args);
+
+        ServiceManager manager = applicationContext.getBean(ServiceManager.class);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                try {
+                    manager.stopAsync().awaitStopped(5, TimeUnit.SECONDS);
+                }
+                catch (TimeoutException timeout) {
+                    logger.error("Failed to stop services");
+                }
+            }
+        });
+        try {
+            manager.startAsync().awaitHealthy(15, TimeUnit.SECONDS);
+        }
+        catch (TimeoutException e) {
+            logger.error("Failed to start Services within 15 seconds.");
+            // manager.stopAsync();
+        }
     }
 }

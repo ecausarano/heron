@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import eu.heronnet.core.model.Field;
+import eu.heronnet.module.gui.model.FieldRow;
 
 /**
  * @author edoardocausarano
  */
 public interface MetadataProcessor {
-    List<Field> process(File file) throws IOException;
+    List<FieldRow> process(File file) throws IOException;
 }

@@ -27,10 +27,4 @@ public class StorageModuleConfiguration {
         }
         return new Environment(envHome, config);
     }
-
-    @Bean
-    Persistence persistence() {
-        return new BerkeleyImpl(environment());
-    }
-
 }

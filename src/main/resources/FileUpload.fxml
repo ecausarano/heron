@@ -12,46 +12,46 @@
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:id="cancelBtn" maxHeight="-Infinity" maxWidth="-Infinity"
             prefHeight="340.0" xmlns="http://javafx.com/javafx/8"
             fx:controller="eu.heronnet.module.gui.fx.controller.FileUploadWindowController">
-    <children>
-        <VBox prefHeight="304.0" spacing="14.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-              AnchorPane.topAnchor="0.0">
-            <children>
-                <HBox spacing="14.0">
-                    <children>
-                        <Button fx:id="chooseBtn" contentDisplay="CENTER" mnemonicParsing="false" onAction="#chooseFile"
-                                text="Choose File"/>
-                        <Label fx:id="filePathLabel" contentDisplay="CENTER" minWidth="-Infinity" text="File Path"
-                               HBox.hgrow="ALWAYS"/>
-                    </children>
-                </HBox>
-                <TableView fx:id="metaTableView" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="nameColumn" prefWidth="75.0" text="C1"/>
-                        <TableColumn fx:id="valueColumn" prefWidth="75.0" text="C2"/>
-                    </columns>
-                </TableView>
-                <HBox spacing="14.0">
-                    <children>
-                        <TextField fx:id="newKey" promptText="key"/>
-                        <TextField fx:id="newValue" promptText="value"/>
-                        <Button fx:id="addMetaBtn" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                                onAction="#addMetaItem" text="Add"/>
-                    </children>
-                </HBox>
-            </children>
-            <padding>
-                <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
-            </padding>
-        </VBox>
-        <HBox spacing="14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
-            <children>
-                <Button fx:id="cancelBtn" cancelButton="true" mnemonicParsing="false" text="Cancel"/>
-                <Button fx:id="confirmBtn" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                        minWidth="-Infinity" mnemonicParsing="false" onAction="#confirm" text="Confirm"/>
-            </children>
-            <padding>
-                <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
-            </padding>
-        </HBox>
-    </children>
+   <children>
+      <VBox prefHeight="304.0" spacing="14.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+            AnchorPane.topAnchor="0.0">
+         <children>
+            <HBox spacing="14.0">
+               <children>
+                  <Button fx:id="chooseBtn" contentDisplay="CENTER" mnemonicParsing="false" onAction="#chooseFile"
+                          text="Choose File"/>
+                  <Label fx:id="filePathLabel" contentDisplay="CENTER" minWidth="-Infinity" text="File Path"
+                         HBox.hgrow="ALWAYS"/>
+               </children>
+            </HBox>
+            <TableView fx:id="metaTableView" editable="true" tableMenuButtonVisible="true" VBox.vgrow="ALWAYS">
+               <columns>
+                  <TableColumn fx:id="nameColumn" minWidth="-Infinity" prefWidth="75.0" text="Key"/>
+                  <TableColumn fx:id="valueColumn" minWidth="-Infinity" prefWidth="75.0" text="Value"/>
+               </columns>
+            </TableView>
+            <HBox spacing="14.0">
+               <children>
+                  <TextField fx:id="newKey" promptText="key"/>
+                  <TextField fx:id="newValue" promptText="value"/>
+                  <Button fx:id="addMetaBtn" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                          onAction="#addMetaItem" text="Add"/>
+               </children>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
+         </padding>
+      </VBox>
+      <HBox spacing="14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
+         <children>
+            <Button fx:id="cancelBtn" cancelButton="true" mnemonicParsing="false" text="Cancel"/>
+            <Button fx:id="confirmBtn" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                    minWidth="-Infinity" mnemonicParsing="false" onAction="#confirm" text="Confirm"/>
+         </children>
+         <padding>
+            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
+         </padding>
+      </HBox>
+   </children>
 </AnchorPane>

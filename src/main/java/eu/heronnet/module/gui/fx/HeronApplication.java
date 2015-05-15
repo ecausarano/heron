@@ -35,6 +35,5 @@ public class HeronApplication extends Application {
             primaryStage.setTitle("Heron");
             primaryStage.show();
         }
-
     }
 }

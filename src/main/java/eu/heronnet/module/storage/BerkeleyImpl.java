@@ -22,15 +22,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+import com.google.common.util.concurrent.AbstractIdleService;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityCursor;
@@ -53,9 +51,8 @@ import eu.heronnet.module.storage.model.converter.FieldConverter;
 /**
  * BerlekeyDB implementation of the Persistence API
  */
-@Singleton
-@Resource
-public class BerkeleyImpl implements Persistence {
+@Component
+public class BerkeleyImpl extends AbstractIdleService implements Persistence {
 
     public static final String DOCUMENT_STORE = "DocumentStore";
     private static final Logger logger = LoggerFactory.getLogger(BerkeleyImpl.class);
@@ -68,6 +65,9 @@ public class BerkeleyImpl implements Persistence {
     @Inject
     private Environment environment;
 
+    public BerkeleyImpl() {
+    }
+
     public BerkeleyImpl(Environment environment) {
         this.environment = environment;
     }
@@ -77,7 +77,7 @@ public class BerkeleyImpl implements Persistence {
      *
      * @throws Exception
      */
-    @PostConstruct
+    @Override
     protected void startUp() throws Exception {
 
         if (environment == null) {
@@ -104,7 +104,7 @@ public class BerkeleyImpl implements Persistence {
      *
      * @throws Exception
      */
-    @PreDestroy
+    @Override
     protected void shutDown() throws Exception {
         logger.debug("Shutting down DocumentStore");
 

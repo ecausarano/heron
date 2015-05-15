@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import eu.heronnet.core.model.Field;
+import eu.heronnet.module.gui.model.FieldRow;
 
 /**
  * @author edoardocausarano
@@ -40,7 +40,7 @@ public class FieldProcessorFactory {
     public MetadataProcessor getProcessor(String mimeType) {
         return strategiesByMimeType.getOrDefault(mimeType, new MetadataProcessor() {
             @Override
-            public List<Field> process(File file) throws IOException {
+            public List<FieldRow> process(File file) throws IOException {
                 logger.warn("Unknown mime-type={} processor requested for file={}", mimeType, file);
                 return Collections.emptyList();
             }
