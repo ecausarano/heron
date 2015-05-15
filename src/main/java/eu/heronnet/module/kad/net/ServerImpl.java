@@ -27,7 +27,6 @@ import com.google.common.util.concurrent.AbstractIdleService;
 
 import eu.heronnet.module.kad.net.codec.KadMessageCodec;
 import eu.heronnet.module.kad.net.handler.FindValueRequestHandler;
-import eu.heronnet.module.kad.net.handler.FindValueResponseHandler;
 import eu.heronnet.module.kad.net.handler.PingRequestHandler;
 import eu.heronnet.module.kad.net.handler.StoreValueRequestHandler;
 import io.netty.bootstrap.ServerBootstrap;
@@ -54,8 +53,6 @@ public class ServerImpl extends AbstractIdleService implements Server {
     private StoreValueRequestHandler storeValueRequestHandler;
     @Inject
     private FindValueRequestHandler findValueRequestHandler;
-    @Inject
-    private FindValueResponseHandler findValueResponseHandler;
 
     @Override
     protected void startUp() throws Exception {
@@ -71,7 +68,6 @@ public class ServerImpl extends AbstractIdleService implements Server {
                 pipeline.addLast("Kad message codec", kadMessageCodec);
                 pipeline.addLast("PING request handler", pingRequestHandler);
                 pipeline.addLast("FIND request handler", findValueRequestHandler);
-                pipeline.addLast("FIND response handler", findValueResponseHandler);
                 pipeline.addLast("STORE request handle", storeValueRequestHandler);
             }
         }).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);

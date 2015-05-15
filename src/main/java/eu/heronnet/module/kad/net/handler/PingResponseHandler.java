@@ -32,8 +32,19 @@ public class PingResponseHandler extends SimpleChannelInboundHandler<PingRespons
 
     private static final Logger logger = LoggerFactory.getLogger(PingResponseHandler.class);
 
+    private static String byteArrayToHex(byte[] a) {
+        StringBuilder sb = new StringBuilder(a.length * 2);
+        for (byte b : a)
+            sb.append(String.format("%02x", b & 0xff));
+        return sb.toString();
+    }
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, PingResponse msg) throws Exception {
-        logger.debug("received PING response {} from {}", msg.getMessageId(), msg.getOrigin().getId());
+
+        byte[] messageId = msg.getMessageId();
+        byte[] originId = msg.getOrigin().getId();
+        logger.debug("received PING response {} from {}", byteArrayToHex(messageId), byteArrayToHex(originId));
     }
+
 }

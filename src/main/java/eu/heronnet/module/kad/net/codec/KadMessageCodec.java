@@ -42,10 +42,11 @@ public class KadMessageCodec extends ByteToMessageCodec<KadMessage> {
 
     private static final Logger logger = LoggerFactory.getLogger(KadMessageCodec.class);
     private final BsonFactory bsonFactory = new BsonFactory();
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper(bsonFactory);
 
     {
         bsonFactory.enable(BsonGenerator.Feature.ENABLE_STREAMING);
+
     }
 
     @Override

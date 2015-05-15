@@ -18,7 +18,10 @@
 package eu.heronnet.module.kad.net;
 
 import eu.heronnet.module.kad.model.rpc.message.KadMessage;
+import eu.heronnet.module.kad.model.rpc.message.PingRequest;
 
 public interface Client {
     void send(KadMessage message);
+
+    void broadcast(PingRequest request);
 }

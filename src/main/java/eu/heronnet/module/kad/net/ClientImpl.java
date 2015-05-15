@@ -17,7 +17,12 @@
 
 package eu.heronnet.module.kad.net;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -31,6 +36,7 @@ import com.google.common.util.concurrent.AbstractIdleService;
 import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.kad.model.RadixTree;
 import eu.heronnet.module.kad.model.rpc.message.KadMessage;
+import eu.heronnet.module.kad.model.rpc.message.PingRequest;
 import eu.heronnet.module.kad.net.codec.KadMessageCodec;
 import eu.heronnet.module.kad.net.handler.FindValueResponseHandler;
 import eu.heronnet.module.kad.net.handler.PingResponseHandler;
@@ -93,6 +99,31 @@ public class ClientImpl extends AbstractIdleService implements Client {
             final Channel channel = future.awaitUninterruptibly().channel();
             channel.writeAndFlush(message);
         }
+    }
+
+    @Override
+    public void broadcast(PingRequest pingRequest) {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                if (!networkInterface.isLoopback()) {
+                    for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+                        InetAddress broadcast = interfaceAddress.getBroadcast();
+                        if (broadcast != null) {
+                            final ChannelFuture future = bootstrap.connect(new InetSocketAddress(broadcast, 6565));
+                            final Channel channel = future.awaitUninterruptibly().channel();
+                            channel.writeAndFlush(broadcast);
+                        }
+                    }
+                }
+            }
+
+        }
+        catch (SocketException e) {
+            logger.error(e.getMessage());
+        }
+
     }
 
 }
