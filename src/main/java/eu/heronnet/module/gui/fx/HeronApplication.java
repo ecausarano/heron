@@ -24,7 +24,7 @@ public class HeronApplication extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         applicationContext = Main.getApplicationContext();
-        try (InputStream fxmlStream = HeronApplication.class.getResourceAsStream("/HeronMainWindow.fxml")) {
+        try (InputStream fxmlStream = HeronApplication.class.getResourceAsStream("/HeronMainWindowV2.fxml")) {
             Callback controllerFactory = applicationContext.getBean(Callback.class);
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setControllerFactory(controllerFactory);

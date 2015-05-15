@@ -16,6 +16,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -51,8 +52,9 @@ public class MainWindowController implements Initializable {
     private Callback controllerFactory;
 
     @FXML
+    private MenuBar menuBar;
+    @FXML
     private ListView<Document> localStorageListView;
-
     @FXML
     private ListView<Document> resultList;
     @FXML
@@ -90,6 +92,11 @@ public class MainWindowController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         logger.debug("Initializing UI controller");
+
+        final String os = System.getProperty("os.name");
+        if (os != null && os.startsWith("Mac")) {
+            menuBar.useSystemMenuBarProperty().set(true);
+        }
 
         resultList.setCellFactory(param -> new DocumentListCell());
         localStorageListView.setCellFactory(param -> new DocumentListCell());
