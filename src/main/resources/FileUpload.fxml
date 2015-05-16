@@ -9,8 +9,8 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:id="cancelBtn" maxHeight="-Infinity" maxWidth="-Infinity"
-            prefHeight="340.0" xmlns="http://javafx.com/javafx/8"
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="340.0"
+            xmlns="http://javafx.com/javafx/8"
             fx:controller="eu.heronnet.module.gui.fx.controller.FileUploadWindowController">
    <children>
       <VBox prefHeight="304.0" spacing="14.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
@@ -45,7 +45,7 @@
       </VBox>
       <HBox spacing="14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
          <children>
-            <Button fx:id="cancelBtn" cancelButton="true" mnemonicParsing="false" text="Cancel"/>
+            <Button fx:id="cancelBtn" cancelButton="true" mnemonicParsing="false" onAction="#cancel" text="Cancel"/>
             <Button fx:id="confirmBtn" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                     minWidth="-Infinity" mnemonicParsing="false" onAction="#confirm" text="Confirm"/>
          </children>

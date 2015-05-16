@@ -17,17 +17,17 @@
 
 package eu.heronnet.module.bus.command;
 
-import eu.heronnet.core.model.Document;
+import eu.heronnet.core.model.DocumentBuilder;
 
 public class Put {
 
-    private final Document document;
+    private final DocumentBuilder documentBuilder;
 
-    public Put(Document document) {
-        this.document = document;
+    public Put(DocumentBuilder documentBuilder) {
+        this.documentBuilder = documentBuilder;
     }
 
-    public Document getDocument() {
-        return document;
+    public DocumentBuilder getDocumentBuilder() {
+        return documentBuilder;
     }
 }

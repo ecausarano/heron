@@ -54,6 +54,8 @@ public class FileUploadWindowController {
     @FXML
     private Button confirmBtn;
     @FXML
+    private Button cancelBtn;
+    @FXML
     private TableView<FieldRow> metaTableView;
     @FXML
     private TableColumn<FieldRow, String> nameColumn;
@@ -74,6 +76,8 @@ public class FileUploadWindowController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose File");
         File file = fileChooser.showOpenDialog(chooseBtn.getScene().getWindow());
+        if (file == null)
+            return;
 
         path = Paths.get(file.toURI());
         logger.debug("Chose file={}", file.getAbsolutePath());
@@ -82,6 +86,7 @@ public class FileUploadWindowController {
         String contentType = Files.probeContentType(path);
 
         ObservableList<FieldRow> metaItems = metaTableView.getItems();
+        // TODO - move this metadata extractor part to a background worker thread
         List<FieldRow> fields = processorFactory.getProcessor(contentType).process(file);
         metaItems.addAll(fields);
 
@@ -120,10 +125,16 @@ public class FileUploadWindowController {
         byte[] allBytes = Files.readAllBytes(path);
         documentBuilder.withBinary(allBytes);
 
-        Put put = new Put(documentBuilder.build());
+        Put put = new Put(documentBuilder);
         eventBus.post(put);
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
+    }
+
+    @FXML
+    private void cancel(ActionEvent event) {
+        Stage window = (Stage) cancelBtn.getScene().getWindow();
+        window.close();
     }
 }

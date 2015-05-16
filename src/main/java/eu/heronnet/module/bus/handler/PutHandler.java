@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import eu.heronnet.core.model.Document;
 import eu.heronnet.module.bus.command.Put;
 import eu.heronnet.module.bus.command.UpdateLocalResults;
 import eu.heronnet.module.storage.Persistence;
@@ -32,9 +33,10 @@ public class PutHandler {
 
     @Subscribe
     public void handle(Put command) {
-        logger.debug("put={}", command.getDocument().getHash());
-        persistence.put(command.getDocument());
-        eventBus.post(new UpdateLocalResults(Collections.singletonList(command.getDocument())));
+        Document document = command.getDocumentBuilder().build();
+        logger.debug("put={}", document.getHash());
+        persistence.put(document);
+        eventBus.post(new UpdateLocalResults(Collections.singletonList(document)));
     }
 
     @PostConstruct
