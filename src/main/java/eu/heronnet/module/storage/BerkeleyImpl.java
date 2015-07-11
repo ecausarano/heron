@@ -31,14 +31,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.util.concurrent.AbstractIdleService;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
-import com.sleepycat.persist.EntityCursor;
-import com.sleepycat.persist.EntityIndex;
-import com.sleepycat.persist.EntityJoin;
-import com.sleepycat.persist.EntityStore;
-import com.sleepycat.persist.ForwardCursor;
-import com.sleepycat.persist.PrimaryIndex;
-import com.sleepycat.persist.SecondaryIndex;
-import com.sleepycat.persist.StoreConfig;
+import com.sleepycat.persist.*;
 
 import eu.heronnet.core.model.Document;
 import eu.heronnet.core.model.DocumentBuilder;
@@ -54,12 +47,12 @@ import eu.heronnet.module.storage.model.converter.FieldConverter;
 @Component
 public class BerkeleyImpl extends AbstractIdleService implements Persistence {
 
-    public static final String DOCUMENT_STORE = "DocumentStore";
+    private static final String DOCUMENT_STORE = "DocumentStore";
     private static final Logger logger = LoggerFactory.getLogger(BerkeleyImpl.class);
-    EntityStore documentStore;
+    private EntityStore documentStore;
     private PrimaryIndex<String, StoredDocument> documentPrimaryIndex;
     private PrimaryIndex<String, StoredField> fieldPrimaryIndex;
-    private SecondaryIndex<String, String, StoredField> fieldBynGram;
+    private SecondaryIndex<String, String, StoredField> fieldByHash;
     private SecondaryIndex<String, String, StoredDocument> documentByField;
 
     @Inject
@@ -94,7 +87,7 @@ public class BerkeleyImpl extends AbstractIdleService implements Persistence {
         fieldPrimaryIndex = documentStore.getPrimaryIndex(String.class, StoredField.class);
 
         documentByField = documentStore.getSecondaryIndex(documentPrimaryIndex, String.class, "meta");
-        fieldBynGram = documentStore.getSecondaryIndex(fieldPrimaryIndex, String.class, "nGrams");
+        fieldByHash = documentStore.getSecondaryIndex(fieldPrimaryIndex, String.class, "nGrams");
 
         logger.debug("Opened database name={}, count={}", DOCUMENT_STORE, documentPrimaryIndex.count());
     }
@@ -139,10 +132,10 @@ public class BerkeleyImpl extends AbstractIdleService implements Persistence {
     }
 
     @Override
-    public List<Document> findByStringKey(List<String> searchKeys) {
+    public List<Document> findByHash(List<byte[]> searchKeys) {
         if (searchKeys.size() == 1) {
-            String key = searchKeys.get(0);
-            EntityIndex<String, StoredField> fieldEntityIndex = fieldBynGram.subIndex(key.toLowerCase());
+            byte[] key = searchKeys.get(0);
+            EntityIndex<String, StoredField> fieldEntityIndex = fieldByHash.subIndex(new String(key));
 
             EntityJoin<String, StoredDocument> join = new EntityJoin<>(documentPrimaryIndex);
 

@@ -7,7 +7,7 @@ import eu.heronnet.core.model.Document;
 /**
  * @author edoardocausarano
  */
-public class SearchResult {
+class SearchResult {
 
     private final SimpleStringProperty title;
     private final SimpleStringProperty type;

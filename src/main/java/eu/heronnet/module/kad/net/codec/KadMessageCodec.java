@@ -46,7 +46,6 @@ public class KadMessageCodec extends ByteToMessageCodec<KadMessage> {
 
     {
         bsonFactory.enable(BsonGenerator.Feature.ENABLE_STREAMING);
-
     }
 
     @Override

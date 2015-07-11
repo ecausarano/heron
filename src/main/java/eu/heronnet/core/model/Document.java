@@ -8,9 +8,7 @@ import java.util.Set;
 public class Document {
 
     private String hash;
-
     private byte[] binaryData;
-
     private Set<Field> meta;
 
     public Document() {

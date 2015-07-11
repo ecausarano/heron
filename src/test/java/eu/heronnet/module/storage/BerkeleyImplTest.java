@@ -2,11 +2,7 @@ package eu.heronnet.module.storage;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -63,7 +59,7 @@ public class BerkeleyImplTest {
             persistence.put(document);
         }
 
-        List<Document> foundDocuments = persistence.findByStringKey(Collections.singletonList("Edoa"));
+        List<Document> foundDocuments = persistence.findByHash(Collections.singletonList("Edoa".getBytes()));
         Assert.assertEquals(100, foundDocuments.size());
     }
 

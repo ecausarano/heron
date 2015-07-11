@@ -26,8 +26,7 @@ import eu.heronnet.module.kad.model.Node;
 public class KadMessage {
 
     private static final Random randomGenerator = new Random();
-
-    private byte[] messageId = new byte[20];
+    private final byte[] messageId = new byte[20];
     private Node origin;
 
     {

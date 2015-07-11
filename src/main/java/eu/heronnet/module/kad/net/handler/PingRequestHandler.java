@@ -23,10 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import eu.heronnet.module.kad.model.Node;
-import eu.heronnet.module.kad.model.Self;
 import eu.heronnet.module.kad.model.rpc.message.PingRequest;
 import eu.heronnet.module.kad.model.rpc.message.PingResponse;
+import eu.heronnet.module.kad.net.SelfNodeProvider;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -38,8 +37,7 @@ public class PingRequestHandler extends SimpleChannelInboundHandler<PingRequest>
     private static final Logger logger = LoggerFactory.getLogger(PingRequestHandler.class);
 
     @Inject
-    @Self
-    Node self;
+    SelfNodeProvider selfNodeProvider;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, PingRequest msg) throws Exception {
@@ -47,7 +45,7 @@ public class PingRequestHandler extends SimpleChannelInboundHandler<PingRequest>
         final byte[] messageId = msg.getMessageId();
         final PingResponse response = new PingResponse();
 
-        response.setOrigin(self);
+        response.setOrigin(selfNodeProvider.getSelf());
         response.setResponse(messageId);
 
         ctx.writeAndFlush(response);

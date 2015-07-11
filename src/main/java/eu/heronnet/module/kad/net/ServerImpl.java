@@ -29,12 +29,14 @@ import eu.heronnet.module.kad.net.codec.KadMessageCodec;
 import eu.heronnet.module.kad.net.handler.FindValueRequestHandler;
 import eu.heronnet.module.kad.net.handler.PingRequestHandler;
 import eu.heronnet.module.kad.net.handler.StoreValueRequestHandler;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LoggingHandler;
 
@@ -43,7 +45,9 @@ public class ServerImpl extends AbstractIdleService implements Server {
     private static final Logger logger = LoggerFactory.getLogger(ServerImpl.class);
     private NioEventLoopGroup bossGroup;
     private NioEventLoopGroup workerGroup;
-    private ServerBootstrap bootstrap;
+
+    private ServerBootstrap tcpBoostrap;
+    private Bootstrap udpbootrap;
 
     @Inject
     private KadMessageCodec kadMessageCodec;
@@ -54,29 +58,40 @@ public class ServerImpl extends AbstractIdleService implements Server {
     @Inject
     private FindValueRequestHandler findValueRequestHandler;
 
+    private final ChannelInitializer<SocketChannel> channelInitializer = new ChannelInitializer<SocketChannel>() {
+        @Override
+        protected void initChannel(SocketChannel ch) throws Exception {
+            final ChannelPipeline pipeline = ch.pipeline();
+            pipeline.addLast("Logger", new LoggingHandler());
+            pipeline.addLast("Kad message codec", new KadMessageCodec());
+            pipeline.addLast("PING request handler", pingRequestHandler);
+            pipeline.addLast("STORE request handler", storeValueRequestHandler);
+            pipeline.addLast("FIND request handler", findValueRequestHandler);
+        }
+    };
+
     @Override
     protected void startUp() throws Exception {
         logger.debug("calling startUp for ServerImpl instance={}", this);
-        bootstrap = new ServerBootstrap();
+        tcpBoostrap = new ServerBootstrap();
+        udpbootrap = new Bootstrap();
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
-        bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).localAddress(6565).childHandler(new ChannelInitializer<SocketChannel>() {
-            @Override
-            protected void initChannel(SocketChannel ch) throws Exception {
-                final ChannelPipeline pipeline = ch.pipeline();
-                pipeline.addLast("Logger", new LoggingHandler());
-                pipeline.addLast("Kad message codec", kadMessageCodec);
-                pipeline.addLast("PING request handler", pingRequestHandler);
-                pipeline.addLast("FIND request handler", findValueRequestHandler);
-                pipeline.addLast("STORE request handle", storeValueRequestHandler);
-            }
-        }).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
-        try {
-            bootstrap.bind().sync();
-        }
-        catch (InterruptedException e) {
-            logger.error("An error has occurred", e);
-        }
+        tcpBoostrap.group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .localAddress(6565)
+                .childHandler(channelInitializer)
+                .option(ChannelOption.SO_BACKLOG, 128)
+                .childOption(ChannelOption.SO_KEEPALIVE, true);
+        tcpBoostrap.bind().sync();
+
+        udpbootrap.group(workerGroup)
+                .channel(NioDatagramChannel.class)
+                .localAddress(6565)
+                .option(ChannelOption.SO_BROADCAST, true)
+                .handler(pingRequestHandler);
+        udpbootrap.bind().sync();
+
     }
 
     @Override

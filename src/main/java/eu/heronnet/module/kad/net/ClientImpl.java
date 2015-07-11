@@ -17,11 +17,7 @@
 
 package eu.heronnet.module.kad.net;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.net.*;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -41,11 +37,7 @@ import eu.heronnet.module.kad.net.codec.KadMessageCodec;
 import eu.heronnet.module.kad.net.handler.FindValueResponseHandler;
 import eu.heronnet.module.kad.net.handler.PingResponseHandler;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -60,7 +52,28 @@ public class ClientImpl extends AbstractIdleService implements Client {
     private RadixTree routingTable;
 
     private Bootstrap bootstrap;
+
     private EventLoopGroup workerGroup;
+
+    private LoggingHandler loggingHandler = new LoggingHandler();
+    @Inject
+    private KadMessageCodec kadMessageCodec;
+    @Inject
+    private PingResponseHandler pingResponseHandler;
+
+    @Inject
+    private FindValueResponseHandler findValueResponseHandler;
+
+    private final ChannelInitializer<SocketChannel> channelInitializer = new ChannelInitializer<SocketChannel>() {
+        @Override
+        protected void initChannel(SocketChannel ch) throws Exception {
+            final ChannelPipeline pipeline = ch.pipeline();
+            pipeline.addFirst(loggingHandler);
+            pipeline.addLast(kadMessageCodec);
+            pipeline.addLast(pingResponseHandler);
+            pipeline.addLast(findValueResponseHandler);
+        }
+    };
 
     public ClientImpl() {
     }
@@ -70,16 +83,7 @@ public class ClientImpl extends AbstractIdleService implements Client {
         bootstrap = new Bootstrap();
         workerGroup = new NioEventLoopGroup();
 
-        bootstrap.group(workerGroup).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
-            @Override
-            protected void initChannel(SocketChannel ch) throws Exception {
-                final ChannelPipeline pipeline = ch.pipeline();
-                pipeline.addLast(new LoggingHandler());
-                pipeline.addLast(new KadMessageCodec());
-                pipeline.addLast(new PingResponseHandler());
-                pipeline.addLast(new FindValueResponseHandler());
-            }
-        });
+        bootstrap.group(workerGroup).channel(NioSocketChannel.class).handler(channelInitializer);
     }
 
     @Override
@@ -88,16 +92,35 @@ public class ClientImpl extends AbstractIdleService implements Client {
         workerGroup.shutdownGracefully();
     }
 
+    /**
+     *
+     * @param message
+     */
     @Override
     public void send(KadMessage message) {
         final byte[] messageId = message.getMessageId();
 
         final List<Node> nodes = routingTable.find(messageId);
         for (Node node : nodes) {
-            InetSocketAddress address = node.getAddress();
-            final ChannelFuture future = bootstrap.connect(address);
-            final Channel channel = future.awaitUninterruptibly().channel();
-            channel.writeAndFlush(message);
+            List<InetSocketAddress> addresses = node.getAddresses();
+            for (InetSocketAddress address : addresses) {
+                final ChannelFuture future;
+                try {
+                    future = bootstrap.connect(address.getAddress(), address.getPort()).sync();
+                    final Channel channel = future.awaitUninterruptibly().channel();
+                    ChannelFuture responseFuture = channel.writeAndFlush(message);
+                    responseFuture.addListener(new ChannelFutureListener() {
+                        @Override
+                        public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                            logger.debug("completed operation: {}", channelFuture.toString());
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    logger.error(e.getMessage());
+                } catch (RuntimeException e) {
+                    logger.error("Unresolved address {}", address);
+                }
+            }
         }
     }
 
@@ -107,23 +130,23 @@ public class ClientImpl extends AbstractIdleService implements Client {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = interfaces.nextElement();
-                if (!networkInterface.isLoopback()) {
-                    for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-                        InetAddress broadcast = interfaceAddress.getBroadcast();
-                        if (broadcast != null) {
-                            final ChannelFuture future = bootstrap.connect(new InetSocketAddress(broadcast, 6565));
-                            final Channel channel = future.awaitUninterruptibly().channel();
-                            channel.writeAndFlush(broadcast);
-                        }
+                // we don't want to ping ourselves
+                if (networkInterface.isLoopback()) return;
+                for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+                    InetAddress address = interfaceAddress.getAddress();
+                    // site-local addresses are deprecated
+                    if (address.isSiteLocalAddress()) return;
+                    InetAddress broadcast = interfaceAddress.getBroadcast();
+                    if (broadcast != null) {
+                        final ChannelFuture future = bootstrap.connect(new InetSocketAddress(broadcast, 6565));
+                        final Channel channel = future.awaitUninterruptibly().channel();
+                        channel.writeAndFlush(broadcast);
                     }
                 }
             }
-
         }
         catch (SocketException e) {
             logger.error(e.getMessage());
         }
-
     }
-
 }

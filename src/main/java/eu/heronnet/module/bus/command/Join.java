@@ -20,7 +20,7 @@ package eu.heronnet.module.bus.command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Join {
+class Join {
 
     private static final Logger logger = LoggerFactory.getLogger(Join.class);
 

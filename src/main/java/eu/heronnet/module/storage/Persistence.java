@@ -30,7 +30,7 @@ public interface Persistence {
 
     List<Document> findDocumentByFieldSpec(List<Field> fields);
 
-    List<Document> findByStringKey(List<String> searchKeys);
+    List<Document> findByHash(List<byte[]> searchKeys);
 
     List<Document> getAll();
 

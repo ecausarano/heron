@@ -17,10 +17,9 @@ import org.slf4j.LoggerFactory;
 public class DocumentBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(DocumentBuilder.class);
-
+    private final Set<Field> fields = new HashSet<>();
     private String hash;
     private byte[] binaryData;
-    private Set<Field> fields = new HashSet<>();
 
     private DocumentBuilder() {
     }

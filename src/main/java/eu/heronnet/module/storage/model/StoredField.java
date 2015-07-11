@@ -30,10 +30,11 @@ public class StoredField {
         this.hash = hash;
         this.name = name;
         this.value = value;
+        // TODO - you want to also hash n-grams or else they won't be addressable in the DHT
         this.nGrams = StoredField.ngrams(value, NGRAM_MIN, value.length());
     }
 
-    public static Set<String> ngrams(String str, int n, int m) {
+    private static Set<String> ngrams(String str, int n, int m) {
         char[] chars = str.toLowerCase().toCharArray();
 
         int L = chars.length;

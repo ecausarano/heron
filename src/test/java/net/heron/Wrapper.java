@@ -20,7 +20,7 @@ package net.heron;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Wrapper {
+class Wrapper {
     private Map<String, String> map = new HashMap<>();
 
     public Map<String, String> getMap() {

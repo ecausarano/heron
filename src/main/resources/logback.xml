@@ -1,4 +1,6 @@
-<configuration debug="true">
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               debug="true"
+               xsi:noNamespaceSchemaLocation="logback.xsd">
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are  by default assigned the type

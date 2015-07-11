@@ -20,7 +20,9 @@ import com.google.common.util.concurrent.ServiceManager;
  * @author edoardocausarano
  */
 @Configuration
-@ComponentScan(basePackages = "eu.heronnet")
+@ComponentScan(basePackages = "eu.heronnet", includeFilters = @ComponentScan.Filter(
+        Configuration.class
+))
 public class SpringConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(SpringConfiguration.class);

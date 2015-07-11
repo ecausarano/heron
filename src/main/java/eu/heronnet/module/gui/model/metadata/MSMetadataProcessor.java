@@ -19,7 +19,7 @@ import eu.heronnet.module.gui.model.FieldRow;
 @FieldProcessorStrategy(mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 public class MSMetadataProcessor implements MetadataProcessor {
 
-    Logger logger = LoggerFactory.getLogger(MSMetadataProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(MSMetadataProcessor.class);
 
     @Override
     public List<FieldRow> process(File file) {

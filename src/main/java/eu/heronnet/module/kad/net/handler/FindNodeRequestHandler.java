@@ -20,7 +20,6 @@ package eu.heronnet.module.kad.net.handler;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +29,7 @@ import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.kad.model.RadixTree;
 import eu.heronnet.module.kad.model.rpc.message.FindNodeRequest;
 import eu.heronnet.module.kad.model.rpc.message.FindNodeResponse;
+import eu.heronnet.module.kad.net.SelfNodeProvider;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -44,8 +44,7 @@ public class FindNodeRequestHandler extends SimpleChannelInboundHandler<FindNode
     RadixTree network;
 
     @Inject
-    @Named("self")
-    Node self;
+    SelfNodeProvider selfNodeProvider;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FindNodeRequest msg) throws Exception {
@@ -56,7 +55,7 @@ public class FindNodeRequestHandler extends SimpleChannelInboundHandler<FindNode
 
         final FindNodeResponse response = new FindNodeResponse();
         response.setFoundNodes(nodes);
-        response.setOrigin(self);
+        response.setOrigin(selfNodeProvider.getSelf());
 
         ctx.writeAndFlush(response);
     }

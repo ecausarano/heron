@@ -17,43 +17,35 @@
 
 package eu.heronnet.module.kad.model;
 
+import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
+import eu.heronnet.module.kad.net.SelfNodeProvider;
 
-@Component
 public class RadixTreeImpl implements RadixTree {
 
     private static final Logger logger = LoggerFactory.getLogger(RadixTreeImpl.class);
     private static final int BUCKET_SIZE = 32;
-    private static Node ZERO_NODE = new Node();
-
-    static {
-        ZERO_NODE.setId(new byte[20]);
-    }
+    private static Node ZERO_NODE;
 
     InternalNode root = new InternalNode();
 
     @Inject
-    @Named("self")
-    Node self;
+    SelfNodeProvider selfNodeProvider;
 
     @PostConstruct
-    public void init() {
-        ZERO_NODE.setId(self.getId());
-        ZERO_NODE.setAddress(self.getAddress());
-        ZERO_NODE.setPort(self.getPort());
+    public void init() throws SocketException {
+        ZERO_NODE = selfNodeProvider.getSelf();
+
     }
 
     @Override
@@ -127,8 +119,7 @@ public class RadixTreeImpl implements RadixTree {
         }
 
         List<Node> find(byte[] key) {
-            final Node dummy = new Node();
-            dummy.setId(key);
+            final Node dummy = new Node(key, null);
 
             // it's a leaf node
             if (midpoint == ZERO_NODE) {
@@ -139,12 +130,12 @@ public class RadixTreeImpl implements RadixTree {
                             return Collections.singletonList(node);
                         }
                     }
-                    logger.debug("couldn't findByStringKey desired key {}, returning bucket", new String(key));
+                    logger.debug("couldn't findByHash desired key {}, returning bucket", new String(key));
                     return ImmutableList.copyOf(bucket);
                 }
                 else {
                     // We have an empty tree, return self
-                    return Arrays.asList(ZERO_NODE);
+                    return Collections.singletonList(ZERO_NODE);
                 }
             }
             else {
@@ -162,8 +153,7 @@ public class RadixTreeImpl implements RadixTree {
             if (bucket == null) {
                 return;
             }
-            final Node dummy = new Node();
-            dummy.setId(key);
+            final Node dummy = new Node(key, null);
             if (midpoint == ZERO_NODE) {
                 for (Node node : bucket) {
                     if (dummy.compareTo(node) == 0) {

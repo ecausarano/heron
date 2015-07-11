@@ -19,37 +19,52 @@ package eu.heronnet.module.kad.model;
 
 import java.net.InetSocketAddress;
 import java.util.BitSet;
+import java.util.Date;
+import java.util.List;
 
 public class Node implements Comparable<Node> {
 
     private byte[] id;
 
-    private InetSocketAddress address;
+    private List<InetSocketAddress> addresses;
+    private Date lastSeen;
+    private long RTT;
 
-    private int port;
+    private Node() {}
+
+    public Node(byte[] id, List<InetSocketAddress> addresses) {
+        this.id = id;
+        this.addresses = addresses;
+    }
+
+    public Node(byte[] id, List<InetSocketAddress> addresses, Date lastSeen) {
+        this.id = id;
+        this.addresses = addresses;
+        this.lastSeen = lastSeen;
+    }
 
     public byte[] getId() {
         return id;
     }
 
-    public void setId(byte[] id) {
-        this.id = id;
+    public List<InetSocketAddress> getAddresses() {
+        return addresses;
     }
 
-    public InetSocketAddress getAddress() {
-        return address;
+    public Date getLastSeen() {
+        return lastSeen;
     }
 
-    public void setAddress(InetSocketAddress address) {
-        this.address = address;
+    public void setLastSeen(Date lastSeen) {
+        this.lastSeen = lastSeen;
     }
 
-    public int getPort() {
-        return port;
+    public long getRTT() {
+        return RTT;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setRTT(long RTT) {
+        this.RTT = RTT;
     }
 
     @Override

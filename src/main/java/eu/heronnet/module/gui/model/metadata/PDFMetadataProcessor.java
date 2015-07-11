@@ -19,7 +19,7 @@ import eu.heronnet.module.gui.model.FieldRow;
 @FieldProcessorStrategy(mimeType = "application/pdf")
 public class PDFMetadataProcessor implements MetadataProcessor {
 
-    Logger logger = LoggerFactory.getLogger(PDFMetadataProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(PDFMetadataProcessor.class);
 
     @Override
     public List<FieldRow> process(File file) {

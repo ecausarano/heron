@@ -27,28 +27,45 @@ public class Find {
 
     private final List<Field> fields;
     private final String term;
+    private final byte[] hash;
     private boolean local = false;
 
     public Find(List<Field> fields) {
-        this.fields = new ArrayList<>(fields);
+        this.hash = null;
         this.term = null;
+        this.fields = new ArrayList<>(fields);
     }
 
     public Find(List<Field> fields, boolean local) {
+        this.hash = null;
         this.fields = fields;
         this.term = null;
         this.local = local;
     }
 
     public Find(String term, boolean local) {
+        this.hash = null;
         this.term = term;
         this.fields = Collections.emptyList();
         this.local = local;
     }
 
+    public Find(byte[] hash, boolean local) {
+        this.hash = hash;
+        this.term = null;
+        this.fields = Collections.emptyList();
+        this.local = local;
+    }
+
+
     public Find(String term) {
+        this.hash = null;
         this.term = term;
         this.fields = Collections.emptyList();
+    }
+
+    public byte[] getHash() {
+        return hash;
     }
 
     public List<Field> getFields() {
