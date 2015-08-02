@@ -17,15 +17,17 @@
 
 package eu.heronnet.module.kad.model.rpc.message;
 
+import java.util.List;
+
 public class FindValueRequest extends KadMessage {
 
-    private byte[] value;
+    private List<byte[]> value;
 
-    public byte[] getValue() {
+    public List<byte[]> getValue() {
         return value;
     }
 
-    public void setValue(byte[] value) {
+    public void setValue(List<byte[]> value) {
         this.value = value;
     }
 }

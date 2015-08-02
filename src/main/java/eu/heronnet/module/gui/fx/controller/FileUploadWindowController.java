@@ -12,11 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
@@ -29,7 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
-import eu.heronnet.core.model.DocumentBuilder;
+import eu.heronnet.core.model.Bundle;
+import eu.heronnet.core.model.Bundle.BundleBuilder;
+import eu.heronnet.core.model.Statement;
 import eu.heronnet.module.bus.command.Put;
 import eu.heronnet.module.gui.model.FieldRow;
 import eu.heronnet.module.gui.model.metadata.FieldProcessorFactory;
@@ -103,7 +101,7 @@ public class FileUploadWindowController {
     @FXML
     private void addMetaItem(ActionEvent event) {
         logger.debug("Adding metadata item: {}={}", newKey.getText(), newValue.getText());
-        FieldRow field = null;
+        FieldRow field;
         try {
             field = new FieldRow(newKey.getText(), newValue.getText());
             metaTableView.getItems().addAll(field);
@@ -115,17 +113,15 @@ public class FileUploadWindowController {
 
     @FXML
     private void confirm(ActionEvent event) throws IOException, NoSuchAlgorithmException {
-        logger.debug("confirming");
-        DocumentBuilder documentBuilder = DocumentBuilder.newInstance();
+        logger.debug("confirming file publish");
+
+        BundleBuilder builder = Bundle.builder();
         ObservableList<FieldRow> items = metaTableView.getItems();
         for (FieldRow item : items) {
-            documentBuilder.withField(item.getName(), item.getValue());
+            builder.withStatement(new Statement<>(item.getName(), item.getValue()));
         }
 
-        byte[] allBytes = Files.readAllBytes(path);
-        documentBuilder.withBinary(allBytes);
-
-        Put put = new Put(documentBuilder);
+        Put put = new Put(builder, path);
         eventBus.post(put);
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();

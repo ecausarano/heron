@@ -22,6 +22,13 @@ import java.util.Random;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import eu.heronnet.module.kad.model.Node;
 
+/**
+ * The superclass of all message types
+ *
+ * Heron Kad messages are BSON objects containing an origin {@link Node Node} and
+ * a randomly generated {@code} messageId byte array 20 bytes long (length compatible
+ * with SHA1 hash
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.PROPERTY, property = "type")
 public class KadMessage {
 

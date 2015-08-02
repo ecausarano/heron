@@ -3,7 +3,6 @@ package eu.heronnet.module.gui.fx.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collections;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
@@ -30,8 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import eu.heronnet.core.model.Document;
-import eu.heronnet.core.model.Field;
+import eu.heronnet.core.model.Bundle;
 import eu.heronnet.module.bus.command.Find;
 import eu.heronnet.module.bus.command.UpdateLocalResults;
 import eu.heronnet.module.bus.command.UpdateResults;
@@ -54,9 +52,9 @@ public class MainWindowController implements Initializable {
     @FXML
     private MenuBar menuBar;
     @FXML
-    private ListView<Document> localStorageListView;
+    private ListView<Bundle> localStorageListView;
     @FXML
-    private ListView<Document> resultList;
+    private ListView<Bundle> resultList;
     @FXML
     private TextField searchField;
     @FXML
@@ -102,23 +100,23 @@ public class MainWindowController implements Initializable {
         localStorageListView.setCellFactory(param -> new DocumentListCell());
 
         eventBus.register(this);
-        eventBus.post(new Find(Collections.<Field> emptyList(), true));
+        eventBus.post(new Find(Bundle.emptyBundle(), true));
     }
 
     @Subscribe
     public void updateSearchResults(UpdateResults results) {
         Platform.runLater(() -> {
-            ObservableList<Document> items = resultList.getItems();
+            ObservableList<Bundle> items = resultList.getItems();
             items.clear();
-            items.addAll(results.getDocuments());
+            items.addAll(results.getBundles());
         });
     }
 
     @Subscribe
     public void updateLocalStorageView(UpdateLocalResults updateResults) {
         Platform.runLater(() -> {
-            ObservableList<Document> items = localStorageListView.getItems();
-            items.addAll(updateResults.getDocuments());
+            ObservableList<Bundle> items = localStorageListView.getItems();
+            items.addAll(updateResults.getBundles());
         });
     }
 }

@@ -19,19 +19,21 @@ package eu.heronnet.module.storage;
 
 import java.util.List;
 
-import eu.heronnet.core.model.Document;
-import eu.heronnet.core.model.Field;
+import eu.heronnet.core.model.Bundle;
+import eu.heronnet.core.model.Triple;
 
 public interface Persistence {
 
-    void put(Document document);
+    void put(Triple triple);
 
-    void deleteByField(Field field);
+    void put(Bundle bundle);
 
-    List<Document> findDocumentByFieldSpec(List<Field> fields);
+    void deleteBySubjectId(byte[] subjectId);
 
-    List<Document> findByHash(List<byte[]> searchKeys);
+    List<Bundle> findByTriples(List<Triple> fields);
 
-    List<Document> getAll();
+    List<Bundle> findByHash(List<byte[]> searchKeys);
+
+    List<Bundle> getAll();
 
 }

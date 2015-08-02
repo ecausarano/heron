@@ -2,7 +2,7 @@ package eu.heronnet.module.gui.model;
 
 import javafx.beans.property.SimpleStringProperty;
 
-import eu.heronnet.core.model.Document;
+import eu.heronnet.core.model.Bundle;
 
 /**
  * @author edoardocausarano
@@ -11,7 +11,7 @@ class SearchResult {
 
     private final SimpleStringProperty title;
     private final SimpleStringProperty type;
-    private Document document;
+    private Bundle bundle;
 
     public SearchResult(String title, String type) {
         this.title = new SimpleStringProperty(title);

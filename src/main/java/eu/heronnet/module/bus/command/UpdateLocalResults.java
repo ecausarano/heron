@@ -2,20 +2,20 @@ package eu.heronnet.module.bus.command;
 
 import java.util.List;
 
-import eu.heronnet.core.model.Document;
+import eu.heronnet.core.model.Bundle;
 
 /**
  * @author edoardocausarano
  */
 public class UpdateLocalResults {
 
-    private final List<Document> documents;
+    private final List<Bundle> bundles;
 
-    public UpdateLocalResults(List<Document> documents) {
-        this.documents = documents;
+    public UpdateLocalResults(List<Bundle> bundles) {
+        this.bundles = bundles;
     }
 
-    public List<Document> getDocuments() {
-        return documents;
+    public List<Bundle> getBundles() {
+        return bundles;
     }
 }

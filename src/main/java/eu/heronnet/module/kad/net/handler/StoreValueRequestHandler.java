@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import eu.heronnet.core.model.Document;
+import eu.heronnet.core.model.Bundle;
 import eu.heronnet.module.kad.model.rpc.message.StoreValueRequest;
 import eu.heronnet.module.storage.Persistence;
 import io.netty.channel.ChannelHandler;
@@ -42,11 +42,11 @@ public class StoreValueRequestHandler extends SimpleChannelInboundHandler<StoreV
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, StoreValueRequest msg) throws Exception {
 
-        Document document = msg.getDocument();
+        Bundle bundle = msg.getBundle();
 
-        if (document != null) {
+        if (bundle != null) {
             logger.debug("Received StoreValueRequest message for binary item");
-            persistence.put(msg.getDocument());
+            persistence.put(msg.getBundle());
         }
     }
 }

@@ -14,7 +14,7 @@ I have a proposal to diffuse such cost to such an extent, as to make the economi
 
 It consists of a computer network platform, over which knowledge-sharing communities can self-organize, determining the most useful data-exchange formats, while miniziming infrastructural costs. It's essential components are:
 
-1. a distributed information repository (Distributed Hash Table, DHT) spread over all participating network nodes, for the purpose of (redundantly) disseminating original, meta, and derived data information items. The implementation is based on the Kademlia algorithm commonly used in P2P networks such as eMule.  
+1. a distributed information repository (Distributed Hash Table, DHT) spread over all participating network nodes, for the purpose of (redundantly) disseminating original, triples, and derived data information items. The implementation is based on the Kademlia algorithm commonly used in P2P networks such as eMule.
 
 2. a peer identification mechanism necessary for the cryptographic certification of all distributed content. The implementation is based on PGP, backed by the DHT and consists of cryptographic metadata related to the other information items distributed on the P2P network. This arrangement will allow for the unequivocal identification of sources and easy assessment of the quality of information items, based on the reliability of their sources.
 
@@ -22,7 +22,7 @@ It consists of a computer network platform, over which knowledge-sharing communi
 
 4. the emergence of community-driven formats (RDF) that become commonly accepted to identify significant attributes of the distributed content, such as primitive information items, collections of derived data, information scoring an so on. Definitions are to be disseminated over the same DHT, cryptographically signed, while the evolution into standards is to be entirely driven by the community, on a volutary basis.
 
-5. a distributed query tool to search and filter the DHT based on: the primitive items contents, their derived and meta data attributes. Criteria for filtering are in principle arbitrary, but accepted on a voluntary basis by each participating peer as a result of the community-driven standardization process.
+5. a distributed query tool to search and filter the DHT based on: the primitive items contents, their derived and triples data attributes. Criteria for filtering are in principle arbitrary, but accepted on a voluntary basis by each participating peer as a result of the community-driven standardization process.
 
 This is Heron, in very broad and abstract terms. A more practical application of if would be the following:
 

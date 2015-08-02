@@ -10,6 +10,7 @@ import com.google.common.eventbus.EventBus;
 
 import eu.heronnet.module.bus.command.UpdateResults;
 import eu.heronnet.module.kad.model.rpc.message.FindValueResponse;
+import eu.heronnet.module.storage.util.HexUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -28,7 +29,7 @@ public class FindValueResponseHandler extends SimpleChannelInboundHandler<FindVa
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, FindValueResponse findValueResponse) throws Exception {
-        logger.debug("Received response id: {}", findValueResponse.getMessageId());
-        eventBus.post(new UpdateResults(findValueResponse.getDocuments()));
+        logger.debug("Received response id=[{}]", HexUtil.bytesToHex(findValueResponse.getMessageId()));
+        eventBus.post(new UpdateResults(findValueResponse.getBundles()));
     }
 }

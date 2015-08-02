@@ -19,21 +19,21 @@ package eu.heronnet.module.kad.model.rpc.message;
 
 import java.util.List;
 
-import eu.heronnet.core.model.Document;
+import eu.heronnet.core.model.Bundle;
 
 public class FindValueResponse extends KadMessage {
 
-    private List<Document> documents;
+    private List<Bundle> bundles;
 
     public FindValueResponse() {
     }
 
-    public List<Document> getDocuments() {
-        return documents;
+    public List<Bundle> getBundles() {
+        return bundles;
     }
 
-    public void setDocuments(List<Document> documents) {
-        this.documents = documents;
+    public void setBundles(List<Bundle> bundles) {
+        this.bundles = bundles;
     }
 
 }

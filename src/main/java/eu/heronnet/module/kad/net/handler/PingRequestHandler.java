@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import eu.heronnet.module.kad.model.rpc.message.PingRequest;
 import eu.heronnet.module.kad.model.rpc.message.PingResponse;
 import eu.heronnet.module.kad.net.SelfNodeProvider;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -48,7 +49,7 @@ public class PingRequestHandler extends SimpleChannelInboundHandler<PingRequest>
         response.setOrigin(selfNodeProvider.getSelf());
         response.setResponse(messageId);
 
-        ctx.writeAndFlush(response);
+        ChannelFuture future = ctx.writeAndFlush(response);
     }
 
     @Override

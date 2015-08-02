@@ -17,5 +17,18 @@
 
 package eu.heronnet.module.kad.model.rpc.message;
 
+/**
+ * Discovery of new {@link eu.heronnet.module.kad.model.Node Nodes} occurs during
+ * all incoming message handling phases.
+ *
+ * A Heron node is seldom totally idle as it is always busy handling incoming
+ * {@link FindNodeRequest FindNodeRequest} or {@link FindValueRequest}
+ * messages, therefore Bucket lists are constantly updated with new {@link eu.heronnet.module.kad.model.Node Node} items.
+ *
+ * Part of this maintenance includes the expiry of an offline {@link eu.heronnet.module.kad.model.Node Node}
+ * and in order to guarantee the periodic of this task, a {@code Ping} message type is
+ * also included to guarantee the execution of this process in any circumstance.
+ *
+ */
 public class PingRequest extends KadMessage {
 }

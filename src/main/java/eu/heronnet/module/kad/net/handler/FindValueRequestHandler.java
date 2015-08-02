@@ -1,6 +1,5 @@
 package eu.heronnet.module.kad.net.handler;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -9,11 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import eu.heronnet.core.model.Document;
+import eu.heronnet.core.model.Bundle;
 import eu.heronnet.module.kad.model.rpc.message.FindValueRequest;
 import eu.heronnet.module.kad.model.rpc.message.FindValueResponse;
 import eu.heronnet.module.kad.net.SelfNodeProvider;
 import eu.heronnet.module.storage.Persistence;
+import eu.heronnet.module.storage.util.HexUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -25,7 +25,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 @ChannelHandler.Sharable
 public class FindValueRequestHandler extends SimpleChannelInboundHandler<FindValueRequest>{
 
-    private static final Logger logger = LoggerFactory.getLogger(FindValueRequestHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FindValueRequestHandler.class);
 
     @Inject
     Persistence persistence;
@@ -34,12 +34,21 @@ public class FindValueRequestHandler extends SimpleChannelInboundHandler<FindVal
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FindValueRequest msg) throws Exception {
-        logger.debug("Received request for value: {}", msg.getValue());
+        List<byte[]> request = msg.getValue();
+        if (LOGGER.isDebugEnabled()) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("[");
+            for (byte[] bytes : request) {
+                stringBuilder.append(" ").append(HexUtil.bytesToHex(bytes));
+            }
+            stringBuilder.append(" ]");
+            LOGGER.debug("Received request for value: {}", stringBuilder.toString());
+        }
 
-        List<Document> byHash = persistence.findByHash(Collections.singletonList(msg.getValue()));
+        List<Bundle> byHash = persistence.findByHash(request);
 
         FindValueResponse response = new FindValueResponse();
-        response.setDocuments(byHash);
+        response.setBundles(byHash);
         response.setOrigin(selfNodeProvider.getSelf());
         ctx.writeAndFlush(response);
     }

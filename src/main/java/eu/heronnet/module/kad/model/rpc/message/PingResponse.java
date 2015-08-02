@@ -17,6 +17,13 @@
 
 package eu.heronnet.module.kad.model.rpc.message;
 
+/**
+ * A {@code PingResponse} in returned in response to a {@link PingRequest}.<br/>
+ *
+ * As with all {@code KadMessage} types it contains the origin {@link eu.heronnet.module.kad.model.Node Node}
+ * as well as the {@code messageId} of the {@code PingRequest} that the current {@link eu.heronnet.module.kad.model.Node Node}
+ * is responding to.
+ */
 public class PingResponse extends KadMessage {
 
     private byte[] response;

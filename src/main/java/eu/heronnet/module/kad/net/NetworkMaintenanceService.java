@@ -28,7 +28,9 @@ public class NetworkMaintenanceService extends AbstractScheduledService {
 
     @Override
     protected void runOneIteration() throws Exception {
-        logger.debug("running network maintenance at={}", new Date());
+        final Date when = new Date();
+        logger.debug("running network maintenance at={}", when);
+
         PingRequest pingRequest = new PingRequest();
         pingRequest.setOrigin(selfNodeProvider.getSelf());
 

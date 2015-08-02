@@ -17,17 +17,31 @@
 
 package eu.heronnet.module.bus.command;
 
-import eu.heronnet.core.model.DocumentBuilder;
+import java.nio.file.Path;
 
+import eu.heronnet.core.model.Bundle;
+import eu.heronnet.core.model.Bundle.BundleBuilder;
+import eu.heronnet.core.model.Triple;
+
+/**
+ * Command to persist a {@link Bundle} of {@link Triple Triples} to storage
+ *
+ */
 public class Put {
 
-    private final DocumentBuilder documentBuilder;
+    private final BundleBuilder builder;
+    private final Path path;
 
-    public Put(DocumentBuilder documentBuilder) {
-        this.documentBuilder = documentBuilder;
+    public Put(BundleBuilder builder, Path path) {
+        this.builder = builder;
+        this.path = path;
     }
 
-    public DocumentBuilder getDocumentBuilder() {
-        return documentBuilder;
+    public BundleBuilder getBuilder() {
+        return builder;
+    }
+
+    public Path getPath() {
+        return path;
     }
 }

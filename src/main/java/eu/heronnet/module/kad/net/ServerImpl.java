@@ -38,7 +38,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LoggingHandler;
 
 @Component
 public class ServerImpl extends AbstractIdleService implements Server {
@@ -62,7 +61,7 @@ public class ServerImpl extends AbstractIdleService implements Server {
         @Override
         protected void initChannel(SocketChannel ch) throws Exception {
             final ChannelPipeline pipeline = ch.pipeline();
-            pipeline.addLast("Logger", new LoggingHandler());
+//            pipeline.addLast("Logger", new LoggingHandler());
             pipeline.addLast("Kad message codec", new KadMessageCodec());
             pipeline.addLast("PING request handler", pingRequestHandler);
             pipeline.addLast("STORE request handler", storeValueRequestHandler);

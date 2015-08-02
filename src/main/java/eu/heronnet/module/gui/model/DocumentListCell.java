@@ -4,25 +4,29 @@ import java.util.Set;
 
 import javafx.scene.control.ListCell;
 
-import eu.heronnet.core.model.Document;
-import eu.heronnet.core.model.Field;
+import eu.heronnet.core.model.BinaryStatement;
+import eu.heronnet.core.model.Bundle;
+import eu.heronnet.core.model.Statement;
 
 /**
  * @author edoardocausarano
  */
-public class DocumentListCell extends ListCell<Document> {
+public class DocumentListCell extends ListCell<Bundle> {
     @Override
-    protected void updateItem(Document item, boolean empty) {
+    protected void updateItem(Bundle item, boolean empty) {
         super.updateItem(item, empty);
         if (empty) {
             setText(null);
             setGraphic(null);
         }
         else {
-            Set<Field> fields = item.getMeta();
+            Set<Statement> statements = item.getStatements();
             StringBuilder builder = new StringBuilder();
-            for (Field field : fields) {
-                builder.append(field.getName()).append("=").append(field.getValue()).append(" ").append("\n");
+            for (Statement statement : statements) {
+                // TODO - add adaptors
+                if (!(statement instanceof BinaryStatement)) {
+                    builder.append(statement.getPredicate()).append("=").append(statement.getObject()).append(" ").append("\n");
+                }
             }
             setText(builder.toString());
         }

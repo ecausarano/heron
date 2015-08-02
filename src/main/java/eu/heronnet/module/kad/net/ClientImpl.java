@@ -68,7 +68,7 @@ public class ClientImpl extends AbstractIdleService implements Client {
         @Override
         protected void initChannel(SocketChannel ch) throws Exception {
             final ChannelPipeline pipeline = ch.pipeline();
-            pipeline.addFirst(loggingHandler);
+//            pipeline.addFirst(loggingHandler);
             pipeline.addLast(kadMessageCodec);
             pipeline.addLast(pingResponseHandler);
             pipeline.addLast(findValueResponseHandler);
@@ -94,7 +94,7 @@ public class ClientImpl extends AbstractIdleService implements Client {
 
     /**
      *
-     * @param message
+     * @param message to be posted
      */
     @Override
     public void send(KadMessage message) {

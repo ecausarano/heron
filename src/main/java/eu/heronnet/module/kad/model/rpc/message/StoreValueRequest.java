@@ -17,22 +17,22 @@
 
 package eu.heronnet.module.kad.model.rpc.message;
 
-import eu.heronnet.core.model.Document;
+import eu.heronnet.core.model.Bundle;
 
 public class StoreValueRequest extends KadMessage {
 
-    private final Document document;
+    private final Bundle bundle;
 
     // Only for JSON
     // @SuppressWarnings("unused")
     // public StoreValueRequest() {
     // }
 
-    public StoreValueRequest(Document document) {
-        this.document = document;
+    public StoreValueRequest(Bundle bundle) {
+        this.bundle = bundle;
     }
 
-    public Document getDocument() {
-        return document;
+    public Bundle getBundle() {
+        return bundle;
     }
 }
