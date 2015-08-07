@@ -17,20 +17,18 @@
 
 package eu.heronnet.module.storage;
 
-import java.util.List;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.StringNode;
 
-import eu.heronnet.core.model.Bundle;
-import eu.heronnet.core.model.Triple;
+import java.util.List;
 
 public interface Persistence {
 
-    void put(Triple triple);
-
-    void put(Bundle bundle);
+    void put(Bundle rawBundle);
 
     void deleteBySubjectId(byte[] subjectId);
 
-    List<Bundle> findByTriples(List<Triple> fields);
+    List<Bundle> findByPredicate(List<StringNode> fields);
 
     List<Bundle> findByHash(List<byte[]> searchKeys);
 

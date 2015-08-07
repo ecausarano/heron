@@ -2,11 +2,12 @@ package eu.heronnet.module.gui.model;
 
 import java.util.Set;
 
+import eu.heronnet.model.BinaryDataNode;
+import eu.heronnet.model.Node;
 import javafx.scene.control.ListCell;
 
-import eu.heronnet.core.model.BinaryStatement;
-import eu.heronnet.core.model.Bundle;
-import eu.heronnet.core.model.Statement;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.Statement;
 
 /**
  * @author edoardocausarano
@@ -24,8 +25,9 @@ public class DocumentListCell extends ListCell<Bundle> {
             StringBuilder builder = new StringBuilder();
             for (Statement statement : statements) {
                 // TODO - add adaptors
-                if (!(statement instanceof BinaryStatement)) {
-                    builder.append(statement.getPredicate()).append("=").append(statement.getObject()).append(" ").append("\n");
+                Node object = statement.getObject();
+                if (!(object instanceof BinaryDataNode)) {
+                    builder.append(statement.getPredicate()).append("=").append(object).append(" ").append("\n");
                 }
             }
             setText(builder.toString());

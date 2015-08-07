@@ -17,7 +17,8 @@
 
 package eu.heronnet.module.bus.command;
 
-import eu.heronnet.core.model.Bundle;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.builder.BundleBuilder;
 
 public class Find {
 
@@ -42,14 +43,14 @@ public class Find {
     public Find(String term, boolean local) {
         this.hash = null;
         this.term = term;
-        this.bundle = Bundle.emptyBundle();
+        this.bundle = BundleBuilder.emptyBundle();
         this.local = local;
     }
 
     public Find(byte[] hash, boolean local) {
         this.hash = hash;
         this.term = null;
-        this.bundle = Bundle.emptyBundle();
+        this.bundle = BundleBuilder.emptyBundle();
         this.local = local;
     }
 
@@ -57,7 +58,7 @@ public class Find {
     public Find(String term) {
         this.hash = null;
         this.term = term;
-        this.bundle = Bundle.emptyBundle();
+        this.bundle = BundleBuilder.emptyBundle();
     }
 
     public byte[] getHash() {

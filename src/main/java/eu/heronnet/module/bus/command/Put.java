@@ -19,12 +19,12 @@ package eu.heronnet.module.bus.command;
 
 import java.nio.file.Path;
 
-import eu.heronnet.core.model.Bundle;
-import eu.heronnet.core.model.Bundle.BundleBuilder;
-import eu.heronnet.core.model.Triple;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.Statement;
+import eu.heronnet.model.builder.BundleBuilder;
 
 /**
- * Command to persist a {@link Bundle} of {@link Triple Triples} to storage
+ * Command to persist a {@link Bundle} of {@link Statement statements} to storage
  *
  */
 public class Put {

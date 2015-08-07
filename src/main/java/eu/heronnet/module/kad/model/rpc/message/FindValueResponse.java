@@ -19,7 +19,7 @@ package eu.heronnet.module.kad.model.rpc.message;
 
 import java.util.List;
 
-import eu.heronnet.core.model.Bundle;
+import eu.heronnet.model.Bundle;
 
 public class FindValueResponse extends KadMessage {
 

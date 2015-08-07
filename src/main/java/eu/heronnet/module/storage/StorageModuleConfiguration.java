@@ -1,18 +1,16 @@
 package eu.heronnet.module.storage;
 
-import java.io.File;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import com.sleepycat.je.DatabaseConfig;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.SecondaryConfig;
+import eu.heronnet.module.storage.binding.BundleBinding;
+import eu.heronnet.module.storage.keycreators.NodeIdIndexKeyCreator;
+import eu.heronnet.module.storage.keycreators.StringObjectNgramIndexKeyCreator;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import eu.heronnet.module.storage.binding.StringTripleBinding;
-import eu.heronnet.module.storage.keycreators.StringNGramKeyCreator;
-import eu.heronnet.module.storage.keycreators.TripleSubjectIdKeyCreator;
+import java.io.File;
 
 /**
  * @author edoardocausarano
@@ -43,40 +41,40 @@ public class StorageModuleConfiguration {
         return databaseConfig;
     }
 
-    @Bean(name = "tripleStoreIndexConfig" )
-    SecondaryConfig tripleStoreIndexConfig() {
+    @Bean
+    SecondaryConfig nodeIdIndexConfig() {
         SecondaryConfig secondaryConfig = new SecondaryConfig();
         secondaryConfig.setAllowCreate(true);
         secondaryConfig.setTransactional(true);
         secondaryConfig.setSortedDuplicates(true);
         secondaryConfig.setAllowPopulate(true);
-        secondaryConfig.setKeyCreator(tripleSubjectIdKeyCreator());
+        secondaryConfig.setMultiKeyCreator(nodeIdIndexKeyCreator());
         return secondaryConfig;
     }
 
-    @Bean (name = "tripleStoreNGramConfig")
-    SecondaryConfig tripleStoreNGramConfig() {
+    @Bean
+    SecondaryConfig stringObjectNgramIndexConfig() {
         SecondaryConfig secondaryConfig = new SecondaryConfig();
         secondaryConfig.setAllowCreate(true);
         secondaryConfig.setTransactional(true);
         secondaryConfig.setSortedDuplicates(true);
         secondaryConfig.setAllowPopulate(true);
-        secondaryConfig.setMultiKeyCreator(stringNGramKeyCreator());
+        secondaryConfig.setMultiKeyCreator(stringObjectNgramIndexKeyCreator());
         return secondaryConfig;
     }
 
     @Bean
-    StringTripleBinding stringTripleBinding() {
-        return new StringTripleBinding();
+    NodeIdIndexKeyCreator nodeIdIndexKeyCreator() {
+        return new NodeIdIndexKeyCreator();
     }
 
     @Bean
-    TripleSubjectIdKeyCreator tripleSubjectIdKeyCreator() {
-        return new TripleSubjectIdKeyCreator();
+    StringObjectNgramIndexKeyCreator stringObjectNgramIndexKeyCreator() {
+        return new StringObjectNgramIndexKeyCreator();
     }
 
     @Bean
-    StringNGramKeyCreator stringNGramKeyCreator() {
-        return new StringNGramKeyCreator();
+    BundleBinding bundleBinding() {
+        return new BundleBinding();
     }
 }

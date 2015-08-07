@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import eu.heronnet.core.model.Bundle;
+import eu.heronnet.model.Bundle;
 import eu.heronnet.module.kad.model.rpc.message.FindValueRequest;
 import eu.heronnet.module.kad.model.rpc.message.FindValueResponse;
 import eu.heronnet.module.kad.net.SelfNodeProvider;

@@ -2,7 +2,7 @@ package eu.heronnet.module.bus.command;
 
 import java.util.List;
 
-import eu.heronnet.core.model.Bundle;
+import eu.heronnet.model.Bundle;
 
 /**
  * @author edoardocausarano

@@ -2,7 +2,7 @@ package eu.heronnet.module.gui.model;
 
 import javafx.beans.property.SimpleStringProperty;
 
-import eu.heronnet.core.model.Bundle;
+import eu.heronnet.model.Bundle;
 
 /**
  * @author edoardocausarano

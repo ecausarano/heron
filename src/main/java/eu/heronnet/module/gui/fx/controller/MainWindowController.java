@@ -1,10 +1,13 @@
 package eu.heronnet.module.gui.fx.controller;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ResourceBundle;
-
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.builder.BundleBuilder;
+import eu.heronnet.module.bus.command.Find;
+import eu.heronnet.module.bus.command.UpdateLocalResults;
+import eu.heronnet.module.bus.command.UpdateResults;
+import eu.heronnet.module.gui.model.DocumentListCell;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,20 +23,14 @@ import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
-import eu.heronnet.core.model.Bundle;
-import eu.heronnet.module.bus.command.Find;
-import eu.heronnet.module.bus.command.UpdateLocalResults;
-import eu.heronnet.module.bus.command.UpdateResults;
-import eu.heronnet.module.gui.model.DocumentListCell;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * @author edoardocausarano
@@ -100,7 +97,7 @@ public class MainWindowController implements Initializable {
         localStorageListView.setCellFactory(param -> new DocumentListCell());
 
         eventBus.register(this);
-        eventBus.post(new Find(Bundle.emptyBundle(), true));
+        eventBus.post(new Find(BundleBuilder.emptyBundle(), true));
     }
 
     @Subscribe

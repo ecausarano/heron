@@ -1,13 +1,13 @@
 package eu.heronnet.module.gui.fx.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-
+import com.google.common.eventbus.EventBus;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.Statement;
+import eu.heronnet.model.StringNode;
+import eu.heronnet.model.builder.BundleBuilder;
+import eu.heronnet.module.bus.command.Put;
+import eu.heronnet.module.gui.model.FieldRow;
+import eu.heronnet.module.gui.model.metadata.FieldProcessorFactory;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,20 +17,17 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.EventBus;
-
-import eu.heronnet.core.model.Bundle;
-import eu.heronnet.core.model.Bundle.BundleBuilder;
-import eu.heronnet.core.model.Statement;
-import eu.heronnet.module.bus.command.Put;
-import eu.heronnet.module.gui.model.FieldRow;
-import eu.heronnet.module.gui.model.metadata.FieldProcessorFactory;
+import javax.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 /**
  * @author edoardocausarano
@@ -115,10 +112,11 @@ public class FileUploadWindowController {
     private void confirm(ActionEvent event) throws IOException, NoSuchAlgorithmException {
         logger.debug("confirming file publish");
 
-        BundleBuilder builder = Bundle.builder();
+        BundleBuilder builder = new BundleBuilder();
         ObservableList<FieldRow> items = metaTableView.getItems();
         for (FieldRow item : items) {
-            builder.withStatement(new Statement<>(item.getName(), item.getValue()));
+
+            builder.withStatement(new Statement(new StringNode(null, item.getName()), new StringNode(null, item.getValue())));
         }
 
         Put put = new Put(builder, path);

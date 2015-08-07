@@ -17,7 +17,7 @@
 
 package eu.heronnet.module.kad.model.rpc.message;
 
-import eu.heronnet.core.model.Bundle;
+import eu.heronnet.model.Bundle;
 
 public class StoreValueRequest extends KadMessage {
 

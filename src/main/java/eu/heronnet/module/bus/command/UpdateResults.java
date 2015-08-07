@@ -1,8 +1,9 @@
 package eu.heronnet.module.bus.command;
 
+import eu.heronnet.model.Bundle;
+
 import java.util.List;
 
-import eu.heronnet.core.model.Bundle;
 
 /**
  * @author edoardocausarano
