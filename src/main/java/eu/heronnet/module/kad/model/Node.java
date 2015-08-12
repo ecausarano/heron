@@ -18,6 +18,7 @@
 package eu.heronnet.module.kad.model;
 
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Date;
 import java.util.List;
@@ -90,5 +91,28 @@ public class Node implements Comparable<Node> {
                 return -1;
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Node node = (Node) o;
+
+        if (RTT != node.RTT) return false;
+        if (!Arrays.equals(id, node.id)) return false;
+        if (!addresses.equals(node.addresses)) return false;
+        return !(lastSeen != null ? !lastSeen.equals(node.lastSeen) : node.lastSeen != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Arrays.hashCode(id);
+        result = 31 * result + addresses.hashCode();
+        result = 31 * result + (lastSeen != null ? lastSeen.hashCode() : 0);
+        result = 31 * result + (int) (RTT ^ (RTT >>> 32));
+        return result;
     }
 }

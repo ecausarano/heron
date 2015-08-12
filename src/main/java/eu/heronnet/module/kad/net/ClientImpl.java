@@ -56,8 +56,7 @@ public class ClientImpl extends AbstractIdleService implements Client {
     private EventLoopGroup workerGroup;
 
     private LoggingHandler loggingHandler = new LoggingHandler();
-    @Inject
-    private KadMessageCodec kadMessageCodec;
+
     @Inject
     private PingResponseHandler pingResponseHandler;
 
@@ -68,8 +67,8 @@ public class ClientImpl extends AbstractIdleService implements Client {
         @Override
         protected void initChannel(SocketChannel ch) throws Exception {
             final ChannelPipeline pipeline = ch.pipeline();
-//            pipeline.addFirst(loggingHandler);
-            pipeline.addLast(kadMessageCodec);
+            pipeline.addFirst(loggingHandler);
+            pipeline.addLast(new KadMessageCodec());
             pipeline.addLast(pingResponseHandler);
             pipeline.addLast(findValueResponseHandler);
         }

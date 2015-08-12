@@ -1,5 +1,6 @@
 package eu.heronnet.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.heronnet.module.storage.util.HexUtil;
 
 /**
@@ -9,7 +10,7 @@ public class BinaryDataNode extends Node {
 
     private final byte[] data;
 
-    public BinaryDataNode(byte[] nodeId, byte[] data) {
+    public BinaryDataNode(@JsonProperty("nodeId") byte[] nodeId, @JsonProperty("data") byte[] data) {
         super(nodeId, NodeType.BINARY);
         this.data = data;
     }

@@ -1,8 +1,9 @@
 package eu.heronnet.model;
 
-import javax.swing.plaf.nimbus.State;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by edo on 07/08/15.
@@ -17,9 +18,9 @@ public class Bundle {
         this.subject = subject;
     }
 
-    public Bundle(IdentifierNode subject, Set<Statement> statements) {
+    public Bundle(@JsonProperty("subject") IdentifierNode subject, @JsonProperty("statements") Set<Statement> statements) {
         this.subject = subject;
-        statements.addAll(statements);
+        this.statements.addAll(statements);
     }
 
     public void add(Statement statement) {
@@ -31,6 +32,6 @@ public class Bundle {
     }
 
     public Set<Statement> getStatements() {
-        return new HashSet(statements);
+        return new HashSet<>(statements);
     }
 }

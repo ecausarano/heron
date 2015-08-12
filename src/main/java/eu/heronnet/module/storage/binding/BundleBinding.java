@@ -1,13 +1,13 @@
 package eu.heronnet.module.storage.binding;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sleepycat.bind.tuple.TupleBinding;
 import com.sleepycat.bind.tuple.TupleInput;
 import com.sleepycat.bind.tuple.TupleOutput;
 import eu.heronnet.model.*;
-
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created by edo on 07/08/15.
@@ -49,7 +49,7 @@ public class BundleBinding extends TupleBinding<Bundle> {
                     byte[] bytes = new byte[tupleInput.readInt()];
                     tupleInput.read(bytes);
                     new BinaryDataNode(objectId, bytes);
-
+                    break;
                 default:
                     throw new RuntimeException("nope cannot ever happen");
             }
@@ -101,6 +101,7 @@ public class BundleBinding extends TupleBinding<Bundle> {
                     byte[] data = ((BinaryDataNode) object).getData();
                     tupleOutput.writeInt(data.length);
                     tupleOutput.write(data);
+                    break;
                 default:
                     throw new RuntimeException("this cannot ever happen");
             }

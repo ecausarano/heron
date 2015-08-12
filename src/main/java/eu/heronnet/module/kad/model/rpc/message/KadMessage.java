@@ -17,6 +17,7 @@
 
 package eu.heronnet.module.kad.model.rpc.message;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -50,5 +51,24 @@ public class KadMessage {
 
     public byte[] getMessageId() {
         return messageId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        KadMessage that = (KadMessage) o;
+
+        if (!Arrays.equals(messageId, that.messageId)) return false;
+        return origin.equals(that.origin);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Arrays.hashCode(messageId);
+        result = 31 * result + origin.hashCode();
+        return result;
     }
 }

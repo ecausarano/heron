@@ -49,8 +49,6 @@ public class ServerImpl extends AbstractIdleService implements Server {
     private Bootstrap udpbootrap;
 
     @Inject
-    private KadMessageCodec kadMessageCodec;
-    @Inject
     private PingRequestHandler pingRequestHandler;
     @Inject
     private StoreValueRequestHandler storeValueRequestHandler;

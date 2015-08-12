@@ -21,32 +21,27 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.undercouch.bson4jackson.BsonFactory;
-import de.undercouch.bson4jackson.BsonGenerator;
 import eu.heronnet.module.kad.model.rpc.message.KadMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 
-@Component
-@ChannelHandler.Sharable
 public class KadMessageCodec extends ByteToMessageCodec<KadMessage> {
 
     private static final Logger logger = LoggerFactory.getLogger(KadMessageCodec.class);
-    private final BsonFactory bsonFactory = new BsonFactory();
-    private final ObjectMapper mapper = new ObjectMapper(bsonFactory);
-
-    {
-        bsonFactory.enable(BsonGenerator.Feature.ENABLE_STREAMING);
-    }
+//    private final BsonFactory bsonFactory = new BsonFactory();
+//    private final ObjectMapper mapper = new ObjectMapper(bsonFactory);
+    private final ObjectMapper mapper = new ObjectMapper();
+//
+//    {
+//        bsonFactory.enable(BsonGenerator.Feature.ENABLE_STREAMING);
+//    }
 
     @Override
     protected void encode(ChannelHandlerContext ctx, KadMessage msg, ByteBuf out) throws Exception {
