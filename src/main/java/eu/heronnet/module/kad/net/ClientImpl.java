@@ -41,6 +41,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.json.JsonObjectDecoder;
 import io.netty.handler.logging.LoggingHandler;
 
 @Component
@@ -68,6 +69,7 @@ public class ClientImpl extends AbstractIdleService implements Client {
         protected void initChannel(SocketChannel ch) throws Exception {
             final ChannelPipeline pipeline = ch.pipeline();
             pipeline.addFirst(loggingHandler);
+            pipeline.addLast(new JsonObjectDecoder());
             pipeline.addLast(new KadMessageCodec());
             pipeline.addLast(pingResponseHandler);
             pipeline.addLast(findValueResponseHandler);

@@ -6,6 +6,9 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
+ * An "RDF" collection of {@link Statement statements} relative to an {@link IdentifierNode subject}
+ * Indeed an RDF triple is a degenerate {@code Bundle} containing one {@code statement}
+ *
  * Created by edo on 07/08/15.
  */
 public class Bundle {
@@ -33,5 +36,23 @@ public class Bundle {
 
     public Set<Statement> getStatements() {
         return new HashSet<>(statements);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Bundle bundle = (Bundle) o;
+
+        return subject.equals(bundle.subject) && statements.equals(bundle.statements);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = subject.hashCode();
+        result = 31 * result + statements.hashCode();
+        return result;
     }
 }

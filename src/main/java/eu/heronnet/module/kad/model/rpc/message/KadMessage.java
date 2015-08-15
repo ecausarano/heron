@@ -57,18 +57,15 @@ public class KadMessage {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         KadMessage that = (KadMessage) o;
-
-        if (!Arrays.equals(messageId, that.messageId)) return false;
-        return origin.equals(that.origin);
-
+        return Arrays.equals(messageId, that.messageId);
     }
 
     @Override
     public int hashCode() {
-        int result = Arrays.hashCode(messageId);
-        result = 31 * result + origin.hashCode();
-        return result;
+        return messageId[3] & 0xFF |
+                (messageId[2] & 0xFF) << 8 |
+                (messageId[1] & 0xFF) << 16 |
+                (messageId[0] & 0xFF) << 24;
     }
 }

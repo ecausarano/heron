@@ -35,31 +35,41 @@ import io.netty.handler.codec.ByteToMessageCodec;
 public class KadMessageCodec extends ByteToMessageCodec<KadMessage> {
 
     private static final Logger logger = LoggerFactory.getLogger(KadMessageCodec.class);
-//    private final BsonFactory bsonFactory = new BsonFactory();
-//    private final ObjectMapper mapper = new ObjectMapper(bsonFactory);
-    private final ObjectMapper mapper = new ObjectMapper();
-//
-//    {
-//        bsonFactory.enable(BsonGenerator.Feature.ENABLE_STREAMING);
-//    }
+
+    private static final ObjectMapper objectMapper;
+
+    static {
+        objectMapper = new ObjectMapper();
+    }
+
+    @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelRegistered(ctx);
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelUnregistered(ctx);
+    }
 
     @Override
     protected void encode(ChannelHandlerContext ctx, KadMessage msg, ByteBuf out) throws Exception {
         logger.debug("encoding KadMessage: {}", msg.toString());
         final ByteBufOutputStream outputStream = new ByteBufOutputStream(out);
-        mapper.writeValue(outputStream, msg);
+        objectMapper.writeValue(outputStream, msg);
     }
+
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         logger.debug("decoding KadMessage");
         final ByteBufInputStream inputStream = new ByteBufInputStream(in);
         try {
-            final KadMessage message = mapper.readValue(inputStream, KadMessage.class);
+            final KadMessage message = objectMapper.readValue(inputStream, KadMessage.class);
             out.add(message);
-        }
-        catch (JsonParseException e) {
+        } catch (JsonParseException e) {
             logger.debug("Unable to decode incoming message");
         }
     }
+
 }
