@@ -37,12 +37,12 @@ public class FindValueRequestHandler extends SimpleChannelInboundHandler<FindVal
         List<byte[]> request = msg.getValue();
         if (LOGGER.isDebugEnabled()) {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("[");
             for (byte[] bytes : request) {
-                stringBuilder.append(" ").append(HexUtil.bytesToHex(bytes));
+                stringBuilder.append("[");
+                stringBuilder.append(HexUtil.bytesToHex(bytes));
+                stringBuilder.append("]");
             }
-            stringBuilder.append(" ]");
-            LOGGER.debug("Received request for value: {}", stringBuilder.toString());
+            LOGGER.debug("Received request for values={}", stringBuilder.toString());
         }
 
         List<Bundle> byHash = persistence.findByHash(request);

@@ -23,11 +23,6 @@ public class StoreValueRequest extends KadMessage {
 
     private final Bundle bundle;
 
-    // Only for JSON
-    // @SuppressWarnings("unused")
-    // public StoreValueRequest() {
-    // }
-
     public StoreValueRequest(Bundle bundle) {
         this.bundle = bundle;
     }
