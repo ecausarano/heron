@@ -1,20 +1,18 @@
 package eu.heronnet.module.gui.model.metadata;
 
+import eu.heronnet.module.gui.model.FieldRow;
+import org.slf4j.Logger;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
-
-import eu.heronnet.module.gui.model.FieldRow;
 
 /**
  * @author edoardocausarano

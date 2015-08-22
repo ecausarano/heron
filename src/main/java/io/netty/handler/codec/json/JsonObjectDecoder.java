@@ -16,8 +16,6 @@
 
 package io.netty.handler.codec.json;
 
-import java.util.List;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler;
@@ -26,6 +24,8 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.handler.codec.TooLongFrameException;
+
+import java.util.List;
 
 /**
  * Splits a byte stream of JSON objects and arrays into individual objects/arrays and passes them up the

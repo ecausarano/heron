@@ -1,18 +1,15 @@
 package eu.heronnet.module.bus;
 
-import java.util.concurrent.Executor;
-
-import javax.inject.Inject;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
-
 import eu.heronnet.module.bus.handler.FindHandler;
 import eu.heronnet.module.bus.handler.GetHandler;
 import eu.heronnet.module.bus.handler.PutHandler;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import javax.inject.Inject;
+import java.util.concurrent.Executor;
 
 /**
  * @author edoardocausarano

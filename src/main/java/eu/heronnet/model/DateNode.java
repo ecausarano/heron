@@ -1,8 +1,8 @@
 package eu.heronnet.model;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Date;
 
 /**
  * Created by edo on 07/08/15.

@@ -1,25 +1,7 @@
 package eu.heronnet.module.bus.handler;
 
-import java.io.UnsupportedEncodingException;
-import java.net.SocketException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
-
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-
 import eu.heronnet.model.Bundle;
 import eu.heronnet.module.bus.command.Find;
 import eu.heronnet.module.bus.command.UpdateLocalResults;
@@ -28,6 +10,21 @@ import eu.heronnet.module.kad.model.rpc.message.FindValueRequest;
 import eu.heronnet.module.kad.net.Client;
 import eu.heronnet.module.kad.net.SelfNodeProvider;
 import eu.heronnet.module.storage.Persistence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.net.SocketException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author edoardocausarano

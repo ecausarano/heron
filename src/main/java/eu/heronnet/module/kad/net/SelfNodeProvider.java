@@ -1,5 +1,8 @@
 package eu.heronnet.module.kad.net;
 
+import eu.heronnet.module.kad.model.Node;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -7,10 +10,6 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
-import eu.heronnet.module.kad.model.Node;
 
 /**
  * @author edoardocausarano

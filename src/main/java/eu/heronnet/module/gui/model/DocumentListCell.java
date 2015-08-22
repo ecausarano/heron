@@ -1,13 +1,12 @@
 package eu.heronnet.module.gui.model;
 
-import java.util.Set;
-
 import eu.heronnet.model.BinaryDataNode;
+import eu.heronnet.model.Bundle;
 import eu.heronnet.model.Node;
+import eu.heronnet.model.Statement;
 import javafx.scene.control.ListCell;
 
-import eu.heronnet.model.Bundle;
-import eu.heronnet.model.Statement;
+import java.util.Set;
 
 /**
  * @author edoardocausarano
@@ -33,4 +32,6 @@ public class DocumentListCell extends ListCell<Bundle> {
             setText(builder.toString());
         }
     }
+
+
 }

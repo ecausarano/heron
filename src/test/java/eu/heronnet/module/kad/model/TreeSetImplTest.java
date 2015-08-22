@@ -1,11 +1,11 @@
 package eu.heronnet.module.kad.model;
 
-import java.util.List;
-import java.util.Random;
-
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.util.List;
+import java.util.Random;
 
 /**
  * @author edoardocausarano

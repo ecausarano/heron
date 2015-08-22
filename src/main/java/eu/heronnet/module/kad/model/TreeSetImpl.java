@@ -1,9 +1,9 @@
 package eu.heronnet.module.kad.model;
 
-import java.util.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * An implementation of Kad using standard library classes

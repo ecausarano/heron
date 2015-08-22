@@ -1,11 +1,9 @@
 package eu.heronnet.module.gui;
 
-import javafx.application.Application;
-
-import org.springframework.stereotype.Component;
-
 import com.google.common.util.concurrent.AbstractIdleService;
 import eu.heronnet.module.gui.fx.HeronApplication;
+import javafx.application.Application;
+import org.springframework.stereotype.Component;
 
 /**
  * @author edoardocausarano

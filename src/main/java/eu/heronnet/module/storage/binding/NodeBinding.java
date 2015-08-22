@@ -4,12 +4,14 @@ import com.sleepycat.bind.tuple.TupleBinding;
 import com.sleepycat.bind.tuple.TupleInput;
 import com.sleepycat.bind.tuple.TupleOutput;
 import eu.heronnet.model.*;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
 /**
  * Created by edo on 07/08/15.
  */
+@Component
 public class NodeBinding extends TupleBinding<Node> {
     @Override
     public Node entryToObject(TupleInput input) {

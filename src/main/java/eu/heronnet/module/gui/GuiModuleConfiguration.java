@@ -1,16 +1,15 @@
 package eu.heronnet.module.gui;
 
+import eu.heronnet.module.gui.fx.controller.FileUploadWindowController;
+import eu.heronnet.module.gui.fx.controller.MainWindowController;
+import javafx.fxml.FXMLLoader;
 import javafx.util.Callback;
-
-import javax.inject.Inject;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import eu.heronnet.module.gui.fx.controller.FileUploadWindowController;
-import eu.heronnet.module.gui.fx.controller.MainWindowController;
+import javax.inject.Inject;
 
 /**
  * @author edoardocausarano
@@ -24,6 +23,14 @@ public class GuiModuleConfiguration {
     @Bean
     public Callback<Class<?>, Object> getControllerFactory() {
         return param -> applicationContext.getBean(param);
+    }
+
+    @Bean
+    @Scope("prototype")
+    FXMLLoader fxmlLoader() {
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        fxmlLoader.setControllerFactory(getControllerFactory());
+        return fxmlLoader;
     }
 
     @Bean

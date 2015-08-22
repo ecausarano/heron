@@ -1,16 +1,14 @@
 package eu.heronnet.module.kad.net;
 
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-
+import com.google.common.util.concurrent.AbstractScheduledService;
+import eu.heronnet.module.kad.model.rpc.message.PingRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.util.concurrent.AbstractScheduledService;
-import eu.heronnet.module.kad.model.rpc.message.PingRequest;
+import javax.inject.Inject;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author edoardocausarano

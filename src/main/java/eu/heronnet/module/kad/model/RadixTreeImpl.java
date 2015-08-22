@@ -17,19 +17,17 @@
 
 package eu.heronnet.module.kad.model;
 
+import com.google.common.collect.ImmutableList;
+import eu.heronnet.module.kad.net.SelfNodeProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableList;
-import eu.heronnet.module.kad.net.SelfNodeProvider;
 
 public class RadixTreeImpl implements RadixTree {
 

@@ -1,14 +1,13 @@
 package eu.heronnet;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
+import com.google.common.util.concurrent.ServiceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import com.google.common.util.concurrent.ServiceManager;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /*
  * The Heron network bootstraps from the "archetype" table where <em>fundamental</em> UUIDs are given a name;

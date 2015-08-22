@@ -1,10 +1,10 @@
 package eu.heronnet.module.gui.model.metadata;
 
+import eu.heronnet.module.gui.model.FieldRow;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
-import eu.heronnet.module.gui.model.FieldRow;
 
 /**
  * @author edoardocausarano

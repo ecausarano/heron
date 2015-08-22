@@ -1,44 +1,44 @@
 package eu.heronnet.module.storage.rdf;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.google.common.util.concurrent.AbstractIdleService;
 import com.sleepycat.je.*;
-
 import eu.heronnet.model.Bundle;
+import eu.heronnet.model.IdentifierNode;
 import eu.heronnet.model.Node;
 import eu.heronnet.model.StringNode;
 import eu.heronnet.module.storage.Persistence;
 import eu.heronnet.module.storage.binding.BundleBinding;
 import eu.heronnet.module.storage.util.HexUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author edoardocausarano
  */
-@Component
+@Component(value = "persistence")
 public class TripleStoreImplV2 extends AbstractIdleService implements Persistence {
 
     private static final String BUNDLE_STORE = "BundleStore";
-    private static final String NGRAM_INDEX = "NgramIndex";
     private static final String NODE_ID_INDEX = "NodeIdIndex";
+    private static final String SUBJECT_ID_INDEX = "SubjectIdIndex";
+    private static final String NGRAM_INDEX = "NgramIndex";
     private static final Logger logger = LoggerFactory.getLogger(TripleStoreImplV2.class);
 
     @Inject private Environment environment;
     @Inject private DatabaseConfig databaseConfig;
     @Inject private SecondaryConfig nodeIdIndexConfig;
+    @Inject
+    private SecondaryConfig subjectIdIndexConfig;
     @Inject private SecondaryConfig stringObjectNgramIndexConfig;
 
     private Database bundleStore;
     private SecondaryDatabase nodeIdIndex;
+    private SecondaryDatabase subjectIdIndex;
     private SecondaryDatabase stringObjectNgramIndex;
     private BundleBinding bundleBinding = new BundleBinding();
 
@@ -66,6 +66,7 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
         try {
             bundleStore = environment.openDatabase(txn, BUNDLE_STORE, databaseConfig);
             nodeIdIndex = environment.openSecondaryDatabase(txn, NODE_ID_INDEX, bundleStore, nodeIdIndexConfig);
+            subjectIdIndex = environment.openSecondaryDatabase(txn, SUBJECT_ID_INDEX, bundleStore, subjectIdIndexConfig);
             stringObjectNgramIndex = environment.openSecondaryDatabase(txn, NGRAM_INDEX, bundleStore, stringObjectNgramIndexConfig);
             txn.commit();
         } catch (RuntimeException e) {
@@ -86,6 +87,7 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
     protected void shutDown() throws Exception {
 
         nodeIdIndex.close();
+        subjectIdIndex.close();
         stringObjectNgramIndex.close();
         bundleStore.close();
 
@@ -98,7 +100,7 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
     }
 
     /**
-     * persist data to the store. for now assume all statements are strings
+     * persist data to the store.
      *
      * @param bundle  the rawBundle to be persisted
      */
@@ -106,7 +108,7 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
     public void put(Bundle bundle) {
         Transaction txn = environment.beginTransaction(null, null);
         try {
-            final DatabaseEntry key = new DatabaseEntry(bundle.getSubject().getNodeId());
+            final DatabaseEntry key = new DatabaseEntry(bundle.getNodeId());
             final DatabaseEntry data = new DatabaseEntry();
 
             bundleBinding.objectToEntry(bundle, data);
@@ -118,55 +120,19 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
         }
     }
 
-//    @Override
-//    public void put(RawBundle bundle) {
-//        Transaction txn = environment.beginTransaction(null, null);
-//        try (Cursor cursor = bundleStore.openCursor(txn, null)) {
-//            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-//
-//            for (RawStatement statement : bundle.getRawStatements()) {
-//                if (statement instanceof BinaryStatement) {
-//                    final DatabaseEntry key = new DatabaseEntry(bundle.getSubject());
-//                    final DatabaseEntry data = new DatabaseEntry();
-//
-//                    data.setData(((BinaryStatement) statement).getBinary());
-//                    nodeStore.put(txn, key, data);
-//                } else {
-//                    // TODO - rubbish
-//                    RawStatement<String> stringStatement = (RawStatement) statement;
-//                    final DatabaseEntry key = new DatabaseEntry();
-//                    final DatabaseEntry data = new DatabaseEntry();
-//
-//                    digest.reset();
-//                    // the subject
-//                    digest.update(bundle.getSubject());
-//                    // the predicate
-//                    digest.update(stringStatement.getPredicate().getBytes());
-//                    // the object
-//                    digest.update(stringStatement.getObject().getBytes());
-//                    key.setData(digest.digest());
-//
-//                    Triple<String> stringTriple = new Triple<>(bundle.getSubject(), stringStatement);
-//                    stringTripleBinding.objectToEntry(stringTriple, data);
-//                    cursor.put(key, data);
-//                }
-//            }
-//            cursor.close();
-//            txn.commit();
-//        } catch (RuntimeException e) {
-//            logger.error("Error in transaction. tx_id={}, message={}", txn.getId(), e.getMessage());
-//            txn.abort();
-//        } catch (NoSuchAlgorithmException e) {
-//            logger.error("Error, SHA-256 not available on platform");
-//            txn.abort();
-//        }
-//    }
-//
+    /**
+     * Delete all items related to the given subjectId
+     *
+     * @param subjectId of bundles that need to be deleted
+     */
     @Override
     public void deleteBySubjectId(byte[] subjectId) {
         Transaction txn = environment.beginTransaction(null, null);
-        try {
-            bundleStore.delete(txn, new DatabaseEntry(subjectId));
+        try (SecondaryCursor cursor = subjectIdIndex.openCursor(txn, null)) {
+            while (cursor.getNext(new DatabaseEntry(), new DatabaseEntry(), LockMode.DEFAULT) == OperationStatus.SUCCESS) {
+                cursor.delete();
+            }
+            txn.commit();
         } catch (RuntimeException e) {
             logger.error("Error in transaction. td_id={}, message={}", txn.getId(), e.getMessage());
             txn.abort();
@@ -179,6 +145,14 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
     }
 
 
+    /**
+     * Fetches all {@link Bundle bundles} related to the given search keys (SHA-256 hashes),
+     * including bundles having the same {@link IdentifierNode} as those containing the keys
+     * (typically {@code Bundles} containing additional metadata related to PGP signatures)
+     *
+     * @param searchKeys the SHA-256 hashes of the keys to search for
+     * @return the bundles found
+     */
     @Override
     public List<Bundle> findByHash(List<byte[]> searchKeys) {
         Transaction txn = environment.beginTransaction(null, null);
@@ -197,14 +171,17 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
                     break; // forget it, a key was not found. No use going further
                 }
             }
-//            // was anything found?
+            // was anything found?
             if (OperationStatus.SUCCESS.equals(operationStatus)) {
                 List<Bundle> foundBundles = new ArrayList<>();
                 try (JoinCursor join = bundleStore.join(cursors.toArray(new SecondaryCursor[cursors.size()]), null)) {
                     DatabaseEntry key = new DatabaseEntry();
                     while (join.getNext(key, foundData, LockMode.DEFAULT) == OperationStatus.SUCCESS) {
                         Bundle foundBundle = bundleBinding.entryToObject(foundData);
-                        foundBundles.add(foundBundle);
+                        // this is a bundle directly related to the search keys
+                        byte[] foundSubjectId = foundBundle.getSubject().getNodeId();
+                        // TODO - not very efficient, we're re-fetching everything a second time
+                        foundBundles.addAll(getBundlesForSubjectId(txn, foundSubjectId));
                         logger.debug("Added bundle={}", HexUtil.bytesToHex(foundBundle.getSubject().getNodeId()));
                     }
                 }
@@ -212,42 +189,27 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
             }
         } finally {
             cursors.forEach(Cursor::close);
+            txn.commit();
         }
         return Collections.emptyList();
     }
 
-    private Bundle getBundleForSubjectId(Transaction txn, final byte[] subjectId) {
+    private Set<Bundle> getBundlesForSubjectId(Transaction txn, final byte[] subjectId) {
+        try (SecondaryCursor cursor = subjectIdIndex.openCursor(txn, null)) {
+            HashSet<Bundle> bundles = new HashSet<>();
+            DatabaseEntry secondaryKey = new DatabaseEntry(subjectId);
+            DatabaseEntry foundData = new DatabaseEntry();
 
-//
-//
-//        boolean autoCommit = false;
-//        if (txn == null) {
-//            txn = environment.beginTransaction(null, null);
-//            autoCommit = true;
-//        }
-//        try (SecondaryCursor cursor = tripleIndex.openCursor(txn, null)) {
-//            BundleBuilder bundleBuilder = RawBundle.builder();
-//            bundleBuilder.withSubject(subjectId);
-//            DatabaseEntry key = new DatabaseEntry(subjectId);
-//            DatabaseEntry foundData = new DatabaseEntry();
-//
-//            OperationStatus operationStatus = cursor.getSearchKey(key, foundData, LockMode.DEFAULT);
-//            if (!OperationStatus.SUCCESS.equals(operationStatus)) return RawBundle.emptyBundle();
-//
-//            while (operationStatus == OperationStatus.SUCCESS) {
-//                addStatement(foundData, bundleBuilder);
-//                operationStatus = cursor.getNextDup(key, foundData, LockMode.DEFAULT);
-//            }
-//            RawBundle rawBundle = bundleBuilder.build();
-//            logger.debug(rawBundle.toString());
-//            return rawBundle;
-//        } catch (Exception e) {
-//            logger.error("Error occurred while reading database. tx_id={}, message={}", txn.getId(), e.getMessage());
-//            return RawBundle.emptyBundle();
-//        } finally {
-//            if (autoCommit) txn.commit();
-//        }
-        return null;
+            OperationStatus status = cursor.getSearchKey(secondaryKey, foundData, LockMode.DEFAULT);
+            while (OperationStatus.SUCCESS.equals(status)) {
+                bundles.add(bundleBinding.entryToObject(foundData));
+                status = cursor.getNextDup(secondaryKey, foundData, LockMode.DEFAULT);
+            }
+            return bundles;
+        } catch (Exception e) {
+            logger.error("Error occurred while reading database. tx_id={}, message={}", txn.getId(), e.getMessage());
+            return Collections.emptySet();
+        }
     }
 
     @Override
@@ -267,6 +229,8 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
         } catch (Exception e) {
             logger.error("Error occurred while reading database. tx_id={}, message={}", txn.getId(), e.getMessage());
             return Collections.emptyList();
+        } finally {
+            txn.commit();
         }
     }
 }

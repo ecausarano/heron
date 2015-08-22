@@ -17,11 +17,11 @@
 
 package eu.heronnet.module.kad.model.rpc.message;
 
-import java.util.Arrays;
-import java.util.Random;
-
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import eu.heronnet.module.kad.model.Node;
+
+import java.util.Arrays;
+import java.util.Random;
 
 /**
  * The superclass of all message types
@@ -34,7 +34,7 @@ import eu.heronnet.module.kad.model.Node;
 public class KadMessage {
 
     private static final Random randomGenerator = new Random();
-    private final byte[] messageId = new byte[20];
+    private final byte[] messageId = new byte[32];
     private Node origin;
 
     {
@@ -63,9 +63,8 @@ public class KadMessage {
 
     @Override
     public int hashCode() {
-        return messageId[3] & 0xFF |
-                (messageId[2] & 0xFF) << 8 |
-                (messageId[1] & 0xFF) << 16 |
-                (messageId[0] & 0xFF) << 24;
+        int result = Arrays.hashCode(messageId);
+        result = 31 * result + origin.hashCode();
+        return result;
     }
 }

@@ -1,19 +1,17 @@
 package eu.heronnet.module.kad;
 
-import java.net.SocketException;
-
-import javax.inject.Named;
-
+import eu.heronnet.module.kad.model.RadixTree;
+import eu.heronnet.module.kad.model.TreeSetImpl;
+import eu.heronnet.module.kad.net.IdGenerator;
+import eu.heronnet.module.kad.net.SelfNodeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import eu.heronnet.module.kad.model.RadixTree;
-import eu.heronnet.module.kad.model.TreeSetImpl;
-import eu.heronnet.module.kad.net.IdGenerator;
-import eu.heronnet.module.kad.net.SelfNodeProvider;
+import javax.inject.Named;
+import java.net.SocketException;
 
 /**
  * @author edoardocausarano

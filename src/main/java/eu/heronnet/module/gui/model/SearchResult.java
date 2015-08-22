@@ -1,8 +1,7 @@
 package eu.heronnet.module.gui.model;
 
-import javafx.beans.property.SimpleStringProperty;
-
 import eu.heronnet.model.Bundle;
+import javafx.beans.property.SimpleStringProperty;
 
 /**
  * @author edoardocausarano

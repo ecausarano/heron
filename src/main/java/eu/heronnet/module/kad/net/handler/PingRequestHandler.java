@@ -17,12 +17,6 @@
 
 package eu.heronnet.module.kad.net.handler;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import eu.heronnet.module.kad.model.rpc.message.PingRequest;
 import eu.heronnet.module.kad.model.rpc.message.PingResponse;
 import eu.heronnet.module.kad.net.SelfNodeProvider;
@@ -30,6 +24,11 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 @ChannelHandler.Sharable

@@ -6,11 +6,11 @@ package eu.heronnet.model;
  * Created by edo on 07/08/15.
  */
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import com.fasterxml.jackson.annotation.*;
 
 import java.util.Arrays;
 
-import com.fasterxml.jackson.annotation.*;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -35,6 +35,10 @@ public abstract class Node<T> {
     public Node(byte[] nodeId, NodeType nodeType) {
         this.nodeId = nodeId;
         this.nodeType = nodeType;
+    }
+
+    public static <T> Node<T> getNil() {
+        return (Node<T>) new NilNode();
     }
 
     public byte[] getNodeId() {
@@ -63,13 +67,29 @@ public abstract class Node<T> {
     /**
      * By design the nodeId of any {@code Node} is the SHA-256 hash of the enclosed data
      *
-     * @return  the SHA-256 hash Id
+     * @return the hash of the Node
      */
     @Override
-    public final int hashCode() {
-        return nodeId[3] & 0xFF |
-                (nodeId[2] & 0xFF) << 8 |
-                (nodeId[1] & 0xFF) << 16 |
-                (nodeId[0] & 0xFF) << 24;
+    public int hashCode() {
+        int result = Arrays.hashCode(nodeId);
+        result = 31 * result + (nodeType != null ? nodeType.hashCode() : 0);
+        return result;
+    }
+
+    public static class NilNode extends Node<Object> {
+
+        public NilNode() {
+            super(new byte[32], NodeType.NIL);
+        }
+
+        @Override
+        public Object getData() {
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return null;
+        }
     }
 }

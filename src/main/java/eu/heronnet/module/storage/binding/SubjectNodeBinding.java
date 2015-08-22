@@ -4,10 +4,12 @@ import com.sleepycat.bind.tuple.TupleBinding;
 import com.sleepycat.bind.tuple.TupleInput;
 import com.sleepycat.bind.tuple.TupleOutput;
 import eu.heronnet.model.IdentifierNode;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by edo on 07/08/15.
  */
+@Component
 public class SubjectNodeBinding extends TupleBinding<IdentifierNode> {
     @Override
     public IdentifierNode entryToObject(TupleInput tupleInput) {

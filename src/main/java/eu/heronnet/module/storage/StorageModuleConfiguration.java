@@ -5,11 +5,16 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.SecondaryConfig;
 import eu.heronnet.module.storage.binding.BundleBinding;
+import eu.heronnet.module.storage.binding.DateNodeBinding;
+import eu.heronnet.module.storage.binding.NodeBinding;
+import eu.heronnet.module.storage.binding.SubjectNodeBinding;
 import eu.heronnet.module.storage.keycreators.NodeIdIndexKeyCreator;
 import eu.heronnet.module.storage.keycreators.StringObjectNgramIndexKeyCreator;
+import eu.heronnet.module.storage.keycreators.SubjectIdIndexKeyCreator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.inject.Inject;
 import java.io.File;
 
 /**
@@ -17,10 +22,27 @@ import java.io.File;
  */
 @Configuration
 public class StorageModuleConfiguration {
+    @Inject
+    String heronDataRoot;
 
+    @Inject
+    BundleBinding bundleBinding;
+    @Inject
+    DateNodeBinding dateNodeBinding;
+    @Inject
+    NodeBinding nodeBinding;
+    @Inject
+    SubjectNodeBinding subjectNodeBinding;
+
+    @Inject
+    NodeIdIndexKeyCreator nodeIdIndexKeyCreator;
+    @Inject
+    StringObjectNgramIndexKeyCreator stringObjectNgramIndexKeyCreator;
+    @Inject
+    SubjectIdIndexKeyCreator subjectIdIndexKeyCreator;
     @Bean
     Environment environment() {
-        String dbEnvHome = "herondb";
+        String dbEnvHome = heronDataRoot + "/db";
         final EnvironmentConfig config = new EnvironmentConfig();
         config.setAllowCreate(true);
         config.setTransactional(true);
@@ -48,7 +70,18 @@ public class StorageModuleConfiguration {
         secondaryConfig.setTransactional(true);
         secondaryConfig.setSortedDuplicates(true);
         secondaryConfig.setAllowPopulate(true);
-        secondaryConfig.setMultiKeyCreator(nodeIdIndexKeyCreator());
+        secondaryConfig.setMultiKeyCreator(nodeIdIndexKeyCreator);
+        return secondaryConfig;
+    }
+
+    @Bean
+    SecondaryConfig subjectIdIndexConfig() {
+        SecondaryConfig secondaryConfig = new SecondaryConfig();
+        secondaryConfig.setAllowCreate(true);
+        secondaryConfig.setTransactional(true);
+        secondaryConfig.setSortedDuplicates(true);
+        secondaryConfig.setAllowPopulate(true);
+        secondaryConfig.setKeyCreator(subjectIdIndexKeyCreator);
         return secondaryConfig;
     }
 
@@ -59,22 +92,27 @@ public class StorageModuleConfiguration {
         secondaryConfig.setTransactional(true);
         secondaryConfig.setSortedDuplicates(true);
         secondaryConfig.setAllowPopulate(true);
-        secondaryConfig.setMultiKeyCreator(stringObjectNgramIndexKeyCreator());
+        secondaryConfig.setMultiKeyCreator(stringObjectNgramIndexKeyCreator);
         return secondaryConfig;
     }
 
-    @Bean
-    NodeIdIndexKeyCreator nodeIdIndexKeyCreator() {
-        return new NodeIdIndexKeyCreator();
-    }
-
-    @Bean
-    StringObjectNgramIndexKeyCreator stringObjectNgramIndexKeyCreator() {
-        return new StringObjectNgramIndexKeyCreator();
-    }
-
-    @Bean
-    BundleBinding bundleBinding() {
-        return new BundleBinding();
-    }
+//    @Bean
+//    NodeIdIndexKeyCreator nodeIdIndexKeyCreator() {
+//        return new NodeIdIndexKeyCreator();
+//    }
+//
+//    @Bean
+//    SubjectIdIndexKeyCreator subjectIdIndexKeyCreator() {
+//        return new SubjectIdIndexKeyCreator();
+//    }
+//
+//    @Bean
+//    StringObjectNgramIndexKeyCreator stringObjectNgramIndexKeyCreator() {
+//        return new StringObjectNgramIndexKeyCreator();
+//    }
+//
+//    @Bean
+//    BundleBinding bundleBinding() {
+//        return new BundleBinding();
+//    }
 }

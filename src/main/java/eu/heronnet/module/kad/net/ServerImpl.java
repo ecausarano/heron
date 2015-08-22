@@ -17,14 +17,7 @@
 
 package eu.heronnet.module.kad.net;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.google.common.util.concurrent.AbstractIdleService;
-
 import eu.heronnet.module.kad.net.codec.KadMessageCodec;
 import eu.heronnet.module.kad.net.handler.FindValueRequestHandler;
 import eu.heronnet.module.kad.net.handler.PingRequestHandler;
@@ -39,6 +32,11 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LoggingHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class ServerImpl extends AbstractIdleService implements Server {

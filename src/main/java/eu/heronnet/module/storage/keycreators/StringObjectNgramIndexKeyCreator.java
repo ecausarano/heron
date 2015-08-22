@@ -11,6 +11,7 @@ import eu.heronnet.module.storage.binding.BundleBinding;
 import eu.heronnet.module.storage.util.HexUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.security.MessageDigest;
@@ -26,6 +27,7 @@ import static eu.heronnet.model.NodeType.STRING;
 /**
  * @author edoardocausarano
  */
+@Component
 public class StringObjectNgramIndexKeyCreator implements SecondaryMultiKeyCreator {
 
     private static final int MINIMUM_NGRAM_LENGTH = 3;

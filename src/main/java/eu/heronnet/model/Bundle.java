@@ -1,9 +1,10 @@
 package eu.heronnet.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import eu.heronnet.module.storage.util.HexUtil;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * An "RDF" collection of {@link Statement statements} relative to an {@link IdentifierNode subject}
@@ -11,17 +12,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * Created by edo on 07/08/15.
  */
-public class Bundle {
+public class Bundle extends Node<Set<Statement>> {
 
     private final IdentifierNode subject;
 
     private final HashSet<Statement> statements = new HashSet<>();
 
-    public Bundle(IdentifierNode subject) {
-        this.subject = subject;
-    }
-
-    public Bundle(@JsonProperty("subject") IdentifierNode subject, @JsonProperty("statements") Set<Statement> statements) {
+    public Bundle(@JsonProperty("nodeId") byte[] nodeId, @JsonProperty("subject") IdentifierNode subject, @JsonProperty("data") Set<Statement> statements) {
+        super(nodeId, NodeType.BUNDLE);
         this.subject = subject;
         this.statements.addAll(statements);
     }
@@ -39,6 +37,16 @@ public class Bundle {
     }
 
     @Override
+    public Set<Statement> getData() {
+        return getStatements();
+    }
+
+    @Override
+    public String toString() {
+        return HexUtil.bytesToHex(nodeId);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -47,12 +55,5 @@ public class Bundle {
 
         return subject.equals(bundle.subject) && statements.equals(bundle.statements);
 
-    }
-
-    @Override
-    public int hashCode() {
-        int result = subject.hashCode();
-        result = 31 * result + statements.hashCode();
-        return result;
     }
 }

@@ -1,25 +1,36 @@
 package eu.heronnet.module.storage.binding;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.sleepycat.bind.tuple.TupleBinding;
 import com.sleepycat.bind.tuple.TupleInput;
 import com.sleepycat.bind.tuple.TupleOutput;
 import eu.heronnet.model.*;
+import eu.heronnet.model.builder.BundleBuilder;
+import eu.heronnet.module.storage.util.HexUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by edo on 07/08/15.
  */
+@Component
 public class BundleBinding extends TupleBinding<Bundle> {
+
+    private static final Logger logger = LoggerFactory.getLogger(BundleBinding.class);
+
     @Override
     public Bundle entryToObject(TupleInput tupleInput) {
 
-        byte[] bundleId = new byte[32];
-        tupleInput.read(bundleId);
+        byte[] identifierId = new byte[32];
+        tupleInput.read(identifierId);
 
-        Bundle bundle = new Bundle(new IdentifierNode(bundleId));
+        BundleBuilder bundleBuilder = new BundleBuilder();
+        bundleBuilder.withSubject(new IdentifierNode(identifierId));
 
         int size = tupleInput.readInt();
         new HashSet<Statement>(size);
@@ -35,20 +46,21 @@ public class BundleBinding extends TupleBinding<Bundle> {
             switch (nodeType) {
                 case STRING:
                     StringNode stringNode = new StringNode(objectId, tupleInput.readString());
-                    bundle.add(new Statement(predicate, stringNode));
+                    bundleBuilder.withStatement((new Statement(predicate, stringNode)));
                     break;
                 case DATE:
                     DateNode dateNode = new DateNode(objectId, new Date(tupleInput.readLong()));
-                    bundle.add(new Statement(predicate, dateNode));
+                    bundleBuilder.withStatement(new Statement(predicate, dateNode));
                     break;
                 case IDENTIFIER:
                     IdentifierNode identifierNode = new IdentifierNode(objectId);
-                    bundle.add(new Statement(predicate, identifierNode));
+                    bundleBuilder.withStatement(new Statement(predicate, identifierNode));
                     break;
                 case BINARY:
                     byte[] bytes = new byte[tupleInput.readInt()];
                     tupleInput.read(bytes);
-                    new BinaryDataNode(objectId, bytes);
+                    BinaryDataNode binaryDataNode = new BinaryDataNode(objectId, bytes);
+                    // do stuff with binary
                     break;
                 default:
                     throw new RuntimeException("nope cannot ever happen");
@@ -56,7 +68,12 @@ public class BundleBinding extends TupleBinding<Bundle> {
 
         }
 
-        return bundle;
+        try {
+            return bundleBuilder.build();
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("Error while building bundle for identifierId={}", HexUtil.bytesToHex(identifierId));
+            return null;
+        }
     }
 
     @Override

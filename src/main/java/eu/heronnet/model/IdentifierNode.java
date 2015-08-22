@@ -16,6 +16,10 @@ public class IdentifierNode extends Node {
         super(nodeId, NodeType.IDENTIFIER);
     }
 
+    public static IdentifierNode anyId() {
+        return new IdentifierNode(new byte[32]);
+    }
+
     @JsonIgnore
     @Override
     public Object getData() {
