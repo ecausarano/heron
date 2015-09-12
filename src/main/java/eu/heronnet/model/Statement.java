@@ -10,16 +10,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Statement {
 
-    private final StringNode predicate;
+    private final IRI predicate;
 
     private final Node object;
 
-    public Statement(@JsonProperty("predicate") StringNode predicate, @JsonProperty("object") Node object) {
+    public Statement(@JsonProperty("predicate") IRI predicate, @JsonProperty("object") Node object) {
         this.predicate = predicate;
         this.object = object;
     }
 
-    public StringNode getPredicate() {
+    public IRI getPredicate() {
         return predicate;
     }
 

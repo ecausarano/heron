@@ -72,12 +72,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-runtime</artifactId>
-            <version>4.0.0-M1</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpg-jdk15on</artifactId>
             <version>${bouncycastle.version}</version>
@@ -95,15 +89,15 @@
         </dependency>
 
         <dependency>
-            <groupId>jline</groupId>
-            <artifactId>jline</artifactId>
-            <version>${jline.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>de.undercouch</groupId>
             <artifactId>bson4jackson</artifactId>
             <version>2.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.facebook.swift</groupId>
+            <artifactId>swift-codec</artifactId>
+            <version>0.15.1</version>
         </dependency>
 
         <dependency>
@@ -133,6 +127,27 @@
 
     <build>
         <plugins>
+            <!--<plugin>-->
+                <!--<groupId>com.facebook.mojo</groupId>-->
+                <!--<artifactId>swift-maven-plugin</artifactId>-->
+                <!--<version>0.15.1</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<goals>-->
+                            <!--<goal>generate</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+                <!--<configuration>-->
+                    <!--<idlFiles>-->
+                    <!--<directory>... base directory ...</directory>-->
+                    <!--<includes>-->
+                        <!--<include>... include pattern ...</include>-->
+                    <!--</includes>-->
+                     <!--</idlFiles>-->
+                    <!--<codeFlavor>java-immutable</codeFlavor>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>2.4</version>

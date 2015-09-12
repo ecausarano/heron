@@ -18,6 +18,7 @@
 package eu.heronnet.module.storage;
 
 import eu.heronnet.model.Bundle;
+import eu.heronnet.model.Node;
 import eu.heronnet.model.StringNode;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public interface Persistence {
 
     void deleteBySubjectId(byte[] subjectId);
 
-    List<Bundle> findByPredicate(List<StringNode> fields);
+    List<Bundle> findByPredicate(List<? extends Node> fields);
 
     List<Bundle> findByHash(List<byte[]> searchKeys);
 

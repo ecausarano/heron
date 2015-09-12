@@ -1,6 +1,8 @@
 package eu.heronnet.module.gui.model.metadata;
 
-import eu.heronnet.module.gui.model.FieldRow;
+import eu.heronnet.model.Statement;
+import eu.heronnet.model.builder.StringNodeBuilder;
+import eu.heronnet.model.vocabulary.DC;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.slf4j.Logger;
@@ -21,13 +23,14 @@ public class PDFMetadataProcessor implements MetadataProcessor {
     private static final Logger logger = LoggerFactory.getLogger(PDFMetadataProcessor.class);
 
     @Override
-    public List<FieldRow> process(File file) {
+    public List<Statement> process(File file) {
         try (PDDocument document = PDDocument.load(file)) {
             PDDocumentInformation documentInformation = document.getDocumentInformation();
-            List<FieldRow> fields = new ArrayList<>();
-            fields.add(new FieldRow("title", documentInformation.getTitle()));
-            fields.add(new FieldRow("author", documentInformation.getAuthor()));
-            fields.add(new FieldRow("year", Integer.toString(documentInformation.getCreationDate().get(Calendar.YEAR))));
+            List<Statement> fields = new ArrayList<>();
+            fields.add(new Statement(DC.TITLE, StringNodeBuilder.withString(documentInformation.getTitle())));
+            fields.add(new Statement(DC.CREATOR, StringNodeBuilder.withString(documentInformation.getAuthor())));
+            fields.add(new Statement(DC.DATE, StringNodeBuilder.withString(Integer.toString(documentInformation.getCreationDate().get(Calendar.YEAR)))));
+            fields.add(new Statement(DC.FORMAT, StringNodeBuilder.withString("application/pdf")));
             return fields;
         }
         catch (IOException e) {

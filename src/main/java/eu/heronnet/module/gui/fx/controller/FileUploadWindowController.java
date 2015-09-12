@@ -1,18 +1,27 @@
 package eu.heronnet.module.gui.fx.controller;
 
 import com.google.common.eventbus.EventBus;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.IRI;
 import eu.heronnet.model.Statement;
 import eu.heronnet.model.StringNode;
 import eu.heronnet.model.builder.BundleBuilder;
+import eu.heronnet.model.builder.IRIBuilder;
+import eu.heronnet.model.builder.StatementBuilder;
 import eu.heronnet.model.builder.StringNodeBuilder;
+import eu.heronnet.model.vocabulary.DC;
+import eu.heronnet.model.vocabulary.HRN;
 import eu.heronnet.module.bus.command.Put;
 import eu.heronnet.module.gui.model.FieldRow;
 import eu.heronnet.module.gui.model.metadata.FieldProcessorFactory;
+import eu.heronnet.module.pgp.PGPUtils;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
@@ -27,9 +36,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 /**
+ * Controller for the Upload window
+ *
  * @author edoardocausarano
  */
 public class FileUploadWindowController {
@@ -38,9 +53,13 @@ public class FileUploadWindowController {
 
     @Inject
     private EventBus eventBus;
+    @Inject
+    private Executor executor;
 
     @Inject
     private FieldProcessorFactory processorFactory;
+    @Inject
+    private PGPUtils pgpUtils;
 
     @FXML
     private Button chooseBtn;
@@ -79,19 +98,46 @@ public class FileUploadWindowController {
         filePathLabel.setText(file.getName());
 
         String contentType = Files.probeContentType(path);
-
-        ObservableList<FieldRow> metaItems = metaTableView.getItems();
-        // TODO - move this metadata extractor part to a background worker thread
-        List<FieldRow> fields = processorFactory.getProcessor(contentType).process(file);
-        metaItems.addAll(fields);
+        Task<List<FieldRow>> extractMetadataTask = new Task<List<FieldRow>>() {
+            @Override
+            protected List<FieldRow> call() throws Exception {
+                List<Statement> statements = processorFactory.getProcessor(contentType).process(file);
+                return statements.stream().map(
+                        statement -> new FieldRow(
+                                statement.getPredicate().toString(),
+                                statement.getObject().toString())).collect(Collectors.toList());
+            }
+        };
+        extractMetadataTask.setOnSucceeded(workerStateEvent -> {
+            ObservableList<FieldRow> metaItems = metaTableView.getItems();
+            metaItems.addAll(extractMetadataTask.getValue());
+        });
+        executor.execute(extractMetadataTask);
 
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        nameColumn.setOnEditCommit(t -> t.getTableView().getItems().get(t.getTablePosition().getRow()).setName(t.getNewValue()));
+
+        nameColumn.setCellFactory(ComboBoxTableCell.forTableColumn());
+        nameColumn.setOnEditCommit(t -> {
+            String newName = t.getNewValue();
+
+            ObservableList<FieldRow> items = t.getTableView().getItems();
+            TablePosition<FieldRow, String> tablePosition = t.getTablePosition();
+
+            FieldRow fieldRow = items.get(tablePosition.getRow());
+            fieldRow.setName(newName);
+        });
 
         valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         valueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        valueColumn.setOnEditCommit(t -> t.getTableView().getItems().get(t.getTablePosition().getRow()).setValue(t.getNewValue()));
+        valueColumn.setOnEditCommit(t -> {
+            String newValue = t.getNewValue();
+
+            ObservableList<FieldRow> items = t.getTableView().getItems();
+            TablePosition<FieldRow, String> tablePosition = t.getTablePosition();
+
+            FieldRow fieldRow = items.get(tablePosition.getRow());
+            fieldRow.setValue(newValue);
+        });
 
     }
 
@@ -114,15 +160,28 @@ public class FileUploadWindowController {
 
         BundleBuilder builder = new BundleBuilder();
         ObservableList<FieldRow> items = metaTableView.getItems();
-        for (FieldRow item : items) {
 
-            StringNode predicate = StringNodeBuilder.withString(item.getName());
-            StringNode object = StringNodeBuilder.withString(item.getValue());
-            builder.withStatement(new Statement(predicate, object));
-        }
+        Task<Statement> signBundleTask = new Task<Statement>() {
+            @Override
+            protected Statement call() throws Exception {
+                items.forEach(fieldRow -> builder.withStatement(new Statement(
+                        IRIBuilder.withString(fieldRow.getName()),
+                        StringNodeBuilder.withString(fieldRow.getValue()))));
+                Bundle bundle = builder.build();
 
-        Put put = new Put(builder, path);
-        eventBus.post(put);
+
+
+                return pgpUtils.createSignature(bundle, "password".toCharArray());
+            }
+        };
+
+        signBundleTask.setOnSucceeded(workerStateEvent ->{
+            builder.withStatement(signBundleTask.getValue()) ;
+            Put put = new Put(builder, path);
+            eventBus.post(put);
+        });
+        executor.execute(signBundleTask);
+
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();

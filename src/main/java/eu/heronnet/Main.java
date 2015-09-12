@@ -69,7 +69,6 @@ public class Main {
         }
         catch (TimeoutException e) {
             logger.error("Failed to start Services within 15 seconds.");
-            // manager.stopAsync();
         }
     }
 }

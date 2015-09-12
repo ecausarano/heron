@@ -5,6 +5,7 @@ import eu.heronnet.model.IdentifierNode;
 import eu.heronnet.model.Statement;
 import eu.heronnet.model.builder.BundleBuilder;
 import eu.heronnet.model.builder.StringNodeBuilder;
+import eu.heronnet.model.vocabulary.HRN;
 import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.kad.model.rpc.message.FindValueResponse;
 import eu.heronnet.module.kad.model.rpc.message.KadMessage;
@@ -35,7 +36,7 @@ public class KadMessageCodecTest {
         BundleBuilder bundleBuilder = new BundleBuilder();
         bundleBuilder.withSubject(IdentifierNode.anyId());
         bundleBuilder.withStatement(new Statement(
-                StringNodeBuilder.withString("predicate"),
+                HRN.GENERIC,
                 StringNodeBuilder.withString("object")));
         bundles.add(bundleBuilder.build());
 

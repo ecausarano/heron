@@ -1,12 +1,21 @@
 package eu.heronnet.module.gui.fx.controller;
 
+import javax.inject.Inject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import eu.heronnet.model.Bundle;
-import eu.heronnet.model.builder.BundleBuilder;
-import eu.heronnet.model.builder.StatementBuilder;
+import eu.heronnet.model.Statement;
+import eu.heronnet.model.vocabulary.HRN;
 import eu.heronnet.module.bus.command.Find;
-import eu.heronnet.module.bus.command.Put;
+import eu.heronnet.module.bus.command.PutBundle;
 import eu.heronnet.module.bus.command.UpdateResults;
 import eu.heronnet.module.gui.fx.views.CreateIdentityWizard;
 import eu.heronnet.module.gui.fx.views.IdentityDetails;
@@ -25,7 +34,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -35,16 +50,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.concurrent.Executor;
 
 /**
  * @author edoardocausarano
@@ -59,7 +64,7 @@ public class MainWindowController implements Initializable {
     @Inject
     private Callback controllerFactory;
     @Inject
-    private Executor executor;
+    private ExecutorService executor;
     @Inject
     private Persistence persistence;
     @Inject
@@ -165,15 +170,22 @@ public class MainWindowController implements Initializable {
                 Bundle item = documentListCell.getItem();
                 byte[] bundleId = item.getNodeId();
                 logger.debug("Requested to sign bundle=[{}]", HexUtil.bytesToHex(bundleId));
-                try {
-                    BundleBuilder signatureBuilder = new BundleBuilder()
-                            .withSubject(item.getSubject())
-                            .withStatement(StatementBuilder.pgpSignature("signature"));
-                    Put put = new Put(signatureBuilder);
-                    eventBus.post(put);
-                } catch (NoSuchAlgorithmException e) {
-                    logger.error("Error signing, message={}", e.getMessage());
-                }
+
+                Task<Statement> signBundleTask = new Task<Statement>() {
+                    @Override
+                    protected Statement call() throws Exception {
+                        return pgpUtils.createSignature(item, "password".toCharArray());
+                    }
+                };
+
+                signBundleTask.setOnSucceeded(workerStateEvent -> {
+                    item.add(signBundleTask.getValue());
+                    eventBus.post(new PutBundle(item));
+                });
+                signBundleTask.setOnFailed(event1 -> {
+                    logger.debug("failed");
+                });
+                executor.execute(signBundleTask);
             });
             MenuItem downloadMenuItem = new MenuItem();
             downloadMenuItem.textProperty().bind(Bindings.format("Download \"%s\"", documentListCell.itemProperty()));
@@ -212,7 +224,7 @@ public class MainWindowController implements Initializable {
         Task<List<Bundle>> listPublicKeysTask = new Task<List<Bundle>>() {
             @Override
             protected List<Bundle> call() throws Exception {
-                List<Bundle> bundles = persistence.findByPredicate(Collections.singletonList(PGPUtils.getPublicKeyClass()));
+                List<Bundle> bundles = persistence.findByPredicate(Collections.singletonList(HRN.PUBLIC_KEY));
                 logger.debug("Found {} public keys", bundles.size());
                 return bundles;
             }

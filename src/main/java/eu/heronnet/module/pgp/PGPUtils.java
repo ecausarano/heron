@@ -1,23 +1,5 @@
 package eu.heronnet.module.pgp;
 
-import eu.heronnet.model.Bundle;
-import eu.heronnet.model.StringNode;
-import eu.heronnet.model.builder.StringNodeBuilder;
-import eu.heronnet.module.storage.Persistence;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
-import org.bouncycastle.bcpg.sig.Features;
-import org.bouncycastle.bcpg.sig.KeyFlags;
-import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
-import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
-import org.bouncycastle.openpgp.*;
-import org.bouncycastle.openpgp.operator.PBESecretKeyEncryptor;
-import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
-import org.bouncycastle.openpgp.operator.bc.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,11 +8,51 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.Statement;
+import eu.heronnet.model.builder.BundleBuilder;
+import eu.heronnet.model.builder.StatementBuilder;
+import eu.heronnet.model.vocabulary.HRN;
+import eu.heronnet.module.storage.Persistence;
+import eu.heronnet.module.storage.util.HexUtil;
+import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.bouncycastle.bcpg.sig.Features;
+import org.bouncycastle.bcpg.sig.KeyFlags;
+import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
+import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openpgp.PGPEncryptedData;
+import org.bouncycastle.openpgp.PGPKeyPair;
+import org.bouncycastle.openpgp.PGPKeyRingGenerator;
+import org.bouncycastle.openpgp.PGPObjectFactory;
+import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPPublicKeyRing;
+import org.bouncycastle.openpgp.PGPSecretKey;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
+import org.bouncycastle.openpgp.PGPSignature;
+import org.bouncycastle.openpgp.PGPSignatureGenerator;
+import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
+import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
+import org.bouncycastle.openpgp.operator.PBESecretKeyEncryptor;
+import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
+import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
+import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyEncryptorBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
+import org.bouncycastle.openpgp.operator.bc.BcPGPKeyPair;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * @author edoardocausarano
@@ -40,38 +62,27 @@ public class PGPUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(PGPUtils.class);
 
-    // WOT Ontology public key class
-    private static StringNode PUBLIC_KEY_CLASS;
-
-    static {
-        try {
-            PUBLIC_KEY_CLASS = StringNodeBuilder.withString("http://xmlns.com/wot/0.1/PubKey");
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("Could not SHA-256 hash algorithm, this should never happen");
-        }
-    }
-
     @Inject
     private String heronDataRoot;
     @Inject
     private Persistence persistence;
 
-    public static StringNode getPublicKeyClass() {
-        return PUBLIC_KEY_CLASS;
+    static {
+        Security.addProvider(new BouncyCastleProvider());
     }
 
-    private static void createKeys(final String email, final String password) throws Exception {
+    public static void createKeys(final String email, final String password) throws Exception {
         logger.debug("Generating public keyring");
 
         PGPKeyRingGenerator pgpKeyRingGenerator = generateKeyRingGenerator(email, password.toCharArray(), 0xc0);
 
-        try (OutputStream outputStream = Files.newOutputStream(Paths.get("dummy.pkr"), StandardOpenOption.CREATE_NEW)) {
+        try (OutputStream outputStream = Files.newOutputStream(Paths.get("identity.pkr"), StandardOpenOption.CREATE_NEW)) {
             PGPPublicKeyRing pgpPublicKeyRing = pgpKeyRingGenerator.generatePublicKeyRing();
 
             pgpPublicKeyRing.encode(outputStream);
         }
 
-        try (OutputStream outputStream = Files.newOutputStream(Paths.get("dummy.skr"), StandardOpenOption.CREATE_NEW)) {
+        try (OutputStream outputStream = Files.newOutputStream(Paths.get("identity.skr"), StandardOpenOption.CREATE_NEW)) {
             PGPSecretKeyRing secretKeyRing = pgpKeyRingGenerator.generateSecretKeyRing();
             secretKeyRing.encode(outputStream);
         }
@@ -136,9 +147,13 @@ public class PGPUtils {
      * @throws Exception
      */
     public List<Bundle> getKnownPublicKeys() throws Exception {
-        List<Bundle> bundles = persistence.findByPredicate(Collections.singletonList(PUBLIC_KEY_CLASS));
+        List<Bundle> bundles = persistence.findByPredicate(Collections.singletonList(HRN.PUBLIC_KEY));
         logger.debug("found {} known public keys in storage", bundles.size());
         return bundles;
+    }
+
+    public PGPPublicKey getPublicKey() throws Exception {
+        return getPrivateKey().getPublicKey();
     }
 
     public boolean hasPrivateKey() {
@@ -179,7 +194,31 @@ public class PGPUtils {
         }
     }
 
-    public PGPPublicKey getPublicKey() throws Exception {
-        return getPrivateKey().getPublicKey();
+    public Statement createSignatureWithBuilder(BundleBuilder bundleBuilder, char[] password) throws Exception {
+        Bundle bundle = bundleBuilder.build();
+        return createSignature(bundle, password);
     }
+
+    public Statement createSignature(Bundle bundle, char[] password) throws Exception {
+        PGPSecretKey secretKey = getPrivateKey();
+        PBESecretKeyDecryptor secretKeyDecryptor = new JcePBESecretKeyDecryptorBuilder()
+                .setProvider(BouncyCastleProvider.PROVIDER_NAME).build(password);
+        PGPPrivateKey privateKey = secretKey.extractPrivateKey(secretKeyDecryptor);
+
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(
+                new BcPGPContentSignerBuilder(secretKey.getPublicKey().getAlgorithm(), PGPUtil.SHA256));
+        sGen.init(PGPSignature.BINARY_DOCUMENT, privateKey);
+
+        sGen.update(bundle.getNodeId());
+        sGen.update(bundle.getSubject().getNodeId());
+        bundle.getStatements().forEach(statement -> {
+            sGen.update(statement.getPredicate().getNodeId());
+            sGen.update(statement.getObject().getNodeId());
+        });
+        PGPSignature signature = sGen.generate();
+
+        return StatementBuilder.pgpSignature(HexUtil.bytesToHex(signature.getEncoded()));
+
+    }
+
 }

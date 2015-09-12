@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 /**
+ * Simple implementation to search for N-grams separated by whitespace characters.
+ *
  * @author edoardocausarano
  */
 @Component

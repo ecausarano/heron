@@ -18,6 +18,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -56,7 +57,7 @@ public class SpringConfiguration {
     }
 
     @Bean
-    Executor executor() {
+    ExecutorService executor() {
         return Executors.newWorkStealingPool();
     }
 

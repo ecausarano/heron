@@ -140,7 +140,7 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
     }
 
     @Override
-    public List<Bundle> findByPredicate(List<StringNode> fields) {
+    public List<Bundle> findByPredicate(List<? extends Node> fields) {
         return findByHash(fields.stream().map(Node::getNodeId).collect(Collectors.toList()));
     }
 

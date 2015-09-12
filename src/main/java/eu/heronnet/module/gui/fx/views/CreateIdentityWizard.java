@@ -31,7 +31,7 @@ public class CreateIdentityWizard extends GridPane {
     }
 
     @FXML
-    private void createAction() {
+    private void createNewKeyPair() {
         logger.debug("create button pressed");
     }
 }

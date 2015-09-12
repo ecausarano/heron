@@ -38,7 +38,7 @@ public class BundleBinding extends TupleBinding<Bundle> {
             byte[] predicateId = new byte[32];
             tupleInput.read(predicateId);
             String predicateData = tupleInput.readString();
-            StringNode predicate = new StringNode(predicateId, predicateData);
+            IRI predicate = new IRI(predicateId, predicateData);
 
             NodeType nodeType = NodeType.values()[tupleInput.readInt()];
             byte[] objectId = new byte[32];
@@ -67,13 +67,7 @@ public class BundleBinding extends TupleBinding<Bundle> {
             }
 
         }
-
-        try {
-            return bundleBuilder.build();
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("Error while building bundle for identifierId={}", HexUtil.bytesToHex(identifierId));
-            return null;
-        }
+        return bundleBuilder.build();
     }
 
     @Override
@@ -86,7 +80,7 @@ public class BundleBinding extends TupleBinding<Bundle> {
         tupleOutput.writeInt(statements.size());
 
         for (Statement statement : statements) {
-            StringNode predicate = statement.getPredicate();
+            IRI predicate = statement.getPredicate();
             // 1. predicateId
             byte[] nodeId = predicate.getNodeId();
             tupleOutput.write(nodeId);

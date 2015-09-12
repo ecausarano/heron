@@ -4,7 +4,9 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import eu.heronnet.model.*;
 import eu.heronnet.model.builder.BundleBuilder;
+import eu.heronnet.model.vocabulary.HRN;
 import eu.heronnet.module.bus.command.Put;
+import eu.heronnet.module.bus.command.PutBundle;
 import eu.heronnet.module.bus.command.UpdateLocalResults;
 import eu.heronnet.module.storage.Persistence;
 import eu.heronnet.module.storage.util.HexUtil;
@@ -29,13 +31,19 @@ import java.util.Collections;
 @Component
 public class PutHandler {
 
-    public static final String HERON_BINARY_PREDICATE = "http://heronnet.eu/0.1/#bytesProperty";
+    public static final String HERON_BINARY_PREDICATE = "http://heronnet.eu/0.1/bytesProperty";
     private static final Logger logger = LoggerFactory.getLogger(PutHandler.class);
     @Inject
     private EventBus eventBus;
 
     @Inject
     private Persistence persistence;
+
+    @Subscribe
+    public void handle(PutBundle command) {
+        persistence.put(command.getBundle());
+        eventBus.post(new UpdateLocalResults(Collections.singletonList(command.getBundle())));
+    }
 
     @Subscribe
     public void handle(Put command) throws IOException, NoSuchAlgorithmException {
@@ -49,10 +57,9 @@ public class PutHandler {
                     digest.update(buffer);
                 }
                 final byte[] fileHash = digest.digest();
-                byte[] statementHash = digest.digest(HERON_BINARY_PREDICATE.getBytes());
                 builder.withSubject(new IdentifierNode(fileHash));
                 builder.withStatement(new Statement(
-                        new StringNode(statementHash, HERON_BINARY_PREDICATE),
+                        HRN.BINARY,
                         // TODO - introduce a type that doesn't contain the bytes but a reference to the file to be streamed
                         new BinaryDataNode(fileHash, Files.readAllBytes(command.getPath()))));
             }

@@ -1,5 +1,6 @@
 package eu.heronnet.module.gui.model.metadata;
 
+import eu.heronnet.model.Statement;
 import eu.heronnet.module.gui.model.FieldRow;
 import org.slf4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -38,7 +39,7 @@ public class FieldProcessorFactory {
     public MetadataProcessor getProcessor(String mimeType) {
         return strategiesByMimeType.getOrDefault(mimeType, new MetadataProcessor() {
             @Override
-            public List<FieldRow> process(File file) throws IOException {
+            public List<Statement> process(File file) throws IOException {
                 logger.warn("Unknown mime-type={} processor requested for file={}", mimeType, file);
                 return Collections.emptyList();
             }
