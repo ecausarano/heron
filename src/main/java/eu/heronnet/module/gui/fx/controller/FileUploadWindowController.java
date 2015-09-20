@@ -1,16 +1,22 @@
 package eu.heronnet.module.gui.fx.controller;
 
+import javax.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
+
 import com.google.common.eventbus.EventBus;
 import eu.heronnet.model.Bundle;
-import eu.heronnet.model.IRI;
 import eu.heronnet.model.Statement;
-import eu.heronnet.model.StringNode;
 import eu.heronnet.model.builder.BundleBuilder;
 import eu.heronnet.model.builder.IRIBuilder;
-import eu.heronnet.model.builder.StatementBuilder;
 import eu.heronnet.model.builder.StringNodeBuilder;
-import eu.heronnet.model.vocabulary.DC;
-import eu.heronnet.model.vocabulary.HRN;
 import eu.heronnet.module.bus.command.Put;
 import eu.heronnet.module.gui.model.FieldRow;
 import eu.heronnet.module.gui.model.metadata.FieldProcessorFactory;
@@ -20,7 +26,12 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -28,19 +39,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 /**
  * Controller for the Upload window

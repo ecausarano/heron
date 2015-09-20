@@ -1,7 +1,5 @@
 package eu.heronnet.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Date;
 
 /**
@@ -11,9 +9,12 @@ public class DateNode extends Node<Date> {
 
     private final Date date;
 
-    public DateNode(@JsonProperty("nodeId") byte[] nodeId, @JsonProperty("date") Date date) {
+    public DateNode(
+            byte[] nodeId,
+            Date date)
+    {
         super(nodeId, NodeType.DATE);
-        this.date = date;
+        this.date = new Date(date.getTime());
     }
 
     @Override

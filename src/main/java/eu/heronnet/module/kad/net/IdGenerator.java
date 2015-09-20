@@ -1,8 +1,8 @@
 package eu.heronnet.module.kad.net;
 
-import org.springframework.stereotype.Component;
-
 import java.util.Random;
+
+import org.springframework.stereotype.Component;
 
 /**
  * @author edoardocausarano

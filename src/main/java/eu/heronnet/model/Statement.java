@@ -1,7 +1,5 @@
 package eu.heronnet.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * An "RDF" item that conveys an item of information regarding an {@link IdentifierNode}
  * Can be thought of as a graph edge
@@ -14,7 +12,10 @@ public class Statement {
 
     private final Node object;
 
-    public Statement(@JsonProperty("predicate") IRI predicate, @JsonProperty("object") Node object) {
+    public Statement(
+            IRI predicate,
+            Node object)
+    {
         this.predicate = predicate;
         this.object = object;
     }

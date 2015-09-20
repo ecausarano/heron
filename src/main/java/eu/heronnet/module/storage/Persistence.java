@@ -17,11 +17,10 @@
 
 package eu.heronnet.module.storage;
 
+import java.util.List;
+
 import eu.heronnet.model.Bundle;
 import eu.heronnet.model.Node;
-import eu.heronnet.model.StringNode;
-
-import java.util.List;
 
 public interface Persistence {
 

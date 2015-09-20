@@ -1,19 +1,25 @@
 package eu.heronnet.module.storage.binding;
 
-import com.sleepycat.bind.tuple.TupleBinding;
-import com.sleepycat.bind.tuple.TupleInput;
-import com.sleepycat.bind.tuple.TupleOutput;
-import eu.heronnet.model.*;
-import eu.heronnet.model.builder.BundleBuilder;
-import eu.heronnet.module.storage.util.HexUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.sleepycat.bind.tuple.TupleBinding;
+import com.sleepycat.bind.tuple.TupleInput;
+import com.sleepycat.bind.tuple.TupleOutput;
+import eu.heronnet.model.BinaryDataNode;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.DateNode;
+import eu.heronnet.model.IRI;
+import eu.heronnet.model.IdentifierNode;
+import eu.heronnet.model.Node;
+import eu.heronnet.model.NodeType;
+import eu.heronnet.model.Statement;
+import eu.heronnet.model.StringNode;
+import eu.heronnet.model.builder.BundleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by edo on 07/08/15.

@@ -1,5 +1,8 @@
 package eu.heronnet.module.gui.fx.views;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -7,9 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * @author edoardocausarano

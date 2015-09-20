@@ -1,20 +1,19 @@
 package eu.heronnet.module.gui.fx.task;
 
-import eu.heronnet.module.kad.model.rpc.message.FindValueRequest;
-import eu.heronnet.module.kad.net.Client;
-import eu.heronnet.module.kad.net.SelfNodeProvider;
-import javafx.concurrent.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
 import javax.inject.Inject;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+
+import eu.heronnet.module.kad.net.SelfNodeProvider;
+import eu.heronnet.module.storage.Persistence;
+import javafx.concurrent.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 /**
  * Simple implementation to search for N-grams separated by whitespace characters.
@@ -31,7 +30,7 @@ public class SearchByPredicate extends Task<Void> {
     @Inject
     private SelfNodeProvider selfNodeProvider;
     @Inject
-    private Client client;
+    private Persistence clientImpl;
 
     private String query;
 
@@ -49,10 +48,7 @@ public class SearchByPredicate extends Task<Void> {
                 digest.update(term.getBytes("UTF-8"));
                 hashes.add(digest.digest());
             }
-            FindValueRequest findValueRequest = new FindValueRequest();
-            findValueRequest.setValue(hashes);
-            findValueRequest.setOrigin(selfNodeProvider.getSelf());
-            client.send(findValueRequest);
+            clientImpl.findByHash(hashes);
         } catch (NoSuchAlgorithmException e) {
             logger.error("SHA-256 not available");
         } catch (UnsupportedEncodingException e) {

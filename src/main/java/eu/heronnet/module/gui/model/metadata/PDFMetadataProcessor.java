@@ -1,5 +1,11 @@
 package eu.heronnet.module.gui.model.metadata;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 import eu.heronnet.model.Statement;
 import eu.heronnet.model.builder.StringNodeBuilder;
 import eu.heronnet.model.vocabulary.DC;
@@ -7,12 +13,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 
 /**
  * @author edoardocausarano

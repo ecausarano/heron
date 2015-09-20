@@ -1,5 +1,7 @@
 package eu.heronnet.module.gui;
 
+import javax.inject.Inject;
+
 import eu.heronnet.module.gui.fx.controller.FileUploadWindowController;
 import eu.heronnet.module.gui.fx.controller.MainWindowController;
 import javafx.fxml.FXMLLoader;
@@ -8,8 +10,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
-
-import javax.inject.Inject;
 
 /**
  * @author edoardocausarano

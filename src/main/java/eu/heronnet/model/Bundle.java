@@ -1,10 +1,10 @@
 package eu.heronnet.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.heronnet.module.storage.util.HexUtil;
-
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import eu.heronnet.module.storage.util.HexUtil;
 
 /**
  * An "RDF" collection of {@link Statement statements} relative to an {@link IdentifierNode subject}
@@ -16,16 +16,16 @@ public class Bundle extends Node<Set<Statement>> {
 
     private final IdentifierNode subject;
 
-    private final HashSet<Statement> statements = new HashSet<>();
+    private final Set<Statement> statements;
 
-    public Bundle(@JsonProperty("nodeId") byte[] nodeId, @JsonProperty("subject") IdentifierNode subject, @JsonProperty("data") Set<Statement> statements) {
+    public Bundle(
+            byte[] nodeId,
+            IdentifierNode subject,
+            Set<Statement> statements)
+    {
         super(nodeId, NodeType.BUNDLE);
         this.subject = subject;
-        this.statements.addAll(statements);
-    }
-
-    public void add(Statement statement) {
-        statements.add(statement);
+        this.statements = Collections.unmodifiableSet(new HashSet<>(statements));
     }
 
     public IdentifierNode getSubject() {

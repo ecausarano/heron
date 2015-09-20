@@ -6,34 +6,18 @@ package eu.heronnet.model;
  * Created by edo on 07/08/15.
  */
 
-import com.fasterxml.jackson.annotation.*;
-
 import java.util.Arrays;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "@class"
-)
-@JsonInclude(NON_NULL)
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = IdentifierNode.class, name="identifierNode"),
-        @JsonSubTypes.Type(value = StringNode.class, name = "stringNode"),
-        @JsonSubTypes.Type(value = BinaryDataNode.class, name = "binaryDataNode"),
-        @JsonSubTypes.Type(value = DateNode.class, name = "dateNode")
-})
-@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class Node<T> {
 
     final byte[] nodeId;
-
-    @JsonIgnore
+    
     final NodeType nodeType;
 
-    public Node(byte[] nodeId, NodeType nodeType) {
-        this.nodeId = nodeId;
+    public Node(
+            byte[] nodeId,
+            NodeType nodeType) {
+        this.nodeId = Arrays.copyOf(nodeId, nodeId.length);
         this.nodeType = nodeType;
     }
 

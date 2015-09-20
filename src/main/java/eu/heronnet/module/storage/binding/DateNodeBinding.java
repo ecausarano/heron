@@ -1,12 +1,12 @@
 package eu.heronnet.module.storage.binding;
 
+import java.util.Date;
+
 import com.sleepycat.bind.tuple.TupleBinding;
 import com.sleepycat.bind.tuple.TupleInput;
 import com.sleepycat.bind.tuple.TupleOutput;
 import eu.heronnet.model.DateNode;
 import org.springframework.stereotype.Component;
-
-import java.util.Date;
 
 /**
  * Created by edo on 07/08/15.

@@ -1,14 +1,14 @@
 package eu.heronnet.module.kad.net;
 
-import com.google.common.util.concurrent.AbstractScheduledService;
-import eu.heronnet.module.kad.model.rpc.message.PingRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import javax.inject.Inject;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
+import com.google.common.util.concurrent.AbstractScheduledService;
+import eu.heronnet.module.storage.Persistence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * @author edoardocausarano
@@ -19,7 +19,7 @@ public class NetworkMaintenanceService extends AbstractScheduledService {
     private static final Logger logger = LoggerFactory.getLogger(NetworkMaintenanceService.class);
 
     @Inject
-    private Client client;
+    private Persistence clientImpl;
 
     @Inject
     private SelfNodeProvider selfNodeProvider;
@@ -29,10 +29,9 @@ public class NetworkMaintenanceService extends AbstractScheduledService {
         final Date when = new Date();
         logger.debug("running network maintenance at={}", when);
 
-        PingRequest pingRequest = new PingRequest();
-        pingRequest.setOrigin(selfNodeProvider.getSelf());
+//        PingRequest pingRequest = new PingRequest(selfNodeProvider.getSelf());
 
-        client.broadcast(pingRequest);
+//        clientImpl.broadcast(pingRequest);
     }
 
     @Override

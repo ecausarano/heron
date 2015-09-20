@@ -1,7 +1,5 @@
 package eu.heronnet.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.heronnet.module.storage.util.HexUtil;
 
 /**
@@ -12,7 +10,7 @@ import eu.heronnet.module.storage.util.HexUtil;
  */
 public class IdentifierNode extends Node {
 
-    public IdentifierNode(@JsonProperty("nodeId") byte[] nodeId) {
+    public IdentifierNode(byte[] nodeId) {
         super(nodeId, NodeType.IDENTIFIER);
     }
 
@@ -20,7 +18,6 @@ public class IdentifierNode extends Node {
         return new IdentifierNode(new byte[32]);
     }
 
-    @JsonIgnore
     @Override
     public Object getData() {
         return nodeId;

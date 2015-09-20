@@ -18,9 +18,9 @@
 package net.heron;
 
 
-import org.junit.Test;
-
 import java.io.IOException;
+
+import org.junit.Test;
 
 /**
  *

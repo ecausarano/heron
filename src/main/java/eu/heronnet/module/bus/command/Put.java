@@ -17,11 +17,11 @@
 
 package eu.heronnet.module.bus.command;
 
+import java.nio.file.Path;
+
 import eu.heronnet.model.Bundle;
 import eu.heronnet.model.Statement;
 import eu.heronnet.model.builder.BundleBuilder;
-
-import java.nio.file.Path;
 
 /**
  * Command to persist a {@link Bundle} of {@link Statement statements} to storage

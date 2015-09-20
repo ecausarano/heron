@@ -1,5 +1,14 @@
 package eu.heronnet;
 
+import javax.inject.Inject;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.Date;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
+
 import eu.heronnet.module.pgp.PGPUtils;
 import eu.heronnet.module.storage.Persistence;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
@@ -8,7 +17,15 @@ import org.bouncycastle.bcpg.sig.Features;
 import org.bouncycastle.bcpg.sig.KeyFlags;
 import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
 import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
-import org.bouncycastle.openpgp.*;
+import org.bouncycastle.openpgp.PGPEncryptedData;
+import org.bouncycastle.openpgp.PGPKeyPair;
+import org.bouncycastle.openpgp.PGPKeyRingGenerator;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPPublicKeyRing;
+import org.bouncycastle.openpgp.PGPSecretKey;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
+import org.bouncycastle.openpgp.PGPSignature;
+import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
 import org.bouncycastle.openpgp.operator.PBESecretKeyEncryptor;
 import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
 import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyEncryptorBuilder;
@@ -20,15 +37,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Date;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
 
 /**
  * @author edoardocausarano

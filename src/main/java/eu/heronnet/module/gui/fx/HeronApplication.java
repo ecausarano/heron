@@ -1,5 +1,8 @@
 package eu.heronnet.module.gui.fx;
 
+import javax.inject.Inject;
+import java.io.InputStream;
+
 import com.google.common.util.concurrent.ServiceManager;
 import eu.heronnet.Main;
 import javafx.application.Application;
@@ -11,9 +14,6 @@ import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
-
-import javax.inject.Inject;
-import java.io.InputStream;
 
 /**
  * @author edoardocausarano

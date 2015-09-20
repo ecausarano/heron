@@ -1,19 +1,5 @@
 package eu.heronnet.module.bus.handler;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-import eu.heronnet.model.*;
-import eu.heronnet.model.builder.BundleBuilder;
-import eu.heronnet.model.vocabulary.HRN;
-import eu.heronnet.module.bus.command.Put;
-import eu.heronnet.module.bus.command.PutBundle;
-import eu.heronnet.module.bus.command.UpdateLocalResults;
-import eu.heronnet.module.storage.Persistence;
-import eu.heronnet.module.storage.util.HexUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.IOException;
@@ -24,6 +10,23 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import eu.heronnet.model.BinaryDataNode;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.IdentifierNode;
+import eu.heronnet.model.Statement;
+import eu.heronnet.model.builder.BundleBuilder;
+import eu.heronnet.model.vocabulary.HRN;
+import eu.heronnet.module.bus.command.Put;
+import eu.heronnet.module.bus.command.PutBundle;
+import eu.heronnet.module.bus.command.UpdateLocalResults;
+import eu.heronnet.module.storage.Persistence;
+import eu.heronnet.module.storage.util.HexUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * @author edoardocausarano

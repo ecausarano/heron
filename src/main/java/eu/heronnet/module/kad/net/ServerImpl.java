@@ -17,11 +17,11 @@
 
 package eu.heronnet.module.kad.net;
 
+import javax.inject.Inject;
+
 import com.google.common.util.concurrent.AbstractIdleService;
-import eu.heronnet.module.kad.net.codec.KadMessageCodec;
-import eu.heronnet.module.kad.net.handler.FindValueRequestHandler;
-import eu.heronnet.module.kad.net.handler.PingRequestHandler;
-import eu.heronnet.module.kad.net.handler.StoreValueRequestHandler;
+import eu.heronnet.module.kad.net.handler.RequestHandler;
+import eu.heronnet.rpc.Messages;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
@@ -31,12 +31,14 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+//import eu.heronnet.module.kad.net.handler.StoreValueRequestHandler;
 
 @Component
 public class ServerImpl extends AbstractIdleService implements Server {
@@ -48,31 +50,28 @@ public class ServerImpl extends AbstractIdleService implements Server {
     private Bootstrap udpbootrap;
 
     @Inject
-    private PingRequestHandler pingRequestHandler;
-    @Inject
-    private StoreValueRequestHandler storeValueRequestHandler;
-    @Inject
-    private FindValueRequestHandler findValueRequestHandler;
+    private RequestHandler requestHandler;
 
     private final ChannelInitializer<SocketChannel> channelInitializer = new ChannelInitializer<SocketChannel>() {
         @Override
         protected void initChannel(SocketChannel ch) throws Exception {
             final ChannelPipeline pipeline = ch.pipeline();
             pipeline.addLast("Logger", new LoggingHandler());
-            pipeline.addLast("Kad message codec", new KadMessageCodec());
-            pipeline.addLast("PING request handler", pingRequestHandler);
-            pipeline.addLast("STORE request handler", storeValueRequestHandler);
-            pipeline.addLast("FIND request handler", findValueRequestHandler);
+            pipeline.addLast("frameDecoder", new ProtobufVarint32FrameDecoder());
+            pipeline.addLast("protobufDecoder", new ProtobufDecoder(Messages.Request.getDefaultInstance()));
+            pipeline.addLast("request handler", requestHandler);
         }
     };
 
     @Override
     protected void startUp() throws Exception {
         logger.debug("calling startUp for ServerImpl instance={}", this);
+
         tcpBoostrap = new ServerBootstrap();
         udpbootrap = new Bootstrap();
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
+
         tcpBoostrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .localAddress(6565)
@@ -84,8 +83,7 @@ public class ServerImpl extends AbstractIdleService implements Server {
         udpbootrap.group(workerGroup)
                 .channel(NioDatagramChannel.class)
                 .localAddress(6565)
-                .option(ChannelOption.SO_BROADCAST, true)
-                .handler(pingRequestHandler);
+                .option(ChannelOption.SO_BROADCAST, true);
         udpbootrap.bind().sync();
 
     }

@@ -1,16 +1,16 @@
 package eu.heronnet.model.builder;
 
-import eu.heronnet.model.Bundle;
-import eu.heronnet.model.IdentifierNode;
-import eu.heronnet.model.Statement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.IdentifierNode;
+import eu.heronnet.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Builder for bundles

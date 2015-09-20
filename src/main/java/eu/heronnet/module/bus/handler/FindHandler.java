@@ -1,20 +1,5 @@
 package eu.heronnet.module.bus.handler;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-import eu.heronnet.model.Bundle;
-import eu.heronnet.module.bus.command.Find;
-import eu.heronnet.module.bus.command.UpdateLocalResults;
-import eu.heronnet.module.bus.command.UpdateResults;
-import eu.heronnet.module.kad.model.rpc.message.FindValueRequest;
-import eu.heronnet.module.kad.net.Client;
-import eu.heronnet.module.kad.net.SelfNodeProvider;
-import eu.heronnet.module.storage.Persistence;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.UnsupportedEncodingException;
@@ -25,6 +10,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.module.bus.command.Find;
+import eu.heronnet.module.bus.command.UpdateLocalResults;
+import eu.heronnet.module.bus.command.UpdateResults;
+import eu.heronnet.module.kad.net.SelfNodeProvider;
+import eu.heronnet.module.storage.Persistence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 /**
  * @author edoardocausarano
@@ -47,7 +45,7 @@ public class FindHandler {
 
 
     @Inject
-    private Client client;
+    private Persistence clientImpl;
 
     @Inject
     private Persistence persistence;
@@ -68,10 +66,7 @@ public class FindHandler {
                     digest.update(term.getBytes("UTF-8"));
                     hashes.add(digest.digest());
                 }
-                FindValueRequest findValueRequest = new FindValueRequest();
-                findValueRequest.setValue(hashes);
-                findValueRequest.setOrigin(selfNodeProvider.getSelf());
-                client.send(findValueRequest);
+                clientImpl.findByHash(hashes);
             } catch (NoSuchAlgorithmException e) {
                 logger.error("SHA-256 not available");
                 eventBus.post(e);

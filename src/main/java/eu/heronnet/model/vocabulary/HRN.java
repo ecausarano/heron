@@ -1,8 +1,5 @@
 package eu.heronnet.model.vocabulary;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 import eu.heronnet.model.IRI;
 import eu.heronnet.model.builder.IRIBuilder;
 

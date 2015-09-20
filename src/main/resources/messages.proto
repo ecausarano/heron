@@ -1,0 +1,83 @@
+package eu.heronnet;
+
+option java_package ="eu.heronnet.rpc";
+
+// syntax = "proto2";
+
+message NetworkNode {
+    required bytes id = 1;
+    repeated Address addresses = 2;
+    optional int64 last_seen = 3;
+    optional int32 rtt = 4;
+}
+
+message Address {
+    required bytes ip_address = 1;
+    required int32 port = 2;
+}
+
+message Bundle {
+    required bytes subject = 1;
+    repeated Statement statements = 2;
+}
+
+message Statement {
+    required string predicate = 1;
+    oneof object {
+        string string_value = 2;
+        bytes identifier_value = 3;
+        int64 date_value = 4;
+        bytes binary_value = 5;
+    }
+}
+
+message Request {
+    oneof body {
+    FindValueRequest find_value_request = 1;
+    FindNodeRequest find_node_request = 2;
+    PingRequest ping_request = 3;
+    }
+}
+
+message Response {
+    oneof body {
+    FindValueResponse find_value_response = 1;
+    FindNodeResponse find_node_response = 2;
+    PingResponse ping_response = 3;
+    }
+}
+
+message FindValueRequest {
+    required bytes message_id = 10;
+    required NetworkNode origin = 11;
+    repeated bytes values = 12;
+}
+
+message FindValueResponse {
+    required bytes message_id = 10;
+    required NetworkNode origin = 11;
+    repeated Bundle bundles = 12;
+}
+
+message FindNodeRequest {
+    required bytes message_id = 20;
+    required NetworkNode origin = 21;
+    required bytes node_id = 22;
+}
+
+message FindNodeResponse {
+    required bytes message_id = 20;
+    required NetworkNode origin = 21;
+    repeated NetworkNode found_nodes = 22;
+}
+
+message PingRequest {
+    required bytes message_id = 30;
+    required NetworkNode origin = 31;
+}
+
+message PingResponse {
+    required bytes message_id = 30;
+    required NetworkNode origin = 31;
+    required bytes response = 32;
+}

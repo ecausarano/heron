@@ -1,20 +1,18 @@
 package eu.heronnet.module.gui.model.metadata;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import eu.heronnet.model.Statement;
-import eu.heronnet.model.builder.StatementBuilder;
 import eu.heronnet.model.builder.StringNodeBuilder;
 import eu.heronnet.model.vocabulary.DC;
-import eu.heronnet.module.gui.model.FieldRow;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author edoardocausarano

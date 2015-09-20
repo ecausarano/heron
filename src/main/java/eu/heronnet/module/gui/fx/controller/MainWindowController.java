@@ -179,7 +179,7 @@ public class MainWindowController implements Initializable {
                 };
 
                 signBundleTask.setOnSucceeded(workerStateEvent -> {
-                    item.add(signBundleTask.getValue());
+//                    item.add(signBundleTask.getValue());
                     eventBus.post(new PutBundle(item));
                 });
                 signBundleTask.setOnFailed(event1 -> {

@@ -1,6 +1,7 @@
 package eu.heronnet.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Arrays;
+
 import eu.heronnet.module.storage.util.HexUtil;
 
 /**
@@ -10,9 +11,12 @@ public class BinaryDataNode extends Node {
 
     private final byte[] data;
 
-    public BinaryDataNode(@JsonProperty("nodeId") byte[] nodeId, @JsonProperty("data") byte[] data) {
+    public BinaryDataNode(
+            byte[] nodeId,
+            byte[] data)
+    {
         super(nodeId, NodeType.BINARY);
-        this.data = data;
+        this.data = Arrays.copyOf(data, data.length);
     }
 
     @Override

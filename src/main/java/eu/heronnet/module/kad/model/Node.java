@@ -18,8 +18,10 @@
 package eu.heronnet.module.kad.model;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -27,37 +29,30 @@ public class Node implements Comparable<Node> {
 
     private byte[] id;
 
-    private List<InetSocketAddress> addresses;
+    private List<byte[]> addresses;
     private Date lastSeen;
     private long RTT;
 
-    private Node() {}
-
-    public Node(byte[] id, List<InetSocketAddress> addresses) {
-        this.id = id;
-        this.addresses = addresses;
+    public Node(byte[] id, List<byte[]> addresses) {
+        this.id = Arrays.copyOf(id, id.length);
+        this.addresses = Collections.unmodifiableList(new ArrayList<>(addresses));
     }
 
-    public Node(byte[] id, List<InetSocketAddress> addresses, Date lastSeen) {
-        this.id = id;
-        this.addresses = addresses;
-        this.lastSeen = lastSeen;
+    public Node(byte[] id, List<byte[]> addresses, Date lastSeen) {
+        this(id, addresses);
+        this.lastSeen = new Date(lastSeen.getTime());
     }
 
     public byte[] getId() {
         return id;
     }
 
-    public List<InetSocketAddress> getAddresses() {
+    public List<byte[]> getAddresses() {
         return addresses;
     }
 
     public Date getLastSeen() {
         return lastSeen;
-    }
-
-    public void setLastSeen(Date lastSeen) {
-        this.lastSeen = lastSeen;
     }
 
     public long getRTT() {

@@ -1,9 +1,9 @@
 package eu.heronnet.model.builder;
 
+import java.security.NoSuchAlgorithmException;
+
 import eu.heronnet.model.Statement;
 import eu.heronnet.model.vocabulary.HRN;
-
-import java.security.NoSuchAlgorithmException;
 
 /**
  * Builder for {@link Statement Statements}

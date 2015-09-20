@@ -1,5 +1,8 @@
 package eu.heronnet.module.storage;
 
+import javax.inject.Inject;
+import java.io.File;
+
 import com.sleepycat.je.DatabaseConfig;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
@@ -13,9 +16,6 @@ import eu.heronnet.module.storage.keycreators.StringObjectNgramIndexKeyCreator;
 import eu.heronnet.module.storage.keycreators.SubjectIdIndexKeyCreator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.inject.Inject;
-import java.io.File;
 
 /**
  * @author edoardocausarano

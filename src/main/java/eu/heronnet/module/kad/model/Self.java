@@ -17,9 +17,9 @@
 
 package eu.heronnet.module.kad.model;
 
-import java.lang.annotation.Retention;
-
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Retention;
 
 @Retention(RUNTIME)
 public @interface Self {

@@ -1,9 +1,9 @@
 package eu.heronnet.model.builder;
 
-import eu.heronnet.model.StringNode;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import eu.heronnet.model.StringNode;
 
 /**
  * @author edoardocausarano

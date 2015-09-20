@@ -1,14 +1,14 @@
 package eu.heronnet.module.storage.keycreators;
 
+import javax.inject.Inject;
+import java.util.Set;
+
 import com.sleepycat.je.DatabaseEntry;
 import com.sleepycat.je.SecondaryDatabase;
 import com.sleepycat.je.SecondaryMultiKeyCreator;
 import eu.heronnet.model.Bundle;
 import eu.heronnet.module.storage.binding.BundleBinding;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Set;
 
 /**
  * Created by edo on 07/08/15.

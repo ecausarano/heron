@@ -1,5 +1,8 @@
 package eu.heronnet.module.kad;
 
+import javax.inject.Named;
+import java.net.SocketException;
+
 import eu.heronnet.module.kad.model.RadixTree;
 import eu.heronnet.module.kad.model.TreeSetImpl;
 import eu.heronnet.module.kad.net.IdGenerator;
@@ -9,9 +12,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-
-import javax.inject.Named;
-import java.net.SocketException;
 
 /**
  * @author edoardocausarano
@@ -29,7 +29,7 @@ public class KadModuleConfiguration {
     @Bean
     @Named("self")
     SelfNodeProvider selfNodeProvider() {
-        return new SelfNodeProvider();
+        return new SelfNodeProvider(idGenerator);
     }
 
     @Bean
