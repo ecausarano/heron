@@ -1,11 +1,19 @@
 package eu.heronnet.module.kad.net.handler;
 
 import javax.inject.Inject;
-
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.common.eventbus.EventBus;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.IdentifierNode;
+import eu.heronnet.model.Statement;
+import eu.heronnet.model.builder.BundleBuilder;
+import eu.heronnet.model.builder.IRIBuilder;
+import eu.heronnet.model.builder.StringNodeBuilder;
 import eu.heronnet.module.bus.command.UpdateResults;
+import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.storage.util.HexUtil;
 import eu.heronnet.rpc.Messages;
 import io.netty.channel.ChannelHandler;
@@ -29,21 +37,57 @@ public class ResponseHandler extends SimpleChannelInboundHandler<Messages.Respon
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Messages.Response message) throws Exception {
-
         switch (message.getBodyCase()) {
             case FIND_VALUE_RESPONSE:
-                Messages.FindValueResponse findValueResponse = message.getFindValueResponse();
-                logger.debug("Received response id=[{}]", HexUtil.bytesToHex(findValueResponse.getMessageId().toByteArray()));
-                List<Messages.Bundle> bundles = message.getFindValueResponse().getBundlesList();
-                // TODO map Messages.Bundle to app domain Bundle
-//                eventBus.post(new UpdateResults(bundles));
+                findValueResponseHandler(message);
                 break;
             default:
                 logger.debug("Received unhandled response of type={}", message.getBodyCase());
         }
+    }
+
+    private void findValueResponseHandler(Messages.Response message) {
+        Messages.FindValueResponse findValueResponse = message.getFindValueResponse();
+        logger.debug("Received response id=[{}]", HexUtil.bytesToHex(findValueResponse.getMessageId().toByteArray()));
+        List<Messages.Bundle> wireBundles = message.getFindValueResponse().getBundlesList();
+
+        ArrayList<Bundle> domainBundles = new ArrayList<>(wireBundles.size());
+        wireBundles.forEach(bundle -> {
+            BundleBuilder bundleBuilder = new BundleBuilder();
+
+            bundleBuilder.withSubject(new IdentifierNode(bundle.getSubject().toByteArray()));
+
+            List<Messages.Statement> statementsList = bundle.getStatementsList();
+            statementsList.forEach(statement -> {
+                eu.heronnet.model.Node object = null;
+                // TODO - type mapping
+                if (statement.getStringValue() != null) {
+                    object = StringNodeBuilder.withString(statement.getStringValue());
+                }
+                bundleBuilder.withStatement(new Statement(IRIBuilder.withString(statement.getPredicate()), object));
+            });
+            domainBundles.add(bundleBuilder.build());
+        });
+        eventBus.post(new UpdateResults(domainBundles));
+    }
+
+    private void pingResponse(Messages.Response message) {
+        Messages.PingResponse response = message.getPingResponse();
+        Messages.NetworkNode origin = response.getOrigin();
+
+        // lookup original ping request log error if not found
+        response.getMessageId();
 
 
+        byte[] originId = origin.getId().toByteArray();
+        List<byte[]> addresses = origin.getAddressesList().stream()
+                .map(address -> address.getIpAddress().toByteArray()).collect(Collectors.toList());
 
+        // check ping request creation, add RTT
+        final Node node = new Node(originId, addresses);
+
+        // add node to bucket holder
+        logger.debug("Received ping response from node id={}", HexUtil.bytesToHex(node.getId()));
 
     }
 }

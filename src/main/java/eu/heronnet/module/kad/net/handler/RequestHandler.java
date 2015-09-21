@@ -6,9 +6,7 @@ import java.util.stream.Collectors;
 
 import com.google.protobuf.ByteString;
 import eu.heronnet.model.Bundle;
-import eu.heronnet.model.IdentifierNode;
 import eu.heronnet.model.StringNode;
-import eu.heronnet.model.builder.StatementBuilder;
 import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.kad.model.RadixTree;
 import eu.heronnet.module.kad.net.IdGenerator;
@@ -78,8 +76,8 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
         responseBuilder.setOrigin(Messages.NetworkNode.newBuilder().setId(ByteString.copyFrom(selfNodeProvider.getSelf().getId())));
 
         byHash.forEach(bundle -> {
-            Messages.Bundle.Builder messageBuilder = Messages.Bundle.newBuilder();
-            messageBuilder.setSubject(ByteString.copyFrom(bundle.getSubject().getNodeId()));
+            Messages.Bundle.Builder bundleBuilder = Messages.Bundle.newBuilder();
+            bundleBuilder.setSubject(ByteString.copyFrom(bundle.getSubject().getNodeId()));
             bundle.getStatements().forEach(statement -> {
                 Messages.Statement.Builder statementBuilder = Messages.Statement.newBuilder();
                 statementBuilder.setPredicate(statement.getPredicate().getData());
@@ -93,13 +91,14 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
                         LOGGER.debug("ignored unknown node type={}", statementObject.getNodeType());
                 }
 
-                messageBuilder.addStatements(statementBuilder.build());
+                bundleBuilder.addStatements(statementBuilder.build());
             });
 
-            responseBuilder.addBundles(messageBuilder.build());
+            responseBuilder.addBundles(bundleBuilder.build());
         });
 
-        ctx.writeAndFlush(responseBuilder.build());
+        Messages.Response.Builder messageBuilder = Messages.Response.newBuilder().setFindValueResponse(responseBuilder);
+        ctx.writeAndFlush(messageBuilder.build());
     }
 
     private void findNodeRequest(ChannelHandlerContext ctx, Messages.FindNodeRequest request) {
