@@ -1,6 +1,7 @@
 package eu.heronnet.module.kad.net.handler;
 
 import javax.inject.Inject;
+import java.net.SocketException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,25 +38,42 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
     @Inject
     IdGenerator idGenerator;
     @Inject
-    RadixTree network;
+    RadixTree routingTable;
 
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Messages.Request msg) throws Exception {
-        switch (msg.getBodyCase()) {
+    protected void channelRead0(ChannelHandlerContext context, Messages.Request message) throws Exception {
+        switch (message.getBodyCase()) {
             case FIND_VALUE_REQUEST:
-                findValueRequest(ctx, msg.getFindValueRequest());
+                findValueRequest(context, message.getFindValueRequest());
                 break;
             case FIND_NODE_REQUEST:
-                findNodeRequest(ctx, msg.getFindNodeRequest());
+                findNodeRequest(context, message.getFindNodeRequest());
+                break;
+            case PING_REQUEST:
+                pingRequest(context, message.getPingRequest());
                 break;
             default:
-                LOGGER.debug("received unhandled request={}", msg.getDescriptorForType().getFullName());
+                LOGGER.debug("received unhandledrequest={}", message.getDescriptorForType().getFullName());
         }
     }
 
+    private void pingRequest(ChannelHandlerContext context, Messages.PingRequest request) {
+        try {
+            final Messages.PingResponse.Builder pingResponse = Messages.PingResponse.newBuilder();
+            pingResponse.setOrigin(createSelfNetworkNodeBuilder());
+            pingResponse.setResponse(ByteString.copyFrom(request.getMessageId().toByteArray()));
 
-    private void findValueRequest(ChannelHandlerContext ctx, Messages.FindValueRequest request) throws Exception{
+            final Messages.Response.Builder responseBuilder = Messages.Response.newBuilder()
+                    .setPingResponse(pingResponse);
+
+            context.writeAndFlush(responseBuilder.build());
+        } catch (SocketException e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
+
+    private void findValueRequest(ChannelHandlerContext context, Messages.FindValueRequest request) throws Exception{
         List<ByteString> valuesList = request.getValuesList();
 
         if (LOGGER.isDebugEnabled()) {
@@ -65,7 +83,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
                 stringBuilder.append(HexUtil.bytesToHex(bytes.toByteArray()));
                 stringBuilder.append("]");
             }
-            LOGGER.debug("Received request for values={}", stringBuilder.toString());
+            LOGGER.debug("Received message for values={}", stringBuilder.toString());
         }
 
         List<byte[]> requestAsBytes = valuesList.stream().map(ByteString::toByteArray).collect(Collectors.toList());
@@ -82,6 +100,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
                 Messages.Statement.Builder statementBuilder = Messages.Statement.newBuilder();
                 statementBuilder.setPredicate(statement.getPredicate().getData());
                 eu.heronnet.model.Node statementObject = statement.getObject();
+                // TODO - move out to an external adapter
                 switch (statementObject.getNodeType()) {
                     case STRING:
                         StringNode stringNode = (StringNode) statementObject;
@@ -98,19 +117,58 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
         });
 
         Messages.Response.Builder messageBuilder = Messages.Response.newBuilder().setFindValueResponse(responseBuilder);
-        ctx.writeAndFlush(messageBuilder.build());
+        context.writeAndFlush(messageBuilder.build());
     }
 
-    private void findNodeRequest(ChannelHandlerContext ctx, Messages.FindNodeRequest request) {
-        LOGGER.debug("handling incoming request {}", request.getClass().toString());
+    private void findNodeRequest(ChannelHandlerContext context, Messages.FindNodeRequest request) {
+        try {
+            Messages.FindNodeResponse.Builder findNodeResponseBuilder = Messages.FindNodeResponse.newBuilder();
+            findNodeResponseBuilder.setOrigin(createSelfNetworkNodeBuilder());
 
-        final byte[] nodeId = request.getNodeId().toByteArray();
-        final List<Node> nodes = network.find(nodeId);
+            final byte[] nodeId = request.getNodeId().toByteArray();
+            final List<Node> nodes = routingTable.find(nodeId);
 
-        Messages.FindNodeResponse.Builder responseBuilder = Messages.FindNodeResponse.newBuilder();
-//        responseBuilder.setOrigin(selfNodeProvider.getSelf())
+            final List<Messages.NetworkNode> networkNodesList = nodes.stream().map(node -> {
+                final Messages.NetworkNode.Builder networkNodeBuilder = Messages.NetworkNode.newBuilder();
+                networkNodeBuilder.setId(ByteString.copyFrom(node.getId()));
+                networkNodeBuilder.setLastSeen(node.getLastSeen().getTime());
+                networkNodeBuilder.setRtt(node.getRTT());
+                final List<Messages.Address> addressBuilders = mapModelAddressToWireAddress(node.getAddresses());
+                networkNodeBuilder.addAllAddresses(addressBuilders);
+                return networkNodeBuilder.build();
+            }).collect(Collectors.toList());
 
-//        final FindNodeResponse response = new FindNodeResponse(selfNodeProvider.getSelf(), nodes);
-//        ctx.writeAndFlush(response);
+            findNodeResponseBuilder.addAllFoundNodes(networkNodesList);
+            final Messages.Response.Builder responseBuilder = Messages.Response.newBuilder()
+                    .setFindNodeResponse(findNodeResponseBuilder);
+
+            context.writeAndFlush(responseBuilder.build());
+
+        } catch (SocketException e) {
+            LOGGER.error(e.getMessage());
+        }
     }
+
+    /*
+     * helper - returns the builder for the "SelfNode" in wire format
+     */
+    private Messages.NetworkNode.Builder createSelfNetworkNodeBuilder() throws SocketException {
+        final Messages.NetworkNode.Builder selfNodeBuilder = Messages.NetworkNode.newBuilder();
+        selfNodeBuilder.setId(ByteString.copyFrom(selfNodeProvider.getSelf().getId()));
+        final List<Messages.Address> selfAddresses = mapModelAddressToWireAddress(selfNodeProvider.getSelf().getAddresses());
+        selfNodeBuilder.addAllAddresses(selfAddresses);
+        return selfNodeBuilder;
+    }
+
+    /*
+     * helper - simple mapper from plain addresses to wire format (model discrepancy... port should go
+     */
+    private List<Messages.Address> mapModelAddressToWireAddress(List<byte[]> addresses) {
+        return addresses.stream().map(address -> Messages.Address.newBuilder()
+                .setPort(6565)
+                .setIpAddress(ByteString.copyFrom(address))
+                .build())
+                .collect(Collectors.toList());
+    }
+
 }

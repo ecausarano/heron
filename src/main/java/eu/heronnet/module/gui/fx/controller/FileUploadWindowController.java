@@ -1,8 +1,10 @@
 package eu.heronnet.module.gui.fx.controller;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,7 +27,10 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -36,6 +41,7 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,11 +59,10 @@ public class FileUploadWindowController {
     private EventBus eventBus;
     @Inject
     private Executor executor;
-
+    @Inject
+    FXMLLoader fxmlLoader;
     @Inject
     private FieldProcessorFactory processorFactory;
-    @Inject
-    private PGPUtils pgpUtils;
 
     @FXML
     private Button chooseBtn;
@@ -157,28 +162,30 @@ public class FileUploadWindowController {
         logger.debug("confirming file publish");
 
         BundleBuilder builder = new BundleBuilder();
-        ObservableList<FieldRow> items = metaTableView.getItems();
+        metaTableView.getItems().forEach(fieldRow -> builder.withStatement(new Statement(
+                    IRIBuilder.withString(fieldRow.getName()),
+                    StringNodeBuilder.withString(fieldRow.getValue()))));
 
-        Task<Statement> signBundleTask = new Task<Statement>() {
-            @Override
-            protected Statement call() throws Exception {
-                items.forEach(fieldRow -> builder.withStatement(new Statement(
-                        IRIBuilder.withString(fieldRow.getName()),
-                        StringNodeBuilder.withString(fieldRow.getValue()))));
-                Bundle bundle = builder.build();
+        Put put = new Put(builder, path);
+        eventBus.post(put);
 
+//        Task<Statement> signBundleTask = new Task<Statement>() {
+//            @Override
+//            protected Statement call() throws Exception {
+//                items.forEach(fieldRow -> builder.withStatement(new Statement(
+//                        IRIBuilder.withString(fieldRow.getName()),
+//                        StringNodeBuilder.withString(fieldRow.getValue()))));
+//                Bundle bundle = builder.build();
+//                return pgpUtils.createSignature(bundle, "password".toCharArray());
+//            }
+//        };
 
-
-                return pgpUtils.createSignature(bundle, "password".toCharArray());
-            }
-        };
-
-        signBundleTask.setOnSucceeded(workerStateEvent ->{
-            builder.withStatement(signBundleTask.getValue()) ;
-            Put put = new Put(builder, path);
-            eventBus.post(put);
-        });
-        executor.execute(signBundleTask);
+//        signBundleTask.setOnSucceeded(workerStateEvent ->{
+//            builder.withStatement(signBundleTask.getValue()) ;
+//            Put put = new Put(builder, path);
+//            eventBus.post(put);
+//        });
+//        executor.execute(signBundleTask);
 
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();

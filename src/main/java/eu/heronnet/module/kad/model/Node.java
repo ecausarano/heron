@@ -31,7 +31,7 @@ public class Node implements Comparable<Node> {
 
     private List<byte[]> addresses;
     private Date lastSeen;
-    private long RTT;
+    private int RTT;
 
     public Node(byte[] id, List<byte[]> addresses) {
         this.id = Arrays.copyOf(id, id.length);
@@ -55,11 +55,11 @@ public class Node implements Comparable<Node> {
         return lastSeen;
     }
 
-    public long getRTT() {
+    public int getRTT() {
         return RTT;
     }
 
-    public void setRTT(long RTT) {
+    public void setRTT(int RTT) {
         this.RTT = RTT;
     }
 

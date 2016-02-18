@@ -87,11 +87,11 @@ public class ServerImpl extends AbstractIdleService implements Server {
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
         tcpBoostrap.bind().sync();
 
-        udpbootrap.group(workerGroup)
-                .channel(NioDatagramChannel.class)
-                .localAddress(6565)
-                .option(ChannelOption.SO_BROADCAST, true);
-        udpbootrap.bind().sync();
+//        udpbootrap.group(workerGroup)
+//                .channel(NioDatagramChannel.class)
+//                .localAddress(6565)
+//                .option(ChannelOption.SO_BROADCAST, true);
+//        udpbootrap.bind().sync();
 
     }
 
