@@ -3,7 +3,8 @@ package eu.heronnet.module.kad;
 import javax.inject.Named;
 import java.net.SocketException;
 
-import eu.heronnet.module.kad.model.RadixTree;
+import eu.heronnet.module.kad.model.Node;
+import eu.heronnet.module.kad.model.RoutingTable;
 import eu.heronnet.module.kad.model.TreeSetImpl;
 import eu.heronnet.module.kad.net.IdGenerator;
 import eu.heronnet.module.kad.net.SelfNodeProvider;
@@ -33,7 +34,7 @@ public class KadModuleConfiguration {
     }
 
     @Bean
-    RadixTree radixTree() throws SocketException {
-        return new TreeSetImpl(selfNodeProvider().getSelf());
+    RoutingTable<Node, byte[]> routingTable() throws SocketException {
+        return new TreeSetImpl(selfNodeProvider().getSelf(), 20);
     }
 }

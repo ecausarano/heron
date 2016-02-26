@@ -19,10 +19,21 @@ package eu.heronnet.module.kad.model;
 
 import java.util.List;
 
-public interface RadixTree {
-    void insert(Node node);
+/**
+ * Routing table maintained by all nodes participating to the Kad network used to define a virtual network
+ * based on a distance topology, where distance is defined as similarity of the network Id: the longer the prefix of
+ * the integerId is, the closer the node is.
+ *
+ * Therefore two nodes can be compared and one be considered "closer" compared to another, depending on how much
+ * of the network prefix is the same.
+ *
+ * (Interestingly enough, could the IPv6 network address === the node ID ?)
+ *
+ */
+public interface RoutingTable<T extends Identifiable<ID>, ID> {
+    void insert(T node);
 
-    List<Node> find(byte[] key);
+    List<T> find(ID key);
 
-    void delete(byte[] key);
+    void delete(ID key);
 }

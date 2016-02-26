@@ -21,6 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,7 +34,8 @@ public class ResponseHandler extends SimpleChannelInboundHandler<Messages.Respon
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
 
     @Inject
-    private EventBus eventBus;
+    @Qualifier(value = "mainBus")
+    private EventBus mainBus;
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Messages.Response message) throws Exception {
@@ -68,7 +70,7 @@ public class ResponseHandler extends SimpleChannelInboundHandler<Messages.Respon
             });
             domainBundles.add(bundleBuilder.build());
         });
-        eventBus.post(new UpdateResults(domainBundles));
+        mainBus.post(new UpdateResults(domainBundles));
     }
 
     private void pingResponse(Messages.Response message) {

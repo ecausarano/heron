@@ -52,6 +52,7 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPKeyPair;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -65,6 +66,7 @@ public class PGPUtils {
     @Inject
     private String heronDataRoot;
     @Inject
+    @Qualifier(value = "localStorage")
     private Persistence persistence;
 
     static {

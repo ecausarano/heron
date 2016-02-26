@@ -26,26 +26,28 @@ import eu.heronnet.module.storage.Persistence;
 import eu.heronnet.module.storage.util.HexUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * @author edoardocausarano
  */
-@Component
 public class PutHandler {
 
     public static final String HERON_BINARY_PREDICATE = "http://heronnet.eu/0.1/bytesProperty";
     private static final Logger logger = LoggerFactory.getLogger(PutHandler.class);
-    @Inject
-    private EventBus eventBus;
 
     @Inject
+    @Qualifier(value = "mainBus")
+    private EventBus mainBus;
+
+    @Inject
+    @Qualifier(value = "distributedStorage")
     private Persistence persistence;
 
     @Subscribe
     public void handle(PutBundle command) {
         persistence.put(command.getBundle());
-        eventBus.post(new UpdateLocalResults(Collections.singletonList(command.getBundle())));
+        mainBus.post(new UpdateLocalResults(Collections.singletonList(command.getBundle())));
     }
 
     @Subscribe
@@ -78,11 +80,11 @@ public class PutHandler {
             }
         }
         persistence.put(bundle);
-        eventBus.post(new UpdateLocalResults(Collections.singletonList(bundle)));
+        mainBus.post(new UpdateLocalResults(Collections.singletonList(bundle)));
     }
 
     @PostConstruct
     void register() {
-        eventBus.register(this);
+        mainBus.register(this);
     }
 }

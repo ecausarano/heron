@@ -8,18 +8,18 @@ import com.google.common.eventbus.Subscribe;
 import eu.heronnet.module.bus.command.Get;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * @author edoardocausarano
  */
-@Component
 public class GetHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GetHandler.class);
 
     @Inject
-    private EventBus eventBus;
+    @Qualifier(value = "mainBus")
+    private EventBus mainBus;
 
     @Subscribe
     public void handle(Get command) {
@@ -39,7 +39,7 @@ public class GetHandler {
 
     @PostConstruct
     void register() {
-        eventBus.register(this);
+        mainBus.register(this);
     }
 
 }

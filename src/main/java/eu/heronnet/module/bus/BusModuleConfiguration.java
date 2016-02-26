@@ -20,8 +20,8 @@ public class BusModuleConfiguration {
     @Inject
     Executor executor;
 
-    @Bean
-    EventBus eventBus() {
+    @Bean()
+    EventBus mainBus() {
         return new AsyncEventBus("MAIN_BUS", executor);
     }
 

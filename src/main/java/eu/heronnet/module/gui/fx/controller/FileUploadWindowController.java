@@ -1,10 +1,8 @@
 package eu.heronnet.module.gui.fx.controller;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,7 +12,6 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import com.google.common.eventbus.EventBus;
-import eu.heronnet.model.Bundle;
 import eu.heronnet.model.Statement;
 import eu.heronnet.model.builder.BundleBuilder;
 import eu.heronnet.model.builder.IRIBuilder;
@@ -22,15 +19,12 @@ import eu.heronnet.model.builder.StringNodeBuilder;
 import eu.heronnet.module.bus.command.Put;
 import eu.heronnet.module.gui.model.FieldRow;
 import eu.heronnet.module.gui.model.metadata.FieldProcessorFactory;
-import eu.heronnet.module.pgp.PGPUtils;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -41,7 +35,6 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +53,7 @@ public class FileUploadWindowController {
     @Inject
     private Executor executor;
     @Inject
-    FXMLLoader fxmlLoader;
+    private FXMLLoader fxmlLoader;
     @Inject
     private FieldProcessorFactory processorFactory;
 

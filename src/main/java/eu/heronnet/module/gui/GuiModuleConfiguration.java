@@ -1,19 +1,13 @@
 package eu.heronnet.module.gui;
 
-import javax.inject.Inject;
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 import com.google.common.eventbus.EventBus;
-import eu.heronnet.module.gui.fx.controller.FileUploadWindowController;
-import eu.heronnet.module.gui.fx.controller.MainWindowController;
 import eu.heronnet.module.gui.fx.controller.UIController;
-import eu.heronnet.module.gui.fx.views.IdentityDetails;
-import eu.heronnet.module.gui.fx.views.BundleView;
-import javafx.fxml.FXMLLoader;
-import javafx.util.Callback;
-import org.springframework.context.ApplicationContext;
+import eu.heronnet.module.gui.fx.task.SearchByPredicate;
+import eu.heronnet.module.gui.fx.task.SignBundleService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
 /**
@@ -22,50 +16,26 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class GuiModuleConfiguration {
 
-    @Inject
-    ApplicationContext applicationContext;
-
-    @Bean
-    public Callback<Class<?>, Object> getControllerFactory() {
-        return param -> applicationContext.getBean(param);
-    }
-
-    @Bean
+    @Bean(name = {"uiBus"})
     EventBus uiBus() {
         // deliberately not AsyncEventBus so we remain on the UI thread
         return new EventBus("UI_BUS");
     }
 
     @Bean
+    @Scope(SCOPE_PROTOTYPE)
+    SearchByPredicate searchByPredicate() {
+        return new SearchByPredicate();
+    }
+
+    @Bean
+    @Scope(SCOPE_PROTOTYPE)
+    SignBundleService signBundleService() {
+        return new SignBundleService();
+    }
+
+    @Bean
     UIController uiController() {
         return new UIController();
-    }
-
-    @Bean @Scope("prototype")
-    FXMLLoader fxmlLoader() {
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setControllerFactory(getControllerFactory());
-        return fxmlLoader;
-    }
-
-    @Bean @Lazy
-    MainWindowController mainWindowController() {
-        return new MainWindowController();
-    }
-
-    @Bean @Lazy
-    @Scope("prototype")
-    FileUploadWindowController fileUploadWindowController() {
-        return new FileUploadWindowController();
-    }
-
-    @Bean @Lazy
-    IdentityDetails identityDetails() {
-        return new IdentityDetails();
-    }
-
-    @Bean @Lazy @Scope("prototype")
-    BundleView localStorageView() {
-        return new BundleView();
     }
 }

@@ -9,7 +9,7 @@ import com.google.protobuf.ByteString;
 import eu.heronnet.model.Bundle;
 import eu.heronnet.model.StringNode;
 import eu.heronnet.module.kad.model.Node;
-import eu.heronnet.module.kad.model.RadixTree;
+import eu.heronnet.module.kad.model.RoutingTable;
 import eu.heronnet.module.kad.net.IdGenerator;
 import eu.heronnet.module.kad.net.SelfNodeProvider;
 import eu.heronnet.module.storage.Persistence;
@@ -20,6 +20,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,13 +33,14 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
 
     @Inject
-    Persistence persistence;
+    @Qualifier(value = "localStorage")
+    Persistence localStorage;
     @Inject
     SelfNodeProvider selfNodeProvider;
     @Inject
     IdGenerator idGenerator;
     @Inject
-    RadixTree routingTable;
+    RoutingTable<Node, byte[]> routingTable;
 
 
     @Override
@@ -60,8 +62,16 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
 
     private void pingRequest(ChannelHandlerContext context, Messages.PingRequest request) {
         try {
+
+            final Messages.NetworkNode origin = request.getOrigin();
+            final List<Messages.Address> addressesList = origin.getAddressesList();
+            final List<byte[]> addresses = addressesList.stream().map(address -> address.getIpAddress().toByteArray()).collect(Collectors.toList());
+            final Node node = new Node(origin.getId().toByteArray(), addresses);
+            routingTable.insert(node);
+
             final Messages.PingResponse.Builder pingResponse = Messages.PingResponse.newBuilder();
             pingResponse.setOrigin(createSelfNetworkNodeBuilder());
+            pingResponse.setMessageId(ByteString.copyFrom(idGenerator.getId()));
             pingResponse.setResponse(ByteString.copyFrom(request.getMessageId().toByteArray()));
 
             final Messages.Response.Builder responseBuilder = Messages.Response.newBuilder()
@@ -87,7 +97,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
         }
 
         List<byte[]> requestAsBytes = valuesList.stream().map(ByteString::toByteArray).collect(Collectors.toList());
-        List<Bundle> byHash = persistence.findByHash(requestAsBytes);
+        List<Bundle> byHash = localStorage.findByHash(requestAsBytes);
 
         Messages.FindValueResponse.Builder responseBuilder = Messages.FindValueResponse.newBuilder();
         responseBuilder.setMessageId(ByteString.copyFrom(idGenerator.getId()));

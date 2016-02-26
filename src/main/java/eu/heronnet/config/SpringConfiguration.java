@@ -36,7 +36,7 @@ public class SpringConfiguration {
 
     @Bean
     String heronDataRoot() throws IOException {
-        String dataFolder = null;
+        String dataFolder;
 
         switch (System.getProperty("os.name")) {
             case "Mac OS X":

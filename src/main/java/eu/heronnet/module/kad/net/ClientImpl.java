@@ -17,6 +17,7 @@
 
 package eu.heronnet.module.kad.net;
 
+
 import javax.inject.Inject;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -34,21 +35,26 @@ import com.google.common.util.concurrent.AbstractIdleService;
 import com.google.protobuf.ByteString;
 import eu.heronnet.model.Bundle;
 import eu.heronnet.module.kad.model.Node;
-import eu.heronnet.module.kad.model.RadixTree;
+import eu.heronnet.module.kad.model.RoutingTable;
 import eu.heronnet.module.kad.net.handler.ResponseHandler;
 import eu.heronnet.module.storage.Persistence;
 import eu.heronnet.rpc.Messages;
 import eu.heronnet.rpc.Messages.Address;
 import eu.heronnet.rpc.Messages.FindValueRequest;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
@@ -59,15 +65,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component(value = "distributedStorage")
 public class ClientImpl extends AbstractIdleService implements Persistence {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientImpl.class);
 
     @Inject
-    private RadixTree routingTable;
+    private RoutingTable<Node, byte[]> routingTable;
 
-    private Bootstrap bootstrap;
+    private Bootstrap tcpBoostrap;
 
     private EventLoopGroup workerGroup;
 
@@ -81,29 +87,45 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
     @Inject
     private IdGenerator idGenerator;
 
-    private final ChannelInitializer<SocketChannel> channelInitializer = new ChannelInitializer<SocketChannel>() {
+    private final ChannelInitializer<SocketChannel> tcpChannelInitializer = new ChannelInitializer<SocketChannel>() {
         @Override
         protected void initChannel(SocketChannel ch) throws Exception {
             final ChannelPipeline pipeline = ch.pipeline();
             pipeline.addLast("frameDecoder", new ProtobufVarint32FrameDecoder());
-            pipeline.addLast("protobufResponseDecoder", new ProtobufDecoder(Messages.Response.getDefaultInstance()));
-
             pipeline.addLast("frameEncoder", new ProtobufVarint32LengthFieldPrepender());
+
+            pipeline.addLast("protobufResponseDecoder", new ProtobufDecoder(Messages.Response.getDefaultInstance()));
             pipeline.addLast("protobufEncoder", new ProtobufEncoder());
 
             pipeline.addLast(responseHandler);
         }
     };
 
+    private final ChannelInitializer<NioDatagramChannel> udpChannelInitializer = new ChannelInitializer<NioDatagramChannel>() {
+        @Override
+        protected void initChannel(NioDatagramChannel ch) throws Exception {
+            final ChannelPipeline pipeline = ch.pipeline();
+        }
+    };
+
+    private Bootstrap udpBoostrap;
+
     public ClientImpl() {
     }
 
     @Override
     protected void startUp() throws Exception {
-        bootstrap = new Bootstrap();
+        tcpBoostrap = new Bootstrap();
+        udpBoostrap = new Bootstrap();
         workerGroup = new NioEventLoopGroup();
 
-        bootstrap.group(workerGroup).channel(NioSocketChannel.class).handler(channelInitializer);
+        tcpBoostrap.group(workerGroup)
+                .channel(NioSocketChannel.class)
+                .handler(tcpChannelInitializer);
+        udpBoostrap.group(workerGroup)
+                .channel(NioDatagramChannel.class)
+                .option(ChannelOption.SO_BROADCAST, true)
+                .handler(udpChannelInitializer);
     }
 
     @Override
@@ -114,23 +136,57 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
 
     public void broadcast() {
         try {
+
+            Messages.NetworkNode.Builder selfNodeBuilder = Messages.NetworkNode.newBuilder();
+            Node self = selfNodeProvider.getSelf();
+            self.getAddresses().forEach(address -> {
+                Address.Builder addressBuilder = Address.newBuilder()
+                        .setPort(6565)
+                        .setIpAddress(ByteString.copyFrom(address));
+                selfNodeBuilder.addAddresses(addressBuilder);
+            });
+            selfNodeBuilder.setId(ByteString.copyFrom(self.getId()));
+
+            final Messages.PingRequest.Builder pingRequestBuilder = Messages.PingRequest.newBuilder();
+            pingRequestBuilder.setMessageId(ByteString.copyFrom(idGenerator.getId()));
+            pingRequestBuilder.setOrigin(selfNodeBuilder);
+
+            final Messages.Request.Builder request = Messages.Request.newBuilder().setPingRequest(pingRequestBuilder);
+
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface networkInterface = interfaces.nextElement();
-                // we don't want to ping ourselves
-                if (networkInterface.isLoopback()) return;
-                for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-                    InetAddress address = interfaceAddress.getAddress();
-                    // site-local addresses are deprecated
-                    if (address.isSiteLocalAddress()) return;
-                    InetAddress broadcast = interfaceAddress.getBroadcast();
-                    if (broadcast != null) {
-                        final ChannelFuture future = bootstrap.connect(new InetSocketAddress(broadcast, 6565));
-                        final Channel channel = future.awaitUninterruptibly().channel();
-                        channel.writeAndFlush(broadcast);
-                    }
+            Collections.list(interfaces).forEach(networkInterface -> {
+                try {
+                    if (networkInterface.isLoopback()) return;
+                    final List<InterfaceAddress> interfaceAddresses = networkInterface.getInterfaceAddresses();
+                    interfaceAddresses.forEach(interfaceAddress -> {
+                        InetAddress broadcast = interfaceAddress.getBroadcast();
+                        if (broadcast != null) {
+                            final ChannelFuture future = udpBoostrap.bind(0);
+                            future.addListener(new ChannelFutureListener() {
+                                @Override
+                                public void operationComplete(ChannelFuture future) throws Exception {
+                                    if (future.isSuccess()) {
+                                        final Channel channel = future.channel();
+
+                                        final ByteBuf requestBuffer = Unpooled.wrappedBuffer(request.build().toByteArray());
+                                        final DatagramPacket datagramPacket = new DatagramPacket(
+                                                requestBuffer,
+                                                new InetSocketAddress(broadcast, 6565));
+                                        channel.writeAndFlush(datagramPacket);
+                                        channel.close();
+                                        logger.debug("completed operation: {}", future.toString());
+                                    } else {
+                                        final Throwable cause = future.cause();
+                                        logger.error("Error in channel bootstrap: {}", cause.getMessage());
+                                    }
+                                }
+                            });
+                        }
+                    });
+                } catch (SocketException e) {
+                    logger.error("Some weird error has occurred, just logging: {}", e.getMessage());
                 }
-            }
+            });
         } catch (SocketException e) {
             logger.error(e.getMessage());
         }
@@ -155,9 +211,7 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
     public List<Bundle> findByHash(List<byte[]> searchKeys) {
 
         ArrayList<Node> targetNodes = new ArrayList<>();
-        searchKeys.forEach(key -> {
-            targetNodes.addAll(routingTable.find(key));
-        });
+        searchKeys.forEach(key -> targetNodes.addAll(routingTable.find(key)));
 
         try {
             // generateself node
@@ -183,7 +237,7 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
                 addresses.forEach(address -> {
                     final ChannelFuture future;
                     try {
-                        future = bootstrap.connect(InetAddress.getByAddress(address), 6565).sync();
+                        future = tcpBoostrap.connect(InetAddress.getByAddress(address), 6565).sync();
                         final Channel channel = future.awaitUninterruptibly().channel();
 
 

@@ -13,7 +13,7 @@ public class IdGenerator {
     private final Random random = new Random();
 
     public byte[] getId() {
-        byte[] bytes = new byte[20];
+        byte[] bytes = new byte[32];
         random.nextBytes(bytes);
         return bytes;
     }

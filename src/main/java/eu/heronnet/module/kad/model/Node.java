@@ -17,15 +17,17 @@
 
 package eu.heronnet.module.kad.model;
 
-import java.net.InetSocketAddress;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class Node implements Comparable<Node> {
+/**
+ * Represents a node of the Heron network
+ */
+public class Node implements Identifiable<byte[]>, Comparable<Node> {
 
     private byte[] id;
 
@@ -33,6 +35,12 @@ public class Node implements Comparable<Node> {
     private Date lastSeen;
     private int RTT;
 
+    /**
+     * Node constructor.
+     *
+     * @param id the random ID of a node
+     * @param addresses a list of known IP of the node
+     */
     public Node(byte[] id, List<byte[]> addresses) {
         this.id = Arrays.copyOf(id, id.length);
         this.addresses = Collections.unmodifiableList(new ArrayList<>(addresses));
@@ -43,6 +51,7 @@ public class Node implements Comparable<Node> {
         this.lastSeen = new Date(lastSeen.getTime());
     }
 
+    @Override
     public byte[] getId() {
         return id;
     }
@@ -64,31 +73,6 @@ public class Node implements Comparable<Node> {
     }
 
     @Override
-    public int compareTo(Node that) {
-        BitSet thatBitSet = BitSet.valueOf(that.getId());
-        final BitSet thisBitSet = BitSet.valueOf(id);
-
-        thatBitSet.xor(thisBitSet);
-
-        // first bit that differs
-        int offset = thatBitSet.nextSetBit(0);
-        // identical
-        if (offset == -1) {
-            return 0;
-        }
-        else {
-            // this node has the larger index
-            if (thisBitSet.get(offset)) {
-                return 1;
-            }
-            else {
-                // this node has the smaller index
-                return -1;
-            }
-        }
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -107,7 +91,14 @@ public class Node implements Comparable<Node> {
         int result = Arrays.hashCode(id);
         result = 31 * result + addresses.hashCode();
         result = 31 * result + (lastSeen != null ? lastSeen.hashCode() : 0);
-        result = 31 * result + (int) (RTT ^ (RTT >>> 32));
+        result = 31 * result + (RTT ^ (RTT >>> 32));
         return result;
+    }
+
+    @Override
+    public int compareTo(Node o) {
+        BigInteger thisNode = id.length == 0 ? BigInteger.ZERO : new BigInteger(1, id);
+        BigInteger thatNode = o.getId().length == 0 ? BigInteger.ZERO : new BigInteger(1, o.getId());
+        return thisNode.compareTo(thatNode);
     }
 }

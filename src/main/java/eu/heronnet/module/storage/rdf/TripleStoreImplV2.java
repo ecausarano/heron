@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 /**
  * @author edoardocausarano
  */
-@Component(value = "persistence")
+@Component(value = "localStorage")
 public class TripleStoreImplV2 extends AbstractIdleService implements Persistence {
 
     private static final String BUNDLE_STORE = "BundleStore";

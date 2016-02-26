@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import eu.heronnet.model.Bundle;
-import eu.heronnet.module.gui.fx.views.IdentityDetails;
+import eu.heronnet.module.gui.fx.views.IdentityDetailsView;
 import eu.heronnet.module.gui.model.DocumentListCell;
 import eu.heronnet.module.storage.util.HexUtil;
 import javafx.beans.binding.Bindings;
@@ -15,7 +15,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
@@ -28,8 +27,6 @@ import javafx.util.Callback;
 import org.controlsfx.control.PopOver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 /**
  * Is responsible of the coordination of all events deriving from user interaction,
@@ -38,19 +35,16 @@ import org.springframework.stereotype.Component;
  *
  * @author edoardocausarano
  */
-@Component
 public class MainWindowController {
 
     private static final Logger logger = LoggerFactory.getLogger(MainWindowController.class);
 
     @Inject
     private UIController uiController;
-
     @Inject
     private Callback controllerFactory;
-
     @Inject
-    private IdentityDetails identityDetails;
+    private IdentityDetailsView identityDetailsView;
 
     @FXML
     private MenuBar menuBar;
@@ -87,15 +81,9 @@ public class MainWindowController {
     }
 
     @FXML
-    public void search(ActionEvent event) {
-        logger.debug("searching for {}", searchField.getText());
-        uiController.searchForText(searchField.getText());
-    }
-
-    @FXML
     public void revealIdPopover() {
         if (idPopover == null) {
-            idPopover = new PopOver(identityDetails);
+            idPopover = new PopOver(identityDetailsView);
             idPopover.setArrowLocation(PopOver.ArrowLocation.RIGHT_TOP);
             idPopover.setDetachable(true);
         }
@@ -107,12 +95,6 @@ public class MainWindowController {
         }
     }
 
-    @FXML
-    public void openLocalStoreView() {
-        logger.debug("called openLocalStoreView");
-        final Alert openLocalStorage = new Alert(Alert.AlertType.INFORMATION);
-        openLocalStorage.show();
-    }
 
     @FXML
     public void initialize() {

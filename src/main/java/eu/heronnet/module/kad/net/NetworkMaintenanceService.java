@@ -5,9 +5,9 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.util.concurrent.AbstractScheduledService;
-import eu.heronnet.module.storage.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,7 +19,8 @@ public class NetworkMaintenanceService extends AbstractScheduledService {
     private static final Logger logger = LoggerFactory.getLogger(NetworkMaintenanceService.class);
 
     @Inject
-    private Persistence clientImpl;
+    @Qualifier(value = "distributedStorage")
+    private ClientImpl clientImpl;
 
     @Inject
     private SelfNodeProvider selfNodeProvider;
@@ -28,14 +29,11 @@ public class NetworkMaintenanceService extends AbstractScheduledService {
     protected void runOneIteration() throws Exception {
         final Date when = new Date();
         logger.debug("running network maintenance at={}", when);
-
-//        PingRequest pingRequest = new PingRequest(selfNodeProvider.getSelf());
-
-//        clientImpl.broadcast(pingRequest);
+        clientImpl.broadcast();
     }
 
     @Override
     protected Scheduler scheduler() {
-        return Scheduler.newFixedRateSchedule(15, 5, TimeUnit.MINUTES);
+        return Scheduler.newFixedRateSchedule(1, 5, TimeUnit.SECONDS);
     }
 }

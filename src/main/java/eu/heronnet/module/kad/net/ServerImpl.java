@@ -18,19 +18,27 @@
 package eu.heronnet.module.kad.net;
 
 import javax.inject.Inject;
+import java.util.List;
 
 import com.google.common.util.concurrent.AbstractIdleService;
 import eu.heronnet.module.kad.net.handler.RequestHandler;
+import eu.heronnet.module.kad.net.handler.ResponseHandler;
 import eu.heronnet.rpc.Messages;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.DatagramChannel;
+import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
@@ -40,7 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-//import eu.heronnet.module.kad.net.handler.StoreValueRequestHandler;
 
 @Component
 public class ServerImpl extends AbstractIdleService implements Server {
@@ -53,22 +60,52 @@ public class ServerImpl extends AbstractIdleService implements Server {
 
     @Inject
     private RequestHandler requestHandler;
+    @Inject
+    private ResponseHandler responseHandler;
 
-    private final ChannelInitializer<SocketChannel> channelInitializer = new ChannelInitializer<SocketChannel>() {
+    private final ChannelInitializer<SocketChannel> tcpChannelInitializer = new ChannelInitializer<SocketChannel>() {
         @Override
         protected void initChannel(SocketChannel ch) throws Exception {
             final ChannelPipeline pipeline = ch.pipeline();
             pipeline.addLast("Logger", new LoggingHandler());
             pipeline.addLast("frameDecoder", new ProtobufVarint32FrameDecoder());
-            pipeline.addLast("protobufDecoder", new ProtobufDecoder(Messages.Request.getDefaultInstance()));
-
             pipeline.addLast("frameEncoder", new ProtobufVarint32LengthFieldPrepender());
-            pipeline.addLast("protobufEncoder", new ProtobufEncoder());
 
+            pipeline.addLast("protobufDecoder", new ProtobufDecoder(Messages.Request.getDefaultInstance()));
+            pipeline.addLast("protobufEncoder", new ProtobufEncoder());
 
             pipeline.addLast("request handler", requestHandler);
         }
     };
+
+    private final ChannelInitializer<DatagramChannel> udpChannelInitializer = new ChannelInitializer<DatagramChannel>() {
+        @Override
+        protected void initChannel(DatagramChannel ch) throws Exception {
+            final ChannelPipeline pipeline = ch.pipeline();
+            pipeline.addLast(new MessageToMessageDecoder<DatagramPacket>() {
+
+                @Override
+                protected void decode(ChannelHandlerContext ctx, DatagramPacket packet, List<Object> out) throws Exception {
+                    final byte[] array;
+                    final ByteBuf msg = packet.content();
+                    final int length = msg.readableBytes();
+                    if (msg.hasArray()) {
+                        array = msg.array();
+                    } else {
+                        array = new byte[length];
+                        msg.getBytes(msg.readerIndex(), array, 0, length);
+                    }
+                    out.add(Unpooled.wrappedBuffer(array));
+                }
+            });
+            pipeline.addLast("protobuf Request decoder", new ProtobufDecoder(Messages.Request.getDefaultInstance()));
+            pipeline.addLast("protobug Response decoder", new ProtobufDecoder(Messages.Response.getDefaultInstance()));
+            pipeline.addLast("request handler", requestHandler);
+            pipeline.addLast("response handler", responseHandler);
+        }
+    };
+
+
 
     @Override
     protected void startUp() throws Exception {
@@ -82,16 +119,17 @@ public class ServerImpl extends AbstractIdleService implements Server {
         tcpBoostrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .localAddress(6565)
-                .childHandler(channelInitializer)
+                .childHandler(tcpChannelInitializer)
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
         tcpBoostrap.bind().sync();
 
-//        udpbootrap.group(workerGroup)
-//                .channel(NioDatagramChannel.class)
-//                .localAddress(6565)
-//                .option(ChannelOption.SO_BROADCAST, true);
-//        udpbootrap.bind().sync();
+        udpbootrap.group(workerGroup)
+                .channel(NioDatagramChannel.class)
+                .localAddress(6565)
+                .handler(udpChannelInitializer)
+                .option(ChannelOption.SO_BROADCAST, true);
+        udpbootrap.bind().sync();
 
     }
 

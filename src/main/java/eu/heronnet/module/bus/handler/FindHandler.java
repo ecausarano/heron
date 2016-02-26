@@ -21,13 +21,13 @@ import eu.heronnet.module.kad.net.SelfNodeProvider;
 import eu.heronnet.module.storage.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 /**
  * @author edoardocausarano
  */
-@Component
+//@Component
 public class FindHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(FindHandler.class);
@@ -38,23 +38,24 @@ public class FindHandler {
     ApplicationContext applicationContext;
 
     @Inject
-    private EventBus eventBus;
+    @Qualifier(value = "mainBus")
+    private EventBus mainBus;
 
     @Inject
     private SelfNodeProvider selfNodeProvider;
 
 
     @Inject
-    private Persistence clientImpl;
+    private Persistence distributedStorage;
 
     @Inject
-    private Persistence persistence;
+    private Persistence localStorage;
 
     @Subscribe
     public void handle(Find command) throws SocketException {
         if (command.isLocal() && command.getTerm() != null) {
-            List<Bundle> byStringKey = persistence.findByHash(Collections.singletonList(command.getHash()));
-            eventBus.post(new UpdateResults(byStringKey));
+            List<Bundle> byStringKey = localStorage.findByHash(Collections.singletonList(command.getHash()));
+            mainBus.post(new UpdateResults(byStringKey));
         }
 
         if (!command.isLocal() && command.getTerm() != null) {
@@ -66,25 +67,25 @@ public class FindHandler {
                     digest.update(term.getBytes("UTF-8"));
                     hashes.add(digest.digest());
                 }
-                clientImpl.findByHash(hashes);
+                distributedStorage.findByHash(hashes);
             } catch (NoSuchAlgorithmException e) {
                 logger.error("SHA-256 not available");
-                eventBus.post(e);
+                mainBus.post(e);
             } catch (UnsupportedEncodingException e) {
                 logger.error("UTF-8 encoding not available on platform... (really?!)");
-                eventBus.post(e);
+                mainBus.post(e);
             }
         }
 
         if (command.isLocal()) {
-            List<Bundle> bundles = persistence.getAll();
-            eventBus.post(new UpdateLocalResults(bundles));
+            List<Bundle> bundles = localStorage.getAll();
+            mainBus.post(new UpdateLocalResults(bundles));
         }
     }
 
     @PostConstruct
     void register() {
-        eventBus.register(this);
+        mainBus.register(this);
     }
 
 }

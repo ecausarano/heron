@@ -52,6 +52,12 @@ public class BundleBuilder {
         return this;
     }
 
+    public BundleBuilder withBundle(Bundle bundle) {
+        this.subject = bundle.getSubject();
+        statements.addAll(bundle.getStatements());
+        return this;
+    }
+
     /**
      * Call to create a new immutable {@link Bundle}
      *

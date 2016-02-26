@@ -1,16 +1,13 @@
 package eu.heronnet.module.gui.fx;
 
 import javax.inject.Inject;
-import java.io.InputStream;
 
 import com.google.common.util.concurrent.ServiceManager;
 import eu.heronnet.Main;
+import eu.heronnet.module.gui.fx.views.MainWindowView;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -26,22 +23,20 @@ public class HeronApplication extends Application {
     @Inject
     ServiceManager serviceManager;
 
-    private ApplicationContext applicationContext;
-
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        applicationContext = Main.getApplicationContext();
-        try (InputStream fxmlStream = HeronApplication.class.getResourceAsStream("/HeronMainWindow.fxml")) {
-            Callback controllerFactory = applicationContext.getBean(Callback.class);
-            FXMLLoader fxmlLoader = new FXMLLoader();
-            fxmlLoader.setControllerFactory(controllerFactory);
-            Parent parent = fxmlLoader.load(fxmlStream);
+        ApplicationContext applicationContext = Main.getApplicationContext();
 
-            Scene scene = new Scene(parent);
+        try {
+            final MainWindowView mainWindowView = new MainWindowView(applicationContext::getBean);
+
+            Scene scene = new Scene(mainWindowView);
             primaryStage.setScene(scene);
             primaryStage.setTitle("Heron");
             primaryStage.show();
+        } catch (RuntimeException e) {
+            logger.error(e.getMessage());
         }
     }
 
