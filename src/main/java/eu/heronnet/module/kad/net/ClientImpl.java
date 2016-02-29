@@ -70,18 +70,15 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientImpl.class);
 
-    @Inject
-    private RoutingTable<Node, byte[]> routingTable;
-
     private Bootstrap tcpBoostrap;
-
+    private Bootstrap udpBoostrap;
     private EventLoopGroup workerGroup;
-
     private LoggingHandler loggingHandler = new LoggingHandler();
 
     @Inject
+    private RoutingTable<Node, byte[]> routingTable;
+    @Inject
     private ResponseHandler responseHandler;
-
     @Inject
     private SelfNodeProvider selfNodeProvider;
     @Inject
@@ -104,14 +101,8 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
     private final ChannelInitializer<NioDatagramChannel> udpChannelInitializer = new ChannelInitializer<NioDatagramChannel>() {
         @Override
         protected void initChannel(NioDatagramChannel ch) throws Exception {
-            final ChannelPipeline pipeline = ch.pipeline();
         }
     };
-
-    private Bootstrap udpBoostrap;
-
-    public ClientImpl() {
-    }
 
     @Override
     protected void startUp() throws Exception {
@@ -136,7 +127,6 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
 
     public void broadcast() {
         try {
-
             Messages.NetworkNode.Builder selfNodeBuilder = Messages.NetworkNode.newBuilder();
             Node self = selfNodeProvider.getSelf();
             self.getAddresses().forEach(address -> {
@@ -239,7 +229,6 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
                     try {
                         future = tcpBoostrap.connect(InetAddress.getByAddress(address), 6565).sync();
                         final Channel channel = future.awaitUninterruptibly().channel();
-
 
                         ChannelFuture responseFuture = channel.writeAndFlush(requestBuilder.build());
                         responseFuture.addListener(new ChannelFutureListener() {

@@ -46,3 +46,21 @@ public class SignBundleService extends Service<Bundle> {
         this.bundle = bundle;
     }
 }
+
+//        Task<Statement> signBundleTask = new Task<Statement>() {
+//            @Override
+//            protected Statement call() throws Exception {
+//                items.forEach(fieldRow -> builder.withStatement(new Statement(
+//                        IRIBuilder.withString(fieldRow.getName()),
+//                        StringNodeBuilder.withString(fieldRow.getValue()))));
+//                Bundle bundle = builder.build();
+//                return pgpUtils.createSignature(bundle, "password".toCharArray());
+//            }
+//        };
+
+//        signBundleTask.setOnSucceeded(workerStateEvent ->{
+//            builder.withStatement(signBundleTask.getValue()) ;
+//            Put put = new Put(builder, path);
+//            eventBus.post(put);
+//        });
+//        executor.execute(signBundleTask);

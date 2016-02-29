@@ -77,8 +77,8 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
 
     @FXML
     private void addFile(ActionEvent event) {
-        logger.debug("Adding file");
         final FileUploadView fileUploadView = new FileUploadView(delegateFactory);
+        fileUploadView.showAndWait();
     }
 
     @FXML

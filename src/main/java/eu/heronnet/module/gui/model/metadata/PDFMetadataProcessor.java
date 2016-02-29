@@ -29,7 +29,11 @@ public class PDFMetadataProcessor implements MetadataProcessor {
             List<Statement> fields = new ArrayList<>();
             fields.add(new Statement(DC.TITLE, StringNodeBuilder.withString(documentInformation.getTitle())));
             fields.add(new Statement(DC.CREATOR, StringNodeBuilder.withString(documentInformation.getAuthor())));
-            fields.add(new Statement(DC.DATE, StringNodeBuilder.withString(Integer.toString(documentInformation.getCreationDate().get(Calendar.YEAR)))));
+
+            final Calendar creationDate = documentInformation.getCreationDate();
+            if (creationDate != null) {
+                fields.add(new Statement(DC.DATE, StringNodeBuilder.withString(Integer.toString(creationDate.get(Calendar.YEAR)))));
+            }
             fields.add(new Statement(DC.FORMAT, StringNodeBuilder.withString("application/pdf")));
             return fields;
         }

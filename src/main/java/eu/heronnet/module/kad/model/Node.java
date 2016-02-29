@@ -42,12 +42,12 @@ public class Node implements Identifiable<byte[]>, Comparable<Node> {
      * @param addresses a list of known IP of the node
      */
     public Node(byte[] id, List<byte[]> addresses) {
-        this.id = Arrays.copyOf(id, id.length);
-        this.addresses = Collections.unmodifiableList(new ArrayList<>(addresses));
+        this(id, addresses, new Date());
     }
 
     public Node(byte[] id, List<byte[]> addresses, Date lastSeen) {
-        this(id, addresses);
+        this.id = Arrays.copyOf(id, id.length);
+        this.addresses = Collections.unmodifiableList(new ArrayList<>(addresses));
         this.lastSeen = new Date(lastSeen.getTime());
     }
 

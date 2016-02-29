@@ -21,9 +21,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
  *
  * @author edoardocausarano
  */
-public class SearchByPredicate extends Service<List<Bundle>> {
+public class SearchByPredicateService extends Service<List<Bundle>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(SearchByPredicate.class);
+    private static final Logger logger = LoggerFactory.getLogger(SearchByPredicateService.class);
     private static final Pattern splitter = Pattern.compile("\\s");
 
     @Inject

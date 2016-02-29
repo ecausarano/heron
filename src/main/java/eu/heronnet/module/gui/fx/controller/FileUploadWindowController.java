@@ -120,7 +120,7 @@ public class FileUploadWindowController {
             TablePosition<FieldRow, String> tablePosition = t.getTablePosition();
 
             FieldRow fieldRow = items.get(tablePosition.getRow());
-            fieldRow.setName(newName);
+            fieldRow.nameProperty().set(newName);
         });
 
         valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
@@ -132,7 +132,7 @@ public class FileUploadWindowController {
             TablePosition<FieldRow, String> tablePosition = t.getTablePosition();
 
             FieldRow fieldRow = items.get(tablePosition.getRow());
-            fieldRow.setValue(newValue);
+            fieldRow.valueProperty().set(newValue);
         });
 
     }
@@ -156,8 +156,8 @@ public class FileUploadWindowController {
 
         BundleBuilder builder = new BundleBuilder();
         metaTableView.getItems().forEach(fieldRow -> builder.withStatement(new Statement(
-                    IRIBuilder.withString(fieldRow.getName()),
-                    StringNodeBuilder.withString(fieldRow.getValue()))));
+                    IRIBuilder.withString(fieldRow.nameProperty().getValue()),
+                    StringNodeBuilder.withString(fieldRow.valueProperty().getValue()))));
 
         Put put = new Put(builder, path);
         eventBus.post(put);

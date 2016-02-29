@@ -1,7 +1,5 @@
 package eu.heronnet.module.kad.net;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -10,18 +8,16 @@ import java.util.Enumeration;
 import java.util.List;
 
 import eu.heronnet.module.kad.model.Node;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author edoardocausarano
  */
 public class SelfNodeProvider {
 
-    private final IdGenerator idGenerator;
+    private final byte[] id;
 
-    @Autowired
-    public SelfNodeProvider(IdGenerator idGenerator) {
-        this.idGenerator = idGenerator;
+    public SelfNodeProvider(byte[] id) {
+        this.id = id;
     }
 
     public Node getSelf() throws SocketException {
@@ -40,6 +36,6 @@ public class SelfNodeProvider {
                 nodeAddresses.add(interfaceAddress.getAddress().getAddress());
             });
         }
-        return new Node(idGenerator.getId(), nodeAddresses);
+        return new Node(id, nodeAddresses);
     }
 }

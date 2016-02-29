@@ -30,7 +30,7 @@ public class KadModuleConfiguration {
     @Bean
     @Named("self")
     SelfNodeProvider selfNodeProvider() {
-        return new SelfNodeProvider(idGenerator);
+        return new SelfNodeProvider(idGenerator.getId());
     }
 
     @Bean

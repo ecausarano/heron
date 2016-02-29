@@ -1,20 +1,24 @@
 package eu.heronnet.module.gui;
 
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+import javax.inject.Inject;
+import java.util.concurrent.ExecutorService;
 
 import com.google.common.eventbus.EventBus;
 import eu.heronnet.module.gui.fx.controller.UIController;
-import eu.heronnet.module.gui.fx.task.SearchByPredicate;
+import eu.heronnet.module.gui.fx.task.ExtractDocumentMetadataService;
+import eu.heronnet.module.gui.fx.task.SearchByPredicateService;
 import eu.heronnet.module.gui.fx.task.SignBundleService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 /**
  * @author edoardocausarano
  */
 @Configuration
 public class GuiModuleConfiguration {
+
+    @Inject
+    ExecutorService executor;
 
     @Bean(name = {"uiBus"})
     EventBus uiBus() {
@@ -23,15 +27,23 @@ public class GuiModuleConfiguration {
     }
 
     @Bean
-    @Scope(SCOPE_PROTOTYPE)
-    SearchByPredicate searchByPredicate() {
-        return new SearchByPredicate();
+    SearchByPredicateService searchByPredicateService() {
+        final SearchByPredicateService service = new SearchByPredicateService();
+        service.setExecutor(executor);
+        return service;
     }
 
     @Bean
-    @Scope(SCOPE_PROTOTYPE)
     SignBundleService signBundleService() {
-        return new SignBundleService();
+        final SignBundleService service = new SignBundleService();
+        service.setExecutor(executor);
+        return service;
+    }
+    @Bean
+    ExtractDocumentMetadataService extractDocumentMetadataService() {
+        final ExtractDocumentMetadataService service = new ExtractDocumentMetadataService();
+        service.setExecutor(executor);
+        return service;
     }
 
     @Bean
