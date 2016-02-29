@@ -25,7 +25,6 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -139,9 +138,9 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
 
             final Messages.PingRequest.Builder pingRequestBuilder = Messages.PingRequest.newBuilder();
             pingRequestBuilder.setMessageId(ByteString.copyFrom(idGenerator.getId()));
-            pingRequestBuilder.setOrigin(selfNodeBuilder);
 
             final Messages.Request.Builder request = Messages.Request.newBuilder().setPingRequest(pingRequestBuilder);
+            request.setOrigin(selfNodeBuilder);
 
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             Collections.list(interfaces).forEach(networkInterface -> {
@@ -182,9 +181,33 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
         }
     }
 
+    /**
+     * TODO call findByHash with bundle's ID to find nodes in closest bucket to publish to.
+     *
+     *
+     * @param rawBundle
+     */
     @Override
     public void put(Bundle rawBundle) {
-        throw new RuntimeException("not implemented");
+
+        final Messages.Bundle.Builder bundleBuilder = Messages.Bundle.newBuilder();
+        bundleBuilder.setSubject(ByteString.copyFrom(rawBundle.getSubject().getNodeId()));
+        rawBundle.getStatements().forEach(statement ->  {
+            final Messages.Statement.Builder statementBuilder = Messages.Statement.newBuilder();
+            statementBuilder.setPredicate(statement.getPredicate().toString());
+            // TODO - type switch on getNodeType, in a separate class... IOW un-hack
+            statementBuilder.setStringValue(statement.getObject().toString());
+            bundleBuilder.addStatements(statementBuilder);
+        });
+
+        final Messages.StoreValueRequest.Builder storeValueRequestBuilder = Messages.StoreValueRequest.newBuilder()
+                .setMessageId(ByteString.copyFrom(idGenerator.getId()))
+                .addBundles(bundleBuilder);
+        final List<Node> nodes = routingTable.find(rawBundle.getSubject().getNodeId());
+
+        final Messages.Request.Builder requestBuilder = Messages.Request.newBuilder()
+                .setStoreValueRequest(storeValueRequestBuilder);
+        sendAllNodes(nodes, requestBuilder);
     }
 
     @Override
@@ -200,11 +223,21 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
     @Override
     public List<Bundle> findByHash(List<byte[]> searchKeys) {
 
-        ArrayList<Node> targetNodes = new ArrayList<>();
-        searchKeys.forEach(key -> targetNodes.addAll(routingTable.find(key)));
+        FindValueRequest.Builder findValueRequestBuilder = FindValueRequest.newBuilder();
+        findValueRequestBuilder.setMessageId(ByteString.copyFrom(idGenerator.getId()));
+        findValueRequestBuilder.addAllValues(searchKeys.stream().map(ByteString::copyFrom).collect(Collectors.toList()));
 
+        final Messages.Request.Builder requestBuilder = Messages.Request.newBuilder();
+        requestBuilder.setFindValueRequest(findValueRequestBuilder);
+
+        final List<Node> targets = searchKeys.stream().flatMap(key -> routingTable.find(key).stream()).collect(Collectors.toList());
+        sendAllNodes(targets, requestBuilder);
+
+        return Collections.emptyList();
+    }
+
+    private void sendAllNodes(List<Node> nodes, Messages.Request.Builder requestBuilder) {
         try {
-            // generateself node
             Node self = selfNodeProvider.getSelf();
             Messages.NetworkNode.Builder selfNodeBuilder = Messages.NetworkNode.newBuilder();
             self.getAddresses().forEach(address -> {
@@ -214,15 +247,9 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
                 selfNodeBuilder.addAddresses(addressBuilder);
             });
             selfNodeBuilder.setId(ByteString.copyFrom(self.getId()));
+            requestBuilder.setOrigin(selfNodeBuilder);
 
-            // build the wire request
-            FindValueRequest.Builder findValueRequestBuilder = FindValueRequest.newBuilder();
-            findValueRequestBuilder.setMessageId(ByteString.copyFrom(idGenerator.getId()));
-            findValueRequestBuilder.setOrigin(selfNodeBuilder);
-            findValueRequestBuilder.addAllValues(searchKeys.stream().map(ByteString::copyFrom).collect(Collectors.toList()));
-
-            Messages.Request.Builder requestBuilder = Messages.Request.newBuilder().setFindValueRequest(findValueRequestBuilder);
-            for (Node node : targetNodes) {
+            for (Node node : nodes) {
                 List<byte[]> addresses = node.getAddresses();
                 addresses.forEach(address -> {
                     final ChannelFuture future;
@@ -249,8 +276,6 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
         } catch (SocketException e) {
             logger.error("Socket exception while building list of self nodes={}", e.getMessage());
         }
-
-        return Collections.emptyList();
     }
 
     @Override

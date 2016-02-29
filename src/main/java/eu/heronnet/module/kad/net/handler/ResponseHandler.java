@@ -75,7 +75,7 @@ public class ResponseHandler extends SimpleChannelInboundHandler<Messages.Respon
 
     private void pingResponse(Messages.Response message) {
         Messages.PingResponse response = message.getPingResponse();
-        Messages.NetworkNode origin = response.getOrigin();
+        Messages.NetworkNode origin = message.getOrigin();
 
         // lookup original ping request log error if not found
         response.getMessageId();

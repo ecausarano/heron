@@ -7,7 +7,13 @@ import java.util.stream.Collectors;
 
 import com.google.protobuf.ByteString;
 import eu.heronnet.model.Bundle;
+import eu.heronnet.model.IRI;
+import eu.heronnet.model.IdentifierNode;
+import eu.heronnet.model.Statement;
 import eu.heronnet.model.StringNode;
+import eu.heronnet.model.builder.BundleBuilder;
+import eu.heronnet.model.builder.IRIBuilder;
+import eu.heronnet.model.builder.StringNodeBuilder;
 import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.kad.model.RoutingTable;
 import eu.heronnet.module.kad.net.IdGenerator;
@@ -45,6 +51,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
 
     @Override
     protected void channelRead0(ChannelHandlerContext context, Messages.Request message) throws Exception {
+        final Messages.NetworkNode origin = message.getOrigin();
         switch (message.getBodyCase()) {
             case FIND_VALUE_REQUEST:
                 findValueRequest(context, message.getFindValueRequest());
@@ -53,28 +60,44 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
                 findNodeRequest(context, message.getFindNodeRequest());
                 break;
             case PING_REQUEST:
-                pingRequest(context, message.getPingRequest());
+                pingRequest(context, message.getPingRequest(), origin);
                 break;
+            case STORE_VALUE_REQUEST:
+                storeValueRequest(context, message.getStoreValueRequest());
             default:
                 LOGGER.debug("received unhandledrequest={}", message.getDescriptorForType().getFullName());
         }
     }
 
-    private void pingRequest(ChannelHandlerContext context, Messages.PingRequest request) {
+    private void storeValueRequest(ChannelHandlerContext channelHandlerContext, Messages.StoreValueRequest storeValueRequest) {
+        final List<Messages.Bundle> bundles = storeValueRequest.getBundlesList();
+        bundles.forEach(bundle -> {
+            final BundleBuilder bundleBuilder = new BundleBuilder();
+            bundleBuilder.withSubject(new IdentifierNode(bundle.getSubject().toByteArray()));
+            bundle.getStatementsList().forEach(wireStatement -> {
+                // TODO
+                final IRI predicate = IRIBuilder.withString(wireStatement.getPredicate());
+                final String stringValue = wireStatement.getStringValue();
+                bundleBuilder.withStatement(new Statement(predicate, StringNodeBuilder.withString(stringValue)));
+            });
+            localStorage.put(bundleBuilder.build());
+        });
+    }
+
+    private void pingRequest(ChannelHandlerContext context, Messages.PingRequest request, Messages.NetworkNode origin) {
         try {
 
-            final Messages.NetworkNode origin = request.getOrigin();
             final List<Messages.Address> addressesList = origin.getAddressesList();
             final List<byte[]> addresses = addressesList.stream().map(address -> address.getIpAddress().toByteArray()).collect(Collectors.toList());
             final Node node = new Node(origin.getId().toByteArray(), addresses);
             routingTable.insert(node);
 
             final Messages.PingResponse.Builder pingResponse = Messages.PingResponse.newBuilder();
-            pingResponse.setOrigin(createSelfNetworkNodeBuilder());
             pingResponse.setMessageId(ByteString.copyFrom(idGenerator.getId()));
             pingResponse.setResponse(ByteString.copyFrom(request.getMessageId().toByteArray()));
 
             final Messages.Response.Builder responseBuilder = Messages.Response.newBuilder()
+                    .setOrigin(createSelfNetworkNodeBuilder())
                     .setPingResponse(pingResponse);
 
             context.writeAndFlush(responseBuilder.build());
@@ -101,7 +124,6 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
 
         Messages.FindValueResponse.Builder responseBuilder = Messages.FindValueResponse.newBuilder();
         responseBuilder.setMessageId(ByteString.copyFrom(idGenerator.getId()));
-        responseBuilder.setOrigin(Messages.NetworkNode.newBuilder().setId(ByteString.copyFrom(selfNodeProvider.getSelf().getId())));
 
         byHash.forEach(bundle -> {
             Messages.Bundle.Builder bundleBuilder = Messages.Bundle.newBuilder();
@@ -126,14 +148,15 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
             responseBuilder.addBundles(bundleBuilder.build());
         });
 
-        Messages.Response.Builder messageBuilder = Messages.Response.newBuilder().setFindValueResponse(responseBuilder);
+        Messages.Response.Builder messageBuilder = Messages.Response.newBuilder()
+                .setOrigin(createSelfNetworkNodeBuilder())
+                .setFindValueResponse(responseBuilder);
         context.writeAndFlush(messageBuilder.build());
     }
 
     private void findNodeRequest(ChannelHandlerContext context, Messages.FindNodeRequest request) {
         try {
             Messages.FindNodeResponse.Builder findNodeResponseBuilder = Messages.FindNodeResponse.newBuilder();
-            findNodeResponseBuilder.setOrigin(createSelfNetworkNodeBuilder());
 
             final byte[] nodeId = request.getNodeId().toByteArray();
             final List<Node> nodes = routingTable.find(nodeId);
@@ -150,6 +173,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
 
             findNodeResponseBuilder.addAllFoundNodes(networkNodesList);
             final Messages.Response.Builder responseBuilder = Messages.Response.newBuilder()
+                    .setOrigin(createSelfNetworkNodeBuilder())
                     .setFindNodeResponse(findNodeResponseBuilder);
 
             context.writeAndFlush(responseBuilder.build());
