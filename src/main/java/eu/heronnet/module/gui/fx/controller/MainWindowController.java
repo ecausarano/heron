@@ -6,9 +6,6 @@ import java.io.InputStream;
 
 import eu.heronnet.model.Bundle;
 import eu.heronnet.module.gui.fx.views.IdentityDetailsView;
-import eu.heronnet.module.gui.model.DocumentListCell;
-import eu.heronnet.module.storage.util.HexUtil;
-import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,10 +13,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -122,41 +117,6 @@ public class MainWindowController {
             logger.error("Error", e.getCause());
         }
 */
-
-        resultList.setCellFactory(param -> {
-            DocumentListCell documentListCell = new DocumentListCell();
-            ContextMenu contextMenu = new ContextMenu();
-
-            MenuItem signMenuItem = new MenuItem();
-
-            if (uiController.isUserSigningEnabled())  {
-                    signMenuItem.setDisable(false);
-            }
-            signMenuItem.textProperty().bind(Bindings.format("Sign \"%s\"", documentListCell.itemProperty()));
-            signMenuItem.setOnAction(event -> {
-                Bundle item = documentListCell.getItem();
-                logger.debug("Requested to sign bundle=[{}]", HexUtil.bytesToHex(item.getNodeId()));
-                uiController.signBundle(item);
-            });
-
-            MenuItem downloadMenuItem = new MenuItem();
-            downloadMenuItem.textProperty().bind(Bindings.format("Download \"%s\"", documentListCell.itemProperty()));
-            downloadMenuItem.setOnAction(event -> {
-                Bundle item = documentListCell.getItem();
-                logger.debug("Requested to download bundle={}", item.getSubject().toString());
-                uiController.downloadBundle(item);
-            });
-            contextMenu.getItems().addAll(signMenuItem, downloadMenuItem);
-
-            documentListCell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
-                if (isNowEmpty) {
-                    documentListCell.setContextMenu(null);
-                } else {
-                    documentListCell.setContextMenu(contextMenu);
-                }
-            });
-            return documentListCell;
-        });
 
     }
 

@@ -9,13 +9,17 @@ import eu.heronnet.model.Bundle;
 import eu.heronnet.module.gui.fx.controller.DelegateAware;
 import eu.heronnet.module.gui.fx.controller.UIController;
 import eu.heronnet.module.gui.model.DocumentListCell;
+import eu.heronnet.module.storage.util.HexUtil;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -57,7 +61,39 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
             fxmlLoader.setController(this);
             fxmlLoader.load(fxmlStream);
 
-            resultList.setCellFactory(param -> new DocumentListCell());
+            resultList.setCellFactory(param -> {
+                DocumentListCell documentListCell = new DocumentListCell();
+                ContextMenu contextMenu = new ContextMenu();
+                MenuItem signMenuItem = new MenuItem();
+
+                if (delegate.isUserSigningEnabled()) {
+                    signMenuItem.setDisable(false);
+                }
+                signMenuItem.textProperty().bind(Bindings.format("Sign \"%s\"", documentListCell.itemProperty()));
+                signMenuItem.setOnAction(event -> {
+                    Bundle item = documentListCell.getItem();
+                    logger.debug("Requested to sign bundle=[{}]", HexUtil.bytesToHex(item.getNodeId()));
+                    delegate.signBundle(item);
+                });
+
+                MenuItem downloadMenuItem = new MenuItem();
+                downloadMenuItem.textProperty().bind(Bindings.format("Download \"%s\"", documentListCell.itemProperty()));
+                downloadMenuItem.setOnAction(event -> {
+                    Bundle item = documentListCell.getItem();
+                    logger.debug("Requested to download bundle={}", item.getSubject().toString());
+                    delegate.downloadBundle(item);
+                });
+                contextMenu.getItems().addAll(signMenuItem, downloadMenuItem);
+
+                documentListCell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                    if (isNowEmpty) {
+                        documentListCell.setContextMenu(null);
+                    } else {
+                        documentListCell.setContextMenu(contextMenu);
+                    }
+                });
+                return documentListCell;
+            });
 
         } catch (Exception e) {
             logger.error("Error in MainWindowView ctor: {}", e.getMessage());
@@ -133,6 +169,6 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
     }
 
     public void setResultView(List<Bundle> resultView) {
-        resultList.getItems().addAll(resultView);
+        resultList.getItems().setAll(resultView);
     }
 }

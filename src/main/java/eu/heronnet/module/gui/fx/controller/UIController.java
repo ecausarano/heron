@@ -3,7 +3,6 @@ package eu.heronnet.module.gui.fx.controller;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.File;
-import java.util.List;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -16,6 +15,7 @@ import eu.heronnet.module.gui.fx.task.SignBundleService;
 import eu.heronnet.module.gui.fx.views.BundleView;
 import eu.heronnet.module.gui.fx.views.FileUploadView;
 import eu.heronnet.module.gui.fx.views.MainWindowView;
+import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -107,8 +107,9 @@ public class UIController {
 
     @Subscribe
     public void updateSearchResults(UpdateResults domainBundles) {
-        final List<Bundle> bundles = domainBundles.getBundles();
-        mainWindowView.setResultView(bundles);
+        Platform.runLater(() -> {
+            mainWindowView.setResultView(domainBundles.getBundles());
+        });
     }
 
 
