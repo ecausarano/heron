@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 
 import com.google.common.eventbus.EventBus;
 import eu.heronnet.model.Bundle;
+import eu.heronnet.model.BundleBuilder;
+import eu.heronnet.model.IRIBuilder;
 import eu.heronnet.model.IdentifierNode;
 import eu.heronnet.model.Statement;
-import eu.heronnet.model.builder.BundleBuilder;
-import eu.heronnet.model.builder.IRIBuilder;
-import eu.heronnet.model.builder.StringNodeBuilder;
+import eu.heronnet.model.StringNodeBuilder;
 import eu.heronnet.module.bus.command.UpdateResults;
 import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.storage.util.HexUtil;

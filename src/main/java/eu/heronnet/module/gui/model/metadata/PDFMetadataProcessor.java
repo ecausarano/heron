@@ -7,7 +7,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import eu.heronnet.model.Statement;
-import eu.heronnet.model.builder.StringNodeBuilder;
+import eu.heronnet.model.StringNodeBuilder;
 import eu.heronnet.model.vocabulary.DC;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;

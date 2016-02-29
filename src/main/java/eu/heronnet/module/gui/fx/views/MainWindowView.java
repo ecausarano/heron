@@ -49,7 +49,7 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
     @FXML
     private Button idBtn;
     @FXML
-    private PopOver idPopover;
+    private PopOver addFilePopover;
 
     public MainWindowView(Function<Class, ?> delegateFactory) throws RuntimeException {
         try (InputStream fxmlStream = MainWindowView.class.getResourceAsStream("/HeronMainWindow.fxml")) {
@@ -69,7 +69,7 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
                 if (delegate.isUserSigningEnabled()) {
                     signMenuItem.setDisable(false);
                 }
-                signMenuItem.textProperty().bind(Bindings.format("Sign \"%s\"", documentListCell.itemProperty()));
+                signMenuItem.textProperty().bind(Bindings.format("Sign"));
                 signMenuItem.setOnAction(event -> {
                     Bundle item = documentListCell.getItem();
                     logger.debug("Requested to sign bundle=[{}]", HexUtil.bytesToHex(item.getNodeId()));
@@ -77,7 +77,7 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
                 });
 
                 MenuItem downloadMenuItem = new MenuItem();
-                downloadMenuItem.textProperty().bind(Bindings.format("Download \"%s\"", documentListCell.itemProperty()));
+                downloadMenuItem.textProperty().bind(Bindings.format("Download"));
                 downloadMenuItem.setOnAction(event -> {
                     Bundle item = documentListCell.getItem();
                     logger.debug("Requested to download bundle={}", item.getSubject().toString());
@@ -113,8 +113,24 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
 
     @FXML
     private void addFile(ActionEvent event) {
+//        if (addFilePopover == null) {
+//            final FileUploadView fileUploadView = new FileUploadView(delegateFactory);
+//            addFilePopover = new PopOver(fileUploadView);
+//            addFilePopover.setArrowLocation(PopOver.ArrowLocation.LEFT_TOP);
+//            addFilePopover.setDetachable(true);
+//        }
+//        if (addFilePopover.isShowing()) {
+//            addFilePopover.hide();
+//            addFilePopover = null;
+//        } else {
+//            addFilePopover.show(addBtn);
+//        }
+        Stage stage = new Stage();
         final FileUploadView fileUploadView = new FileUploadView(delegateFactory);
-        fileUploadView.showAndWait();
+        stage.setScene(new Scene(fileUploadView));
+        stage.setTitle("Add file");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.showAndWait();
     }
 
     @FXML
@@ -144,17 +160,17 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
 
     @FXML
     public void revealIdPopover() {
-        if (idPopover == null) {
+        if (addFilePopover == null) {
             final IdentityDetailsView identityDetailsView = new IdentityDetailsView(delegateFactory);
-            idPopover = new PopOver(identityDetailsView);
-            idPopover.setArrowLocation(PopOver.ArrowLocation.RIGHT_TOP);
-            idPopover.setDetachable(true);
+            addFilePopover = new PopOver(identityDetailsView);
+            addFilePopover.setArrowLocation(PopOver.ArrowLocation.RIGHT_TOP);
+            addFilePopover.setDetachable(true);
         }
-        if (idPopover.isShowing()) {
-            idPopover.hide();
-            idPopover = null;
+        if (addFilePopover.isShowing()) {
+            addFilePopover.hide();
+            addFilePopover = null;
         } else {
-            idPopover.show(idBtn);
+            addFilePopover.show(idBtn);
         }
     }
 

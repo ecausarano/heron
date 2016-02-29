@@ -1,4 +1,4 @@
-package eu.heronnet.model.builder;
+package eu.heronnet.model;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -6,9 +6,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import eu.heronnet.model.Bundle;
-import eu.heronnet.model.IdentifierNode;
-import eu.heronnet.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +32,6 @@ public class BundleBuilder {
      */
     public static Bundle emptyBundle() {
         return EMPTY_BUNDLE;
-    }
-
-    public BundleBuilder withId(byte[] id) {
-        this.id = id;
-        return this;
     }
 
     public BundleBuilder withSubject(IdentifierNode subject) {

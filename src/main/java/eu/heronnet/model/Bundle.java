@@ -18,7 +18,7 @@ public class Bundle extends Node<Set<Statement>> {
 
     private final Set<Statement> statements;
 
-    public Bundle(
+    Bundle(
             byte[] nodeId,
             IdentifierNode subject,
             Set<Statement> statements)
@@ -33,7 +33,7 @@ public class Bundle extends Node<Set<Statement>> {
     }
 
     public Set<Statement> getStatements() {
-        return new HashSet<>(statements);
+        return statements;
     }
 
     @Override

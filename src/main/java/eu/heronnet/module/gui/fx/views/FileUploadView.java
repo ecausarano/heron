@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import eu.heronnet.model.BundleBuilder;
+import eu.heronnet.model.IRIBuilder;
 import eu.heronnet.model.Statement;
-import eu.heronnet.model.builder.BundleBuilder;
-import eu.heronnet.model.builder.IRIBuilder;
-import eu.heronnet.model.builder.StringNodeBuilder;
+import eu.heronnet.model.StringNodeBuilder;
 import eu.heronnet.module.bus.command.Put;
 import eu.heronnet.module.gui.fx.controller.DelegateAware;
 import eu.heronnet.module.gui.fx.controller.UIController;
@@ -23,8 +23,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -33,7 +31,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +68,6 @@ public class FileUploadView extends AnchorPane implements DelegateAware<UIContro
     private Path path;
 
     private UIController delegate;
-    private final Stage stage;
 
     public FileUploadView(Function<Class, ?> delegateFactory) {
         try (InputStream fxmlStream = this.getClass().getResourceAsStream("/FileUpload.fxml")) {
@@ -79,46 +75,34 @@ public class FileUploadView extends AnchorPane implements DelegateAware<UIContro
             this.delegate = (UIController) delegateFactory.apply(UIController.class);
             delegate.setFileUploadView(this);
 
-            stage = new Stage();
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setController(this);
             fxmlLoader.setRoot(this);
-            Parent loader = fxmlLoader.load(fxmlStream);
+            fxmlLoader.load(fxmlStream);
 
             fileChooser = new FileChooser();
             fileChooser.setTitle("Choose File");
 
             metaTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
             nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
-            nameColumn.setOnEditCommit(t -> {
-                String newName = t.getNewValue();
-
-                ObservableList<FieldRow> items = t.getTableView().getItems();
-                TablePosition<FieldRow, String> tablePosition = t.getTablePosition();
-
-                FieldRow fieldRow = items.get(tablePosition.getRow());
-                fieldRow.nameProperty().set(newName);
-            });
-
+            nameColumn.setOnEditCommit(this::onFieldEdit);
             valueColumn.setCellValueFactory(param -> param.getValue().valueProperty());
-            valueColumn.setOnEditCommit(t -> {
-                String newValue = t.getNewValue();
+            valueColumn.setOnEditCommit(this::onFieldEdit);
 
-                ObservableList<FieldRow> items = t.getTableView().getItems();
-                TablePosition<FieldRow, String> tablePosition = t.getTablePosition();
-
-                FieldRow fieldRow = items.get(tablePosition.getRow());
-                fieldRow.valueProperty().set(newValue);
-            });
-
-            stage.setScene(new Scene(loader));
-            stage.setTitle("Add file");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    public void onFieldEdit(TableColumn.CellEditEvent<FieldRow, String> event) {
+        String newValue = event.getNewValue();
+
+        ObservableList<FieldRow> items = event.getTableView().getItems();
+        TablePosition<FieldRow, String> tablePosition = event.getTablePosition();
+
+        FieldRow fieldRow = items.get(tablePosition.getRow());
+        fieldRow.valueProperty().set(newValue);
     }
 
     @Override
@@ -173,14 +157,11 @@ public class FileUploadView extends AnchorPane implements DelegateAware<UIContro
 
     @FXML
     private void cancel(ActionEvent event) {
-        Stage window = (Stage) cancelBtn.getScene().getWindow();
+        Stage window = (Stage) this.getScene().getWindow();
         window.close();
 
     }
 
-    public void showAndWait() {
-        stage.showAndWait();
-    }
     public ObservableList<FieldRow> getFieldRows() {
         return metaTableView.getItems();
     }

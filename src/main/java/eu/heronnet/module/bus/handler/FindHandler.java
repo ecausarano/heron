@@ -15,7 +15,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import eu.heronnet.model.Bundle;
 import eu.heronnet.module.bus.command.Find;
-import eu.heronnet.module.bus.command.UpdateLocalResults;
 import eu.heronnet.module.bus.command.UpdateResults;
 import eu.heronnet.module.kad.net.SelfNodeProvider;
 import eu.heronnet.module.storage.Persistence;
@@ -75,11 +74,6 @@ public class FindHandler {
                 logger.error("UTF-8 encoding not available on platform... (really?!)");
                 mainBus.post(e);
             }
-        }
-
-        if (command.isLocal()) {
-            List<Bundle> bundles = localStorage.getAll();
-            mainBus.post(new UpdateLocalResults(bundles));
         }
     }
 

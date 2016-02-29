@@ -1,7 +1,7 @@
 package eu.heronnet.model.vocabulary;
 
 import eu.heronnet.model.IRI;
-import eu.heronnet.model.builder.IRIBuilder;
+import eu.heronnet.model.IRIBuilder;
 
 /**
  * Vocabulary constants for the Dublin Core Metadata Element Set, version 1.1

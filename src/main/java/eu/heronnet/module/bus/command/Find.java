@@ -18,7 +18,7 @@
 package eu.heronnet.module.bus.command;
 
 import eu.heronnet.model.Bundle;
-import eu.heronnet.model.builder.BundleBuilder;
+import eu.heronnet.model.BundleBuilder;
 
 public class Find {
 

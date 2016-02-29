@@ -24,7 +24,7 @@ import eu.heronnet.model.Node;
 
 public interface Persistence {
 
-    void put(Bundle rawBundle);
+    void put(Bundle bundle);
 
     void deleteBySubjectId(byte[] subjectId);
 

@@ -1,7 +1,7 @@
 package eu.heronnet.model.vocabulary;
 
 import eu.heronnet.model.IRI;
-import eu.heronnet.model.builder.IRIBuilder;
+import eu.heronnet.model.IRIBuilder;
 
 /**
  * @author edoardocausarano

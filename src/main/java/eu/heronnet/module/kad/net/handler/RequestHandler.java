@@ -8,13 +8,16 @@ import java.util.stream.Collectors;
 import com.google.protobuf.ByteString;
 import eu.heronnet.model.BinaryDataNode;
 import eu.heronnet.model.Bundle;
+import eu.heronnet.model.BundleBuilder;
+import eu.heronnet.model.DateNode;
+import eu.heronnet.model.DateNodeBuilder;
 import eu.heronnet.model.IRI;
+import eu.heronnet.model.IRIBuilder;
 import eu.heronnet.model.IdentifierNode;
 import eu.heronnet.model.Statement;
 import eu.heronnet.model.StringNode;
-import eu.heronnet.model.builder.BundleBuilder;
-import eu.heronnet.model.builder.IRIBuilder;
-import eu.heronnet.model.builder.StringNodeBuilder;
+import eu.heronnet.model.StringNodeBuilder;
+import eu.heronnet.model.vocabulary.DC;
 import eu.heronnet.model.vocabulary.HRN;
 import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.kad.model.RoutingTable;
@@ -78,14 +81,15 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
             final BundleBuilder bundleBuilder = new BundleBuilder();
             bundleBuilder.withSubject(new IdentifierNode(subject.toByteArray()));
             bundle.getStatementsList().forEach(wireStatement -> {
-                // TODO
                 final IRI predicate = IRIBuilder.withString(wireStatement.getPredicate());
-
                 if (HRN.BINARY.equals(predicate)) {
                     final ByteString binaryValue = wireStatement.getBinaryValue();
                     bundleBuilder.withStatement(new Statement(
                             predicate,
                             new BinaryDataNode(subject.toByteArray(), binaryValue.toByteArray())));
+                } else if (DC.DATE.equals(predicate)) {
+                    final DateNode dateNode = DateNodeBuilder.withDate(wireStatement.getDateValue());
+                    bundleBuilder.withStatement(new Statement(predicate, dateNode));
                 } else {
                     final String stringValue = wireStatement.getStringValue();
                     bundleBuilder.withStatement(new Statement(predicate, StringNodeBuilder.withString(stringValue)));

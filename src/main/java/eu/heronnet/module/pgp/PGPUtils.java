@@ -15,9 +15,9 @@ import java.util.Date;
 import java.util.List;
 
 import eu.heronnet.model.Bundle;
+import eu.heronnet.model.BundleBuilder;
 import eu.heronnet.model.Statement;
-import eu.heronnet.model.builder.BundleBuilder;
-import eu.heronnet.model.builder.StatementBuilder;
+import eu.heronnet.model.StatementBuilder;
 import eu.heronnet.model.vocabulary.HRN;
 import eu.heronnet.module.storage.Persistence;
 import eu.heronnet.module.storage.util.HexUtil;

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.heronnet.model.Statement;
-import eu.heronnet.model.builder.StringNodeBuilder;
+import eu.heronnet.model.StringNodeBuilder;
 import eu.heronnet.model.vocabulary.DC;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;

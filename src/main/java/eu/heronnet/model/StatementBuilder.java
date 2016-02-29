@@ -1,8 +1,7 @@
-package eu.heronnet.model.builder;
+package eu.heronnet.model;
 
 import java.security.NoSuchAlgorithmException;
 
-import eu.heronnet.model.Statement;
 import eu.heronnet.model.vocabulary.HRN;
 
 /**

@@ -32,7 +32,13 @@ import java.util.stream.Collectors;
 
 import com.google.common.util.concurrent.AbstractIdleService;
 import com.google.protobuf.ByteString;
+import eu.heronnet.model.BinaryDataNode;
 import eu.heronnet.model.Bundle;
+import eu.heronnet.model.DateNode;
+import eu.heronnet.model.IRI;
+import eu.heronnet.model.StringNode;
+import eu.heronnet.model.vocabulary.DC;
+import eu.heronnet.model.vocabulary.HRN;
 import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.kad.model.RoutingTable;
 import eu.heronnet.module.kad.net.handler.ResponseHandler;
@@ -185,25 +191,38 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
      * TODO call findByHash with bundle's ID to find nodes in closest bucket to publish to.
      *
      *
-     * @param rawBundle
+     * @param bundle
      */
     @Override
-    public void put(Bundle rawBundle) {
+    public void put(Bundle bundle) {
 
         final Messages.Bundle.Builder bundleBuilder = Messages.Bundle.newBuilder();
-        bundleBuilder.setSubject(ByteString.copyFrom(rawBundle.getSubject().getNodeId()));
-        rawBundle.getStatements().forEach(statement ->  {
-            final Messages.Statement.Builder statementBuilder = Messages.Statement.newBuilder();
-            statementBuilder.setPredicate(statement.getPredicate().toString());
-            // TODO - type switch on getNodeType, in a separate class... IOW un-hack
-            statementBuilder.setStringValue(statement.getObject().toString());
-            bundleBuilder.addStatements(statementBuilder);
+        bundleBuilder.setSubject(ByteString.copyFrom(bundle.getSubject().getNodeId()));
+
+        // TODO - type switch on getNodeType, in a separate class... IOW un-hack
+        bundle.getStatements().forEach(statement ->  {
+            final IRI predicate = statement.getPredicate();
+            final Messages.Statement.Builder wireStatementBuilder = Messages.Statement.newBuilder();
+            wireStatementBuilder.setPredicate(predicate.toString());
+            if (HRN.BINARY.equals(predicate)) {
+                final BinaryDataNode binaryDataNode = (BinaryDataNode) statement.getObject();
+                wireStatementBuilder.setBinaryValue(ByteString.copyFrom(binaryDataNode.getData()));
+                bundleBuilder.addStatements(wireStatementBuilder);
+            } else if (DC.DATE.equals(predicate)) {
+                final DateNode dateNode = (DateNode) statement.getObject();
+                wireStatementBuilder.setDateValue(dateNode.getData().getTime());
+                bundleBuilder.addStatements(wireStatementBuilder);
+            } else { // default to string
+                final StringNode stringNode = (StringNode) statement.getObject();
+                wireStatementBuilder.setStringValue(stringNode.getData());
+                bundleBuilder.addStatements(wireStatementBuilder);
+            }
         });
 
         final Messages.StoreValueRequest.Builder storeValueRequestBuilder = Messages.StoreValueRequest.newBuilder()
                 .setMessageId(ByteString.copyFrom(idGenerator.getId()))
                 .addBundles(bundleBuilder);
-        final List<Node> nodes = routingTable.find(rawBundle.getSubject().getNodeId());
+        final List<Node> nodes = routingTable.find(bundle.getSubject().getNodeId());
 
         final Messages.Request.Builder requestBuilder = Messages.Request.newBuilder()
                 .setStoreValueRequest(storeValueRequestBuilder);

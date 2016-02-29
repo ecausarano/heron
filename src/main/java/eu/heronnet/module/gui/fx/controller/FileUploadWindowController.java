@@ -12,10 +12,10 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import com.google.common.eventbus.EventBus;
+import eu.heronnet.model.BundleBuilder;
+import eu.heronnet.model.IRIBuilder;
 import eu.heronnet.model.Statement;
-import eu.heronnet.model.builder.BundleBuilder;
-import eu.heronnet.model.builder.IRIBuilder;
-import eu.heronnet.model.builder.StringNodeBuilder;
+import eu.heronnet.model.StringNodeBuilder;
 import eu.heronnet.module.bus.command.Put;
 import eu.heronnet.module.gui.model.FieldRow;
 import eu.heronnet.module.gui.model.metadata.FieldProcessorFactory;
