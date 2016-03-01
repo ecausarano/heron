@@ -65,7 +65,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
                 findNodeRequest(context, message.getFindNodeRequest());
                 break;
             case PING_REQUEST:
-                pingRequest(context, message.getPingRequest(), origin);
+                pingRequest(context, message, origin);
                 break;
             case STORE_VALUE_REQUEST:
                 storeValueRequest(context, message.getStoreValueRequest());
@@ -100,7 +100,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
         });
     }
 
-    private void pingRequest(ChannelHandlerContext context, Messages.PingRequest request, Messages.NetworkNode origin) {
+    private void pingRequest(ChannelHandlerContext context, Messages.Request request, Messages.NetworkNode origin) {
         try {
 
             final List<Messages.Address> addressesList = origin.getAddressesList();
@@ -109,10 +109,10 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
             routingTable.insert(node);
 
             final Messages.PingResponse.Builder pingResponse = Messages.PingResponse.newBuilder();
-            pingResponse.setMessageId(ByteString.copyFrom(idGenerator.getId()));
-            pingResponse.setResponse(ByteString.copyFrom(request.getMessageId().toByteArray()));
+            pingResponse.setPayload(ByteString.copyFrom(request.getPingRequest().getPayload().toByteArray()));
 
             final Messages.Response.Builder responseBuilder = Messages.Response.newBuilder()
+                    .setMessageId(ByteString.copyFrom(idGenerator.getId()))
                     .setOrigin(createSelfNetworkNodeBuilder())
                     .setPingResponse(pingResponse);
 
@@ -139,7 +139,6 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
         List<Bundle> byHash = localStorage.findByHash(requestAsBytes);
 
         Messages.FindValueResponse.Builder responseBuilder = Messages.FindValueResponse.newBuilder();
-        responseBuilder.setMessageId(ByteString.copyFrom(idGenerator.getId()));
 
         byHash.forEach(bundle -> {
             Messages.Bundle.Builder bundleBuilder = Messages.Bundle.newBuilder();
@@ -165,6 +164,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
         });
 
         Messages.Response.Builder messageBuilder = Messages.Response.newBuilder()
+                .setMessageId(ByteString.copyFrom(idGenerator.getId()))
                 .setOrigin(createSelfNetworkNodeBuilder())
                 .setFindValueResponse(responseBuilder);
         context.writeAndFlush(messageBuilder.build());

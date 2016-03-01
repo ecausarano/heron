@@ -13,7 +13,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <bouncycastle.version>1.52</bouncycastle.version>
-        <netty.version>4.0.30.Final</netty.version>
+        <netty.version>4.0.34.Final</netty.version>
         <jline.version>2.11</jline.version>
         <je.version>6.2.31</je.version>
         <logback.version>1.1.3</logback.version>

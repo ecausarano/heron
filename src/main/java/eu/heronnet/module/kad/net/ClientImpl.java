@@ -43,6 +43,7 @@ import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.kad.model.RoutingTable;
 import eu.heronnet.module.kad.net.handler.ResponseHandler;
 import eu.heronnet.module.storage.Persistence;
+import eu.heronnet.module.storage.util.HexUtil;
 import eu.heronnet.rpc.Messages;
 import eu.heronnet.rpc.Messages.Address;
 import eu.heronnet.rpc.Messages.FindValueRequest;
@@ -132,21 +133,13 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
 
     public void broadcast() {
         try {
-            Messages.NetworkNode.Builder selfNodeBuilder = Messages.NetworkNode.newBuilder();
-            Node self = selfNodeProvider.getSelf();
-            self.getAddresses().forEach(address -> {
-                Address.Builder addressBuilder = Address.newBuilder()
-                        .setPort(6565)
-                        .setIpAddress(ByteString.copyFrom(address));
-                selfNodeBuilder.addAddresses(addressBuilder);
-            });
-            selfNodeBuilder.setId(ByteString.copyFrom(self.getId()));
+            final Messages.PingRequest.Builder pingRequestBuilder = Messages.PingRequest.newBuilder()
+                    .setPayload(ByteString.copyFrom(idGenerator.getId()));
 
-            final Messages.PingRequest.Builder pingRequestBuilder = Messages.PingRequest.newBuilder();
-            pingRequestBuilder.setMessageId(ByteString.copyFrom(idGenerator.getId()));
-
-            final Messages.Request.Builder request = Messages.Request.newBuilder().setPingRequest(pingRequestBuilder);
-            request.setOrigin(selfNodeBuilder);
+            final Messages.Request.Builder request = Messages.Request.newBuilder()
+                    .setMessageId(ByteString.copyFrom(idGenerator.getId()))
+                    .setOrigin(originBuilder())
+                    .setPingRequest(pingRequestBuilder);
 
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             Collections.list(interfaces).forEach(networkInterface -> {
@@ -171,8 +164,7 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
                                         channel.close();
                                         logger.debug("completed operation: {}", future.toString());
                                     } else {
-                                        final Throwable cause = future.cause();
-                                        logger.error("Error in channel bootstrap: {}", cause.getMessage());
+                                        logger.error("Error in channel bootstrap: {}", future.cause().getMessage());
                                     }
                                 }
                             });
@@ -184,6 +176,23 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
             });
         } catch (SocketException e) {
             logger.error(e.getMessage());
+        }
+    }
+
+    private Messages.NetworkNode.Builder originBuilder() throws RuntimeException {
+        try {
+            Messages.NetworkNode.Builder selfNodeBuilder = Messages.NetworkNode.newBuilder();
+        Node self = selfNodeProvider.getSelf();
+        self.getAddresses().forEach(address -> {
+            Address.Builder addressBuilder = Address.newBuilder()
+                    .setPort(6565)
+                    .setIpAddress(ByteString.copyFrom(address));
+            selfNodeBuilder.addAddresses(addressBuilder);
+        });
+        selfNodeBuilder.setId(ByteString.copyFrom(self.getId()));
+        return selfNodeBuilder;
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -220,11 +229,12 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
         });
 
         final Messages.StoreValueRequest.Builder storeValueRequestBuilder = Messages.StoreValueRequest.newBuilder()
-                .setMessageId(ByteString.copyFrom(idGenerator.getId()))
                 .addBundles(bundleBuilder);
         final List<Node> nodes = routingTable.find(bundle.getSubject().getNodeId());
 
         final Messages.Request.Builder requestBuilder = Messages.Request.newBuilder()
+                .setMessageId(ByteString.copyFrom(idGenerator.getId()))
+                .setOrigin(originBuilder())
                 .setStoreValueRequest(storeValueRequestBuilder);
         sendAllNodes(nodes, requestBuilder);
     }
@@ -243,11 +253,12 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
     public List<Bundle> findByHash(List<byte[]> searchKeys) {
 
         FindValueRequest.Builder findValueRequestBuilder = FindValueRequest.newBuilder();
-        findValueRequestBuilder.setMessageId(ByteString.copyFrom(idGenerator.getId()));
         findValueRequestBuilder.addAllValues(searchKeys.stream().map(ByteString::copyFrom).collect(Collectors.toList()));
 
-        final Messages.Request.Builder requestBuilder = Messages.Request.newBuilder();
-        requestBuilder.setFindValueRequest(findValueRequestBuilder);
+        final Messages.Request.Builder requestBuilder = Messages.Request.newBuilder()
+                .setMessageId(ByteString.copyFrom(idGenerator.getId()))
+                .setOrigin(originBuilder())
+                .setFindValueRequest(findValueRequestBuilder);
 
         final List<Node> targets = searchKeys.stream().flatMap(key -> routingTable.find(key).stream()).collect(Collectors.toList());
         sendAllNodes(targets, requestBuilder);
@@ -276,11 +287,16 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
                         future = tcpBoostrap.connect(InetAddress.getByAddress(address), 6565).sync();
                         final Channel channel = future.awaitUninterruptibly().channel();
 
-                        ChannelFuture responseFuture = channel.writeAndFlush(requestBuilder.build());
+                        Messages.Request request = requestBuilder.build();
+                        ChannelFuture responseFuture = channel.writeAndFlush(request);
                         responseFuture.addListener(new ChannelFutureListener() {
                             @Override
                             public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                                logger.debug("completed operation: {}", channelFuture.toString());
+                                if (channelFuture.isSuccess()) {
+                                    logger.debug("Message send complete. id={}, type={}",
+                                            HexUtil.bytesToHex(request.getMessageId().toByteArray()),
+                                            request.getBodyCase());
+                                }
                             }
                         });
                     } catch (InterruptedException e) {

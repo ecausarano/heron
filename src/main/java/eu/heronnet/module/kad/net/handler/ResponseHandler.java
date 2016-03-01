@@ -43,14 +43,16 @@ public class ResponseHandler extends SimpleChannelInboundHandler<Messages.Respon
             case FIND_VALUE_RESPONSE:
                 findValueResponseHandler(message);
                 break;
+            case PING_RESPONSE:
+                pingResponse(message);
+                break;
             default:
                 logger.debug("Received unhandled response of type={}", message.getBodyCase());
         }
     }
 
     private void findValueResponseHandler(Messages.Response message) {
-        Messages.FindValueResponse findValueResponse = message.getFindValueResponse();
-        logger.debug("Received response id=[{}]", HexUtil.bytesToHex(findValueResponse.getMessageId().toByteArray()));
+        logger.debug("Received response id=[{}]", HexUtil.bytesToHex(message.getMessageId().toByteArray()));
         List<Messages.Bundle> wireBundles = message.getFindValueResponse().getBundlesList();
 
         ArrayList<Bundle> domainBundles = new ArrayList<>(wireBundles.size());
@@ -74,12 +76,7 @@ public class ResponseHandler extends SimpleChannelInboundHandler<Messages.Respon
     }
 
     private void pingResponse(Messages.Response message) {
-        Messages.PingResponse response = message.getPingResponse();
         Messages.NetworkNode origin = message.getOrigin();
-
-        // lookup original ping request log error if not found
-        response.getMessageId();
-
 
         byte[] originId = origin.getId().toByteArray();
         List<byte[]> addresses = origin.getAddressesList().stream()

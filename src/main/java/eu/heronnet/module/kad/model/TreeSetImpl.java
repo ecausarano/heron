@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import eu.heronnet.module.storage.util.HexUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +38,13 @@ public class TreeSetImpl implements RoutingTable<Node, byte[]> {
         final Set<Node> bucket = getBucketForNode(node);
 
         if (bucket.size() == 0) {
-            logger.debug("Inserting first node in routing table");
+            logger.debug("Inserting first node id={} in routing table", HexUtil.bytesToHex(node.getId()));
             nodes.add(node);
             return;
         }
 
         if (bucket.size() <= bucketSize) {
-            logger.debug("Inserting node {} in bucket size {}", node.getId(), bucketSize);
+            logger.debug("Inserting node id={} in bucket size={}", HexUtil.bytesToHex(node.getId()), bucket.size());
             bucket.add(node);
         } else {
             logger.debug("max bucket size reached, randomly pruning bucket");

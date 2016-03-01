@@ -33,53 +33,50 @@ message Statement {
 
 message Request {
     required NetworkNode origin = 1;
+    required bytes message_id = 2;
+
     oneof body {
-    FindValueRequest find_value_request = 2;
-    FindNodeRequest find_node_request = 3;
-    PingRequest ping_request = 4;
-    StoreValueRequest store_value_request= 5;
+    FindValueRequest find_value_request = 5;
+    FindNodeRequest find_node_request = 6;
+    PingRequest ping_request = 7;
+    StoreValueRequest store_value_request= 8;
     }
 }
 
 message Response {
     required NetworkNode origin = 1;
+    required bytes message_id = 2;
     oneof body {
-    FindValueResponse find_value_response = 2;
-    FindNodeResponse find_node_response = 3;
-    PingResponse ping_response = 4;
+    FindValueResponse find_value_response = 5;
+    FindNodeResponse find_node_response = 6;
+    PingResponse ping_response = 7;
     }
 }
 
 message FindValueRequest {
-    required bytes message_id = 10;
-    repeated bytes values = 11;
+    repeated bytes values = 10;
 }
 
 message StoreValueRequest{
-    required bytes message_id = 10;
-    repeated Bundle bundles = 11;
+    repeated Bundle bundles = 10;
 }
 
 message FindValueResponse {
-    required bytes message_id = 10;
-    repeated Bundle bundles = 11;
+    repeated Bundle bundles = 10;
 }
 
 message FindNodeRequest {
-    required bytes message_id = 20;
-    required bytes node_id = 21;
+    required bytes node_id = 10;
 }
 
 message FindNodeResponse {
-    required bytes message_id = 20;
-    repeated NetworkNode found_nodes = 21;
+    repeated NetworkNode found_nodes = 10;
 }
 
 message PingRequest {
-    required bytes message_id = 30;
+    required bytes payload = 10;
 }
 
 message PingResponse {
-    required bytes message_id = 30;
-    required bytes response = 32;
+    required bytes payload = 10;
 }

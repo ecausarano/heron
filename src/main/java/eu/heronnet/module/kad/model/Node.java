@@ -34,6 +34,7 @@ public class Node implements Identifiable<byte[]>, Comparable<Node> {
     private List<byte[]> addresses;
     private Date lastSeen;
     private int RTT;
+    private int port;
 
     /**
      * Node constructor.
@@ -42,13 +43,14 @@ public class Node implements Identifiable<byte[]>, Comparable<Node> {
      * @param addresses a list of known IP of the node
      */
     public Node(byte[] id, List<byte[]> addresses) {
-        this(id, addresses, new Date());
+        this(id, addresses, new Date(), 6565);
     }
 
-    public Node(byte[] id, List<byte[]> addresses, Date lastSeen) {
+    public Node(byte[] id, List<byte[]> addresses, Date lastSeen, int port) {
         this.id = Arrays.copyOf(id, id.length);
         this.addresses = Collections.unmodifiableList(new ArrayList<>(addresses));
         this.lastSeen = new Date(lastSeen.getTime());
+        this.port = port;
     }
 
     @Override
@@ -70,6 +72,10 @@ public class Node implements Identifiable<byte[]>, Comparable<Node> {
 
     public void setRTT(int RTT) {
         this.RTT = RTT;
+    }
+
+    public int getPort() {
+        return port;
     }
 
     @Override
