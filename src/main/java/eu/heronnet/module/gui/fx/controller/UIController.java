@@ -3,10 +3,13 @@ package eu.heronnet.module.gui.fx.controller;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import eu.heronnet.model.Bundle;
+import eu.heronnet.model.vocabulary.HRN;
 import eu.heronnet.module.bus.command.Put;
 import eu.heronnet.module.bus.command.UpdateResults;
 import eu.heronnet.module.gui.fx.task.ExtractDocumentMetadataService;
@@ -14,7 +17,9 @@ import eu.heronnet.module.gui.fx.task.SearchByPredicateService;
 import eu.heronnet.module.gui.fx.task.SignBundleService;
 import eu.heronnet.module.gui.fx.views.BundleView;
 import eu.heronnet.module.gui.fx.views.FileUploadView;
+import eu.heronnet.module.gui.fx.views.IdentityDetailsView;
 import eu.heronnet.module.gui.fx.views.MainWindowView;
+import eu.heronnet.module.pgp.PGPUtils;
 import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +39,15 @@ public class UIController {
     @Inject
     private SignBundleService signBundleService;
     @Inject
+    private PGPUtils pgpUtils;
+    @Inject
     @Qualifier(value = "mainBus")
     EventBus mainBus;
 
     private volatile BundleView bundleView;
     private volatile MainWindowView mainWindowView;
     private volatile FileUploadView fileUploadView;
+    private volatile IdentityDetailsView identityDetailsView;
 
     @PostConstruct
     public void postConstruct() {
@@ -58,9 +66,13 @@ public class UIController {
         this.fileUploadView = fileUploadView;
     }
 
+    public void setIdentityDetailsView(IdentityDetailsView identityDetailsView) {
+        this.identityDetailsView = identityDetailsView;
+    }
+
     public void distributedSearch(String text) {
         searchByPredicateService.reset();
-        searchByPredicateService.setQuery(text);
+        searchByPredicateService.setQuery(Collections.singletonList(text));
         searchByPredicateService.setLocal(false);
         searchByPredicateService.setOnSucceeded(event -> mainWindowView.setResultView(searchByPredicateService.getValue()));
         searchByPredicateService.start();
@@ -68,7 +80,7 @@ public class UIController {
 
     public void localSearch(String text) {
         searchByPredicateService.reset();
-        searchByPredicateService.setQuery(text);
+        searchByPredicateService.setQuery(Collections.singletonList(text));
         searchByPredicateService.setLocal(true);
         searchByPredicateService.setOnSucceeded(event -> {
             logger.debug("done: " + event.getSource().getValue());
@@ -78,7 +90,7 @@ public class UIController {
     }
 
     public boolean isUserSigningEnabled() {
-        return true;
+        return pgpUtils.hasPrivateKey();
     }
 
     public void signBundle(Bundle item) {
@@ -102,7 +114,16 @@ public class UIController {
     }
 
     public void downloadBundle(Bundle item) {
-        throw new RuntimeException("download not implemented");
+        logger.debug("Downloading item id={}", item.getSubject().getNodeId());
+        searchByPredicateService.reset();
+        searchByPredicateService.setHash(item.getSubject().getNodeId());
+        searchByPredicateService.setQuery(Collections.singletonList(HRN.BINARY.toString()));
+        searchByPredicateService.start();
+        searchByPredicateService.setOnSucceeded(event -> {
+            final List<Bundle> value = searchByPredicateService.getValue();
+            logger.debug("HORRAAAAAY, found {} files", value.size());
+        });
+
     }
 
     @Subscribe

@@ -7,9 +7,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import eu.heronnet.model.Bundle;
 import eu.heronnet.module.storage.Persistence;
+import eu.heronnet.module.storage.util.HexUtil;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
@@ -33,12 +35,17 @@ public class SearchByPredicateService extends Service<List<Bundle>> {
     @Qualifier(value = "localStorage")
     private Persistence local;
 
-    private String query;
+    private List<String> query;
     private Boolean isLocal = Boolean.TRUE;
     private List<Bundle> bundles;
+    private byte[] hash;
 
-    public void setQuery(String string) {
-        this.query = string;
+    public void setQuery(List<String> strings) {
+        this.query = new ArrayList<>(strings);
+    }
+
+    public void setHash(byte[] hash) {
+        this.hash = hash;
     }
 
     public void setLocal(Boolean isLocal) {
@@ -50,13 +57,20 @@ public class SearchByPredicateService extends Service<List<Bundle>> {
             @Override
             protected List<Bundle> call() throws Exception {
                 try {
-                    ArrayList<byte[]> hashes = new ArrayList<>();
                     MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                    String[] terms = splitter.split(query);
 
-                    for (String term : terms) {
-                        digest.update(term.getBytes("UTF-8"));
-                        hashes.add(digest.digest());
+                    final List<byte[]> hashes = query.stream().flatMap(splitter::splitAsStream).map(term -> {
+                        try {
+                            digest.update(term.getBytes("UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            // ignore
+                        }
+                        return digest.digest();
+                    }).collect(Collectors.toList());
+
+                    // add specified hash
+                    if (hash != null) {
+                        hashes.add(hash);
                     }
 
                     if (isLocal) {
@@ -70,8 +84,6 @@ public class SearchByPredicateService extends Service<List<Bundle>> {
                     }
                 } catch (NoSuchAlgorithmException e) {
                     logger.error("SHA-256 not available");
-                } catch (UnsupportedEncodingException e) {
-                    logger.error("UTF-8 encoding not available on platform... (really?!)");
                 }
                 return bundles;
             }
@@ -81,6 +93,6 @@ public class SearchByPredicateService extends Service<List<Bundle>> {
 
     @Override
     protected void succeeded() {
-        logger.debug("Initiated search request for \"{}\", {} entries found", query, bundles.size());
+        logger.debug("Search request for hash=[{}], query=\"{}\", {} entries found", HexUtil.bytesToHex(hash), query, bundles.size());
     }
 }

@@ -40,14 +40,14 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
     private static final String BUNDLE_STORE = "BundleStore";
     private static final String NODE_ID_INDEX = "NodeIdIndex";
     private static final String SUBJECT_ID_INDEX = "SubjectIdIndex";
+    private static final String PREDICATE_INDEX = "PredicateIndex";
     private static final String NGRAM_INDEX = "NgramIndex";
     private static final Logger logger = LoggerFactory.getLogger(TripleStoreImplV2.class);
 
     @Inject private Environment environment;
     @Inject private DatabaseConfig databaseConfig;
     @Inject private SecondaryConfig nodeIdIndexConfig;
-    @Inject
-    private SecondaryConfig subjectIdIndexConfig;
+    @Inject private SecondaryConfig subjectIdIndexConfig;
     @Inject private SecondaryConfig stringObjectNgramIndexConfig;
 
     private Database bundleStore;

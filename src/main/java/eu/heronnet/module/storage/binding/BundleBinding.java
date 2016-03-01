@@ -49,29 +49,26 @@ public class BundleBinding extends TupleBinding<Bundle> {
             NodeType nodeType = NodeType.values()[tupleInput.readInt()];
             byte[] objectId = new byte[32];
             tupleInput.read(objectId);
+            Node node;
             switch (nodeType) {
                 case STRING:
-                    StringNode stringNode = new StringNode(objectId, tupleInput.readString());
-                    bundleBuilder.withStatement((new Statement(predicate, stringNode)));
+                    node = new StringNode(objectId, tupleInput.readString());
                     break;
                 case DATE:
-                    DateNode dateNode = new DateNode(objectId, new Date(tupleInput.readLong()));
-                    bundleBuilder.withStatement(new Statement(predicate, dateNode));
+                    node = new DateNode(objectId, new Date(tupleInput.readLong()));
                     break;
                 case IDENTIFIER:
-                    IdentifierNode identifierNode = new IdentifierNode(objectId);
-                    bundleBuilder.withStatement(new Statement(predicate, identifierNode));
+                    node = new IdentifierNode(objectId);
                     break;
                 case BINARY:
                     byte[] bytes = new byte[tupleInput.readInt()];
                     tupleInput.read(bytes);
-                    BinaryDataNode binaryDataNode = new BinaryDataNode(objectId, bytes);
-                    // do stuff with binary
+                    node = new BinaryDataNode(objectId, bytes);
                     break;
                 default:
                     throw new RuntimeException("nope cannot ever happen");
             }
-
+            bundleBuilder.withStatement((new Statement(predicate, node)));
         }
         return bundleBuilder.build();
     }

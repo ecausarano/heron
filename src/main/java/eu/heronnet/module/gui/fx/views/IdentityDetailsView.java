@@ -1,8 +1,12 @@
 package eu.heronnet.module.gui.fx.views;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.function.Function;
 
+import eu.heronnet.module.gui.fx.controller.UIController;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
@@ -17,6 +21,7 @@ public class IdentityDetailsView extends GridPane {
 
     private static final Logger logger = LoggerFactory.getLogger(IdentityDetailsView.class);
     private final Function<Class, ?> delegateFactory;
+    private final UIController delegate;
 
 
     @FXML
@@ -28,13 +33,19 @@ public class IdentityDetailsView extends GridPane {
     @FXML
     private ImageView idImage;
 
-//    @Inject
-//    private PGPUtils pgpUtils;
-
     public IdentityDetailsView(Function<Class, ?> delegateFactory) {
         this.delegateFactory = delegateFactory;
-
+        delegate = (UIController) delegateFactory.apply(UIController.class);
+        try (InputStream fxmlStream = this.getClass().getResourceAsStream("/identityDetails.fxml")) {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setRoot(this);
+            fxmlLoader.setController(this);
+            fxmlLoader.load(fxmlStream);
+         } catch (IOException e) {
+            logger.error("Failed to initialize \"Identity Details\" view. Error={}", e.getMessage());
+        }
     }
+
     public void postConstruct() {
 //        if (pgpUtils.hasPrivateKey()) {
 //            try (InputStream fxmlStream = this.getClass().getResourceAsStream("/identityDetails.fxml")) {
@@ -55,14 +66,6 @@ public class IdentityDetailsView extends GridPane {
 //        } else {
 //             logger.debug("no PGP key, requesting wizard to start");
 //        }
-    }
-
-    public void setUserIdLabel(String userIdLabel) {
-        this.userIdLabel.setText(userIdLabel);
-    }
-
-    public void setFingerprintLabel(String fingerprintLabel) {
-        this.fingerprintLabel.setText(fingerprintLabel);
     }
 
     @FXML

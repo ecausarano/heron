@@ -66,9 +66,8 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
                 ContextMenu contextMenu = new ContextMenu();
                 MenuItem signMenuItem = new MenuItem();
 
-                if (delegate.isUserSigningEnabled()) {
-                    signMenuItem.setDisable(false);
-                }
+                signMenuItem.setDisable(!delegate.isUserSigningEnabled());
+
                 signMenuItem.textProperty().bind(Bindings.format("Sign"));
                 signMenuItem.setOnAction(event -> {
                     Bundle item = documentListCell.getItem();
@@ -162,6 +161,7 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
     public void revealIdPopover() {
         if (addFilePopover == null) {
             final IdentityDetailsView identityDetailsView = new IdentityDetailsView(delegateFactory);
+
             addFilePopover = new PopOver(identityDetailsView);
             addFilePopover.setArrowLocation(PopOver.ArrowLocation.RIGHT_TOP);
             addFilePopover.setDetachable(true);
@@ -185,6 +185,6 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
     }
 
     public void setResultView(List<Bundle> resultView) {
-        resultList.getItems().setAll(resultView);
+        resultList.getItems().addAll(resultView);
     }
 }

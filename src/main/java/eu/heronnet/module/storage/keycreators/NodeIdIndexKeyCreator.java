@@ -23,6 +23,5 @@ public class NodeIdIndexKeyCreator implements SecondaryMultiKeyCreator {
     public void createSecondaryKeys(SecondaryDatabase secondary, DatabaseEntry key, DatabaseEntry data, Set<DatabaseEntry> results) {
         Bundle bundle = bundleBinding.entryToObject(data);
         bundle.getStatements().stream().forEach(statement -> results.add(new DatabaseEntry(statement.getPredicate().getNodeId())));
-
     }
 }

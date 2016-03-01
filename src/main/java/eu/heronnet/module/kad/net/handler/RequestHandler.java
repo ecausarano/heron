@@ -69,6 +69,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
                 break;
             case STORE_VALUE_REQUEST:
                 storeValueRequest(context, message.getStoreValueRequest());
+                break;
             default:
                 LOGGER.debug("received unhandledrequest={}", message.getDescriptorForType().getFullName());
         }

@@ -118,7 +118,7 @@ public class FileUploadView extends AnchorPane implements DelegateAware<UIContro
     @FXML
     private void chooseFile(ActionEvent event) throws Exception {
         logger.debug("called file chooser");
-        File file = fileChooser.showOpenDialog(chooseBtn.getScene().getWindow());
+        File file = fileChooser.showOpenDialog(this.getScene().getWindow());
         if (file == null)
             return;
         filePathLabel.setText(file.getAbsolutePath());
