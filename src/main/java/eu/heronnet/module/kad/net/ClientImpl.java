@@ -159,7 +159,7 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
                                         final ByteBuf requestBuffer = Unpooled.wrappedBuffer(request.build().toByteArray());
                                         final DatagramPacket datagramPacket = new DatagramPacket(
                                                 requestBuffer,
-                                                new InetSocketAddress(broadcast, 6565));
+                                                new InetSocketAddress(broadcast, selfNodeProvider.getSelf().getPort()));
                                         channel.writeAndFlush(datagramPacket);
                                         channel.close();
                                         logger.debug("completed operation: {}", future.toString());
@@ -185,7 +185,7 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
         Node self = selfNodeProvider.getSelf();
         self.getAddresses().forEach(address -> {
             Address.Builder addressBuilder = Address.newBuilder()
-                    .setPort(6565)
+                    .setPort(self.getPort())
                     .setIpAddress(ByteString.copyFrom(address));
             selfNodeBuilder.addAddresses(addressBuilder);
         });
@@ -272,7 +272,7 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
             Messages.NetworkNode.Builder selfNodeBuilder = Messages.NetworkNode.newBuilder();
             self.getAddresses().forEach(address -> {
                 Address.Builder addressBuilder = Address.newBuilder()
-                        .setPort(6565)
+                        .setPort(self.getPort())
                         .setIpAddress(ByteString.copyFrom(address));
                 selfNodeBuilder.addAddresses(addressBuilder);
             });
@@ -284,7 +284,7 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
                 addresses.forEach(address -> {
                     final ChannelFuture future;
                     try {
-                        future = tcpBoostrap.connect(InetAddress.getByAddress(address), 6565).sync();
+                        future = tcpBoostrap.connect(InetAddress.getByAddress(address), node.getPort()).sync();
                         final Channel channel = future.awaitUninterruptibly().channel();
 
                         Messages.Request request = requestBuilder.build();

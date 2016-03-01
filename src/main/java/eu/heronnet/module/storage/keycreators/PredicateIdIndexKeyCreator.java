@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * Created by edo on 07/08/15.
  */
 @Component
-public class NodeIdIndexKeyCreator implements SecondaryMultiKeyCreator {
+public class PredicateIdIndexKeyCreator implements SecondaryMultiKeyCreator {
 
     @Inject
     BundleBinding bundleBinding;

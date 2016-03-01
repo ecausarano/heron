@@ -11,7 +11,7 @@ import eu.heronnet.module.storage.binding.BundleBinding;
 import eu.heronnet.module.storage.binding.DateNodeBinding;
 import eu.heronnet.module.storage.binding.NodeBinding;
 import eu.heronnet.module.storage.binding.SubjectNodeBinding;
-import eu.heronnet.module.storage.keycreators.NodeIdIndexKeyCreator;
+import eu.heronnet.module.storage.keycreators.PredicateIdIndexKeyCreator;
 import eu.heronnet.module.storage.keycreators.StringObjectNgramIndexKeyCreator;
 import eu.heronnet.module.storage.keycreators.SubjectIdIndexKeyCreator;
 import org.springframework.context.annotation.Bean;
@@ -35,11 +35,12 @@ public class StorageModuleConfiguration {
     SubjectNodeBinding subjectNodeBinding;
 
     @Inject
-    NodeIdIndexKeyCreator nodeIdIndexKeyCreator;
+    SubjectIdIndexKeyCreator subjectIdIndexKeyCreator;
+    @Inject
+    PredicateIdIndexKeyCreator predicateIdIndexKeyCreator;
     @Inject
     StringObjectNgramIndexKeyCreator stringObjectNgramIndexKeyCreator;
-    @Inject
-    SubjectIdIndexKeyCreator subjectIdIndexKeyCreator;
+
     @Bean
     Environment environment() {
         String dbEnvHome = heronDataRoot + "/db";
@@ -64,17 +65,6 @@ public class StorageModuleConfiguration {
     }
 
     @Bean
-    SecondaryConfig nodeIdIndexConfig() {
-        SecondaryConfig secondaryConfig = new SecondaryConfig();
-        secondaryConfig.setAllowCreate(true);
-        secondaryConfig.setTransactional(true);
-        secondaryConfig.setSortedDuplicates(true);
-        secondaryConfig.setAllowPopulate(true);
-        secondaryConfig.setMultiKeyCreator(nodeIdIndexKeyCreator);
-        return secondaryConfig;
-    }
-
-    @Bean
     SecondaryConfig subjectIdIndexConfig() {
         SecondaryConfig secondaryConfig = new SecondaryConfig();
         secondaryConfig.setAllowCreate(true);
@@ -86,6 +76,18 @@ public class StorageModuleConfiguration {
     }
 
     @Bean
+    SecondaryConfig predicateIdIndexConfig() {
+        SecondaryConfig secondaryConfig = new SecondaryConfig();
+        secondaryConfig.setAllowCreate(true);
+        secondaryConfig.setTransactional(true);
+        secondaryConfig.setSortedDuplicates(true);
+        secondaryConfig.setAllowPopulate(true);
+        secondaryConfig.setMultiKeyCreator(predicateIdIndexKeyCreator);
+        return secondaryConfig;
+    }
+
+
+    @Bean
     SecondaryConfig stringObjectNgramIndexConfig() {
         SecondaryConfig secondaryConfig = new SecondaryConfig();
         secondaryConfig.setAllowCreate(true);
@@ -95,24 +97,4 @@ public class StorageModuleConfiguration {
         secondaryConfig.setMultiKeyCreator(stringObjectNgramIndexKeyCreator);
         return secondaryConfig;
     }
-
-//    @Bean
-//    NodeIdIndexKeyCreator nodeIdIndexKeyCreator() {
-//        return new NodeIdIndexKeyCreator();
-//    }
-//
-//    @Bean
-//    SubjectIdIndexKeyCreator subjectIdIndexKeyCreator() {
-//        return new SubjectIdIndexKeyCreator();
-//    }
-//
-//    @Bean
-//    StringObjectNgramIndexKeyCreator stringObjectNgramIndexKeyCreator() {
-//        return new StringObjectNgramIndexKeyCreator();
-//    }
-//
-//    @Bean
-//    BundleBinding bundleBinding() {
-//        return new BundleBinding();
-//    }
 }

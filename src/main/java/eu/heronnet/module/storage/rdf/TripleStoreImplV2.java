@@ -1,5 +1,9 @@
 package eu.heronnet.module.storage.rdf;
 
+import static com.sleepycat.je.LockMode.DEFAULT;
+import static com.sleepycat.je.OperationStatus.NOTFOUND;
+import static com.sleepycat.je.OperationStatus.SUCCESS;
+
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,12 +50,12 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
 
     @Inject private Environment environment;
     @Inject private DatabaseConfig databaseConfig;
-    @Inject private SecondaryConfig nodeIdIndexConfig;
     @Inject private SecondaryConfig subjectIdIndexConfig;
+    @Inject private SecondaryConfig predicateIdIndexConfig;
     @Inject private SecondaryConfig stringObjectNgramIndexConfig;
 
     private Database bundleStore;
-    private SecondaryDatabase nodeIdIndex;
+    private SecondaryDatabase predicateIdIndex;
     private SecondaryDatabase subjectIdIndex;
     private SecondaryDatabase stringObjectNgramIndex;
     private BundleBinding bundleBinding = new BundleBinding();
@@ -79,8 +83,8 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
         Transaction txn = environment.beginTransaction(null, null);
         try {
             bundleStore = environment.openDatabase(txn, BUNDLE_STORE, databaseConfig);
-            nodeIdIndex = environment.openSecondaryDatabase(txn, NODE_ID_INDEX, bundleStore, nodeIdIndexConfig);
             subjectIdIndex = environment.openSecondaryDatabase(txn, SUBJECT_ID_INDEX, bundleStore, subjectIdIndexConfig);
+            predicateIdIndex = environment.openSecondaryDatabase(txn, PREDICATE_INDEX, bundleStore, predicateIdIndexConfig);
             stringObjectNgramIndex = environment.openSecondaryDatabase(txn, NGRAM_INDEX, bundleStore, stringObjectNgramIndexConfig);
             txn.commit();
         } catch (RuntimeException e) {
@@ -100,8 +104,8 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
     @Override
     protected void shutDown() throws Exception {
 
-        nodeIdIndex.close();
         subjectIdIndex.close();
+        predicateIdIndex.close();
         stringObjectNgramIndex.close();
         bundleStore.close();
 
@@ -143,7 +147,7 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
     public void deleteBySubjectId(byte[] subjectId) {
         Transaction txn = environment.beginTransaction(null, null);
         try (SecondaryCursor cursor = subjectIdIndex.openCursor(txn, null)) {
-            while (cursor.getNext(new DatabaseEntry(), new DatabaseEntry(), LockMode.DEFAULT) == OperationStatus.SUCCESS) {
+            while (cursor.getNext(new DatabaseEntry(), new DatabaseEntry(), DEFAULT) == SUCCESS) {
                 cursor.delete();
             }
             txn.commit();
@@ -173,24 +177,49 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
         ArrayList<SecondaryCursor> cursors = new ArrayList<>();
         DatabaseEntry foundData = new DatabaseEntry();
         try {
+            OperationStatus subjectsStatus = NOTFOUND;
+            OperationStatus predicatesStatus = NOTFOUND;
+            OperationStatus ngramsStatus = NOTFOUND;
             // get a cursor for each search key and check if any data is found
-            OperationStatus operationStatus = OperationStatus.NOTFOUND;
             for (byte[] searchKey : searchKeys) {
                 // open a cursor for each key
-                SecondaryCursor ngramIndexCursor = stringObjectNgramIndex.openCursor(txn, null);
-                cursors.add(ngramIndexCursor);
-                operationStatus = ngramIndexCursor.getSearchKey(new DatabaseEntry(searchKey), foundData, LockMode.DEFAULT);
-                logger.debug("Operation status={}", operationStatus);
-                if (!OperationStatus.SUCCESS.equals(operationStatus)) {
-                    break; // forget it, a key was not found. No use going further
+                final SecondaryCursor subjectIdCursor = subjectIdIndex.openCursor(txn, null);
+                final SecondaryCursor predicateIndexCursor = predicateIdIndex.openCursor(txn, null);
+                final SecondaryCursor ngramIndexCursor = stringObjectNgramIndex.openCursor(txn, null);
+
+                subjectsStatus = subjectIdCursor.getSearchKey(new DatabaseEntry(searchKey), foundData, LockMode.DEFAULT);
+                predicatesStatus = predicateIndexCursor.getSearchKey(new DatabaseEntry(searchKey), foundData, LockMode.DEFAULT);
+                ngramsStatus = ngramIndexCursor.getSearchKey(new DatabaseEntry(searchKey), foundData, LockMode.DEFAULT);
+
+                if (SUCCESS.equals(subjectsStatus)) {
+                    cursors.add(subjectIdCursor);
+                } else {
+                    subjectIdCursor.close();
+                }
+                if (SUCCESS.equals(predicatesStatus)) {
+                    cursors.add(predicateIndexCursor);
+                } else {
+                    predicateIndexCursor.close();
+                }
+
+                if (SUCCESS.equals(ngramsStatus)) {
+                    cursors.add(ngramIndexCursor);
+                } else {
+                    ngramIndexCursor.close();
+                }
+                logger.debug("Operation status for indexes s={}, p={}, o(ng)={}", ngramsStatus, predicatesStatus, ngramsStatus);
+
+                if (cursors.size() == 0) {
+                    break;
                 }
             }
             // was anything found?
-            if (OperationStatus.SUCCESS.equals(operationStatus)) {
+            if (SUCCESS.equals(subjectsStatus) || SUCCESS.equals(predicatesStatus) || SUCCESS.equals(ngramsStatus)) {
                 List<Bundle> foundBundles = new ArrayList<>();
+
                 try (JoinCursor join = bundleStore.join(cursors.toArray(new SecondaryCursor[cursors.size()]), null)) {
                     DatabaseEntry key = new DatabaseEntry();
-                    while (join.getNext(key, foundData, LockMode.DEFAULT) == OperationStatus.SUCCESS) {
+                    while (join.getNext(key, foundData, DEFAULT) == SUCCESS) {
                         Bundle foundBundle = bundleBinding.entryToObject(foundData);
                         // this is a bundle directly related to the search keys
                         byte[] foundSubjectId = foundBundle.getSubject().getNodeId();
@@ -214,10 +243,10 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
             DatabaseEntry secondaryKey = new DatabaseEntry(subjectId);
             DatabaseEntry foundData = new DatabaseEntry();
 
-            OperationStatus status = cursor.getSearchKey(secondaryKey, foundData, LockMode.DEFAULT);
-            while (OperationStatus.SUCCESS.equals(status)) {
+            OperationStatus status = cursor.getSearchKey(secondaryKey, foundData, DEFAULT);
+            while (SUCCESS.equals(status)) {
                 bundles.add(bundleBinding.entryToObject(foundData));
-                status = cursor.getNextDup(secondaryKey, foundData, LockMode.DEFAULT);
+                status = cursor.getNextDup(secondaryKey, foundData, DEFAULT);
             }
             return bundles;
         } catch (Exception e) {
@@ -228,16 +257,14 @@ public class TripleStoreImplV2 extends AbstractIdleService implements Persistenc
 
     @Override
     public List<Bundle> getAll() {
-        ArrayList<Bundle> bundles= new ArrayList<>();
         Transaction txn = environment.beginTransaction(null, null);
-        try {
-            try (Cursor cursor = bundleStore.openCursor(txn, null)) {
-                DatabaseEntry key = new DatabaseEntry();
-                DatabaseEntry value = new DatabaseEntry();
-                while (OperationStatus.SUCCESS.equals(cursor.getNext(key, value, LockMode.DEFAULT))) {
-                    Bundle bundle = bundleBinding.entryToObject(value);
-                    bundles.add(bundle);
-                }
+        try (Cursor cursor = bundleStore.openCursor(txn, null)) {
+            ArrayList<Bundle> bundles= new ArrayList<>();
+            DatabaseEntry key = new DatabaseEntry();
+            DatabaseEntry value = new DatabaseEntry();
+            while (SUCCESS.equals(cursor.getNext(key, value, DEFAULT))) {
+                Bundle bundle = bundleBinding.entryToObject(value);
+                bundles.add(bundle);
             }
             return bundles;
         } catch (Exception e) {

@@ -153,6 +153,10 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
                         StringNode stringNode = (StringNode) statementObject;
                         statementBuilder.setStringValue(stringNode.getData());
                         break;
+                    case BINARY:
+                        BinaryDataNode binaryDataNode = (BinaryDataNode) statementObject;
+                        statementBuilder.setBinaryValue(ByteString.copyFrom(binaryDataNode.getData()));
+                        break;
                     default:
                         LOGGER.debug("ignored unknown node type={}", statementObject.getNodeType());
                 }
