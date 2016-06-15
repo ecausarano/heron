@@ -1,19 +1,5 @@
 package eu.heronnet.module.pgp;
 
-import javax.inject.Inject;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
 import eu.heronnet.model.Bundle;
 import eu.heronnet.model.BundleBuilder;
 import eu.heronnet.model.Statement;
@@ -28,32 +14,30 @@ import org.bouncycastle.bcpg.sig.KeyFlags;
 import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
 import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.PGPEncryptedData;
-import org.bouncycastle.openpgp.PGPKeyPair;
-import org.bouncycastle.openpgp.PGPKeyRingGenerator;
-import org.bouncycastle.openpgp.PGPObjectFactory;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyRing;
-import org.bouncycastle.openpgp.PGPSecretKey;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
-import org.bouncycastle.openpgp.PGPSignature;
-import org.bouncycastle.openpgp.PGPSignatureGenerator;
-import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
-import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
 import org.bouncycastle.openpgp.operator.PBESecretKeyEncryptor;
 import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
-import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
-import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyEncryptorBuilder;
-import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
-import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
-import org.bouncycastle.openpgp.operator.bc.BcPGPKeyPair;
+import org.bouncycastle.openpgp.operator.bc.*;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author edoardocausarano

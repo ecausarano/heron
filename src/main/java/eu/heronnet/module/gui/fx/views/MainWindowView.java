@@ -1,10 +1,6 @@
 package eu.heronnet.module.gui.fx.views;
 
 
-import java.io.InputStream;
-import java.util.List;
-import java.util.function.Function;
-
 import eu.heronnet.model.Bundle;
 import eu.heronnet.module.gui.fx.controller.DelegateAware;
 import eu.heronnet.module.gui.fx.controller.UIController;
@@ -15,18 +11,17 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.controlsfx.control.PopOver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author edoardocausarano
@@ -152,6 +147,7 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
         final Scene scene = new Scene(vBox);
 
         stage.setScene(scene);
+        stage.setResizable(false);
 
         delegate.localSearch("");
         stage.show();
@@ -186,5 +182,9 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
 
     public void setResultView(List<Bundle> resultView) {
         resultList.getItems().addAll(resultView);
+    }
+
+    public void addResult(Bundle result) {
+        resultList.getItems().add(result);
     }
 }

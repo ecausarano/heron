@@ -1,10 +1,5 @@
 package eu.heronnet.module.gui.fx.views;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.function.Function;
-
 import eu.heronnet.model.Bundle;
 import eu.heronnet.module.gui.fx.controller.UIController;
 import eu.heronnet.module.gui.model.DocumentListCell;
@@ -16,6 +11,11 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author edoardocausarano
@@ -29,9 +29,9 @@ public class BundleView extends VBox {
     private UIController delegate;
 
     @FXML
-    ListView<Bundle> listView;
+    private ListView<Bundle> listView;
     @FXML
-    TextField searchField;
+    private TextField searchField;
 
     public BundleView(Function<Class, ?> delegateFactory) {
         this.delegateFactory = delegateFactory;
@@ -62,6 +62,10 @@ public class BundleView extends VBox {
 
     public void update(List<Bundle> items) {
         listView.getItems().addAll(items);
+    }
+
+    public void add(Bundle item) {
+        listView.getItems().add(item);
     }
 
     public void set(List<Bundle> items) {

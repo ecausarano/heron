@@ -1,11 +1,5 @@
 package eu.heronnet.module.gui.fx.controller;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import eu.heronnet.model.Bundle;
@@ -24,6 +18,11 @@ import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import java.io.File;
+import java.util.Collections;
 
 /**
  * @author edoardocausarano
@@ -120,8 +119,7 @@ public class UIController {
         searchByPredicateService.setQuery(Collections.singletonList(HRN.BINARY.toString()));
         searchByPredicateService.start();
         searchByPredicateService.setOnSucceeded(event -> {
-            final List<Bundle> value = searchByPredicateService.getValue();
-            logger.debug("HORRAAAAAY, found {} files", value.size());
+            logger.debug("HORRAAAAAY, found files");
         });
 
     }

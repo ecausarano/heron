@@ -1,30 +1,7 @@
 package eu.heronnet.module.storage.rdf;
 
-import static com.sleepycat.je.LockMode.DEFAULT;
-import static com.sleepycat.je.OperationStatus.NOTFOUND;
-import static com.sleepycat.je.OperationStatus.SUCCESS;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.google.common.util.concurrent.AbstractIdleService;
-import com.sleepycat.je.Cursor;
-import com.sleepycat.je.Database;
-import com.sleepycat.je.DatabaseConfig;
-import com.sleepycat.je.DatabaseEntry;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.JoinCursor;
-import com.sleepycat.je.LockMode;
-import com.sleepycat.je.OperationStatus;
-import com.sleepycat.je.SecondaryConfig;
-import com.sleepycat.je.SecondaryCursor;
-import com.sleepycat.je.SecondaryDatabase;
-import com.sleepycat.je.Transaction;
+import com.sleepycat.je.*;
 import eu.heronnet.model.Bundle;
 import eu.heronnet.model.IdentifierNode;
 import eu.heronnet.model.Node;
@@ -34,6 +11,14 @@ import eu.heronnet.module.storage.util.HexUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.sleepycat.je.LockMode.DEFAULT;
+import static com.sleepycat.je.OperationStatus.NOTFOUND;
+import static com.sleepycat.je.OperationStatus.SUCCESS;
 
 /**
  * @author edoardocausarano

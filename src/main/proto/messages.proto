@@ -46,6 +46,7 @@ message Request {
 message Response {
     required NetworkNode origin = 1;
     required bytes message_id = 2;
+    required bytes request_id = 3;
     oneof body {
     FindValueResponse find_value_response = 5;
     FindNodeResponse find_node_response = 6;

@@ -1,22 +1,7 @@
 package eu.heronnet.module.kad.net.handler;
 
-import javax.inject.Inject;
-import java.net.SocketException;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.protobuf.ByteString;
-import eu.heronnet.model.BinaryDataNode;
-import eu.heronnet.model.Bundle;
-import eu.heronnet.model.BundleBuilder;
-import eu.heronnet.model.DateNode;
-import eu.heronnet.model.DateNodeBuilder;
-import eu.heronnet.model.IRI;
-import eu.heronnet.model.IRIBuilder;
-import eu.heronnet.model.IdentifierNode;
-import eu.heronnet.model.Statement;
-import eu.heronnet.model.StringNode;
-import eu.heronnet.model.StringNodeBuilder;
+import eu.heronnet.model.*;
 import eu.heronnet.model.vocabulary.DC;
 import eu.heronnet.model.vocabulary.HRN;
 import eu.heronnet.module.kad.model.Node;
@@ -33,6 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.net.SocketException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author edoardocausarano
@@ -59,7 +49,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
         final Messages.NetworkNode origin = message.getOrigin();
         switch (message.getBodyCase()) {
             case FIND_VALUE_REQUEST:
-                findValueRequest(context, message.getFindValueRequest());
+                findValueRequest(context, message.getMessageId(), message.getFindValueRequest());
                 break;
             case FIND_NODE_REQUEST:
                 findNodeRequest(context, message.getFindNodeRequest());
@@ -113,6 +103,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
 
             final Messages.Response.Builder responseBuilder = Messages.Response.newBuilder()
                     .setMessageId(ByteString.copyFrom(idGenerator.getId()))
+                    .setRequestId(request.getMessageId())
                     .setOrigin(createSelfNetworkNodeBuilder())
                     .setPingResponse(pingResponse);
 
@@ -122,7 +113,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
         }
     }
 
-    private void findValueRequest(ChannelHandlerContext context, Messages.FindValueRequest request) throws Exception{
+    private void findValueRequest(ChannelHandlerContext context, ByteString messageId, Messages.FindValueRequest request) throws Exception{
         List<ByteString> valuesList = request.getValuesList();
 
         if (LOGGER.isDebugEnabled()) {
@@ -169,6 +160,7 @@ public class RequestHandler extends SimpleChannelInboundHandler<Messages.Request
 
         Messages.Response.Builder messageBuilder = Messages.Response.newBuilder()
                 .setMessageId(ByteString.copyFrom(idGenerator.getId()))
+                .setRequestId(messageId)
                 .setOrigin(createSelfNetworkNodeBuilder())
                 .setFindValueResponse(responseBuilder);
         context.writeAndFlush(messageBuilder.build());

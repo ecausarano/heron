@@ -1,15 +1,5 @@
 package eu.heronnet.module.gui.fx.views;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import eu.heronnet.model.BundleBuilder;
 import eu.heronnet.model.IRIBuilder;
 import eu.heronnet.model.Statement;
@@ -23,22 +13,27 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TablePosition;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
  * @author edoardocausarano
  */
-public class FileUploadView extends AnchorPane implements DelegateAware<UIController> {
+public class FileUploadView extends VBox implements DelegateAware<UIController> {
 
     private static final Logger logger = LoggerFactory.getLogger(FileUploadView.class);
     private final Function<Class, ?> delegateFactory;

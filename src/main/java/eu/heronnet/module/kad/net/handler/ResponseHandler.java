@@ -1,17 +1,7 @@
 package eu.heronnet.module.kad.net.handler;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.common.eventbus.EventBus;
-import eu.heronnet.model.Bundle;
-import eu.heronnet.model.BundleBuilder;
-import eu.heronnet.model.IRIBuilder;
-import eu.heronnet.model.IdentifierNode;
-import eu.heronnet.model.Statement;
-import eu.heronnet.model.StringNodeBuilder;
+import eu.heronnet.model.*;
 import eu.heronnet.module.bus.command.UpdateResults;
 import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.storage.util.HexUtil;
@@ -23,6 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author edoardocausarano

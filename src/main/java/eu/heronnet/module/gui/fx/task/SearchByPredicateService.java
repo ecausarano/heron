@@ -1,14 +1,5 @@
 package eu.heronnet.module.gui.fx.task;
 
-import javax.inject.Inject;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import eu.heronnet.model.Bundle;
 import eu.heronnet.module.storage.Persistence;
 import eu.heronnet.module.storage.util.HexUtil;
@@ -17,6 +8,16 @@ import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Simple implementation to search for N-grams separated by whitespace characters.
@@ -74,7 +75,7 @@ public class SearchByPredicateService extends Service<List<Bundle>> {
                     }
 
                     if (isLocal) {
-                        if ("".equals(query)) {
+                        if (query.size() == 1 && query.get(0).equals("")) {
                             bundles = local.getAll();
                         } else {
                             bundles = local.findByHash(hashes);
@@ -82,10 +83,11 @@ public class SearchByPredicateService extends Service<List<Bundle>> {
                     } else {
                         bundles = distributed.findByHash(hashes);
                     }
+                    return bundles;
                 } catch (NoSuchAlgorithmException e) {
                     logger.error("SHA-256 not available");
+                    return Collections.emptyList();
                 }
-                return bundles;
             }
 
         };

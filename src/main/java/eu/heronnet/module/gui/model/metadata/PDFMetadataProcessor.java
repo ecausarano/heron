@@ -1,11 +1,6 @@
 package eu.heronnet.module.gui.model.metadata;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
+import eu.heronnet.model.DateNodeBuilder;
 import eu.heronnet.model.Statement;
 import eu.heronnet.model.StringNodeBuilder;
 import eu.heronnet.model.vocabulary.DC;
@@ -13,6 +8,12 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 /**
  * @author edoardocausarano
@@ -27,13 +28,22 @@ public class PDFMetadataProcessor implements MetadataProcessor {
         try (PDDocument document = PDDocument.load(file)) {
             PDDocumentInformation documentInformation = document.getDocumentInformation();
             List<Statement> fields = new ArrayList<>();
-            fields.add(new Statement(DC.TITLE, StringNodeBuilder.withString(documentInformation.getTitle())));
-            fields.add(new Statement(DC.CREATOR, StringNodeBuilder.withString(documentInformation.getAuthor())));
+
+            final String title = documentInformation.getTitle();
+            if (title != null) {
+                fields.add(new Statement(DC.TITLE, StringNodeBuilder.withString(title)));
+            }
+
+            final String author = documentInformation.getAuthor();
+            if (author != null) {
+                fields.add(new Statement(DC.CREATOR, StringNodeBuilder.withString(author)));
+            }
 
             final Calendar creationDate = documentInformation.getCreationDate();
             if (creationDate != null) {
-                fields.add(new Statement(DC.DATE, StringNodeBuilder.withString(Integer.toString(creationDate.get(Calendar.YEAR)))));
+                fields.add(new Statement(DC.DATE, DateNodeBuilder.withDate(creationDate.get(Calendar.YEAR))));
             }
+
             fields.add(new Statement(DC.FORMAT, StringNodeBuilder.withString("application/pdf")));
             return fields;
         }
