@@ -13,11 +13,8 @@ public class UIService extends AbstractIdleService {
 
     @Override
     protected void startUp() throws Exception {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Application.launch(HeronApplication.class, "");
-            }
+        Thread thread = new Thread(() -> {
+            Application.launch(HeronApplication.class, "");
         });
         thread.start();
     }

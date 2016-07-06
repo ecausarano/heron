@@ -1,18 +1,14 @@
 package eu.heronnet.module.gui.model.metadata;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import eu.heronnet.model.Statement;
 import org.slf4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author edoardocausarano
@@ -36,12 +32,9 @@ public class FieldProcessorFactory {
     }
 
     public MetadataProcessor getProcessor(String mimeType) {
-        return strategiesByMimeType.getOrDefault(mimeType, new MetadataProcessor() {
-            @Override
-            public List<Statement> process(File file) throws IOException {
-                logger.warn("Unknown mime-type={} processor requested for file={}", mimeType, file);
-                return Collections.emptyList();
-            }
+        return strategiesByMimeType.getOrDefault(mimeType, file -> {
+            logger.warn("Unknown mime-type={} processor requested for file={}", mimeType, file);
+            return Collections.emptyList();
         });
     }
 }
