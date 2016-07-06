@@ -17,12 +17,8 @@
 
 package eu.heronnet.module.kad.net;
 
-import javax.inject.Inject;
-import java.util.List;
-
 import com.google.common.util.concurrent.AbstractIdleService;
 import eu.heronnet.module.kad.net.handler.RequestHandler;
-import eu.heronnet.module.kad.net.handler.ResponseHandler;
 import eu.heronnet.rpc.Messages;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
@@ -48,6 +44,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.inject.Inject;
+import java.util.List;
+
 
 @Component
 public class ServerImpl extends AbstractIdleService implements Server {
@@ -60,8 +59,6 @@ public class ServerImpl extends AbstractIdleService implements Server {
 
     @Inject
     private RequestHandler requestHandler;
-    @Inject
-    private ResponseHandler responseHandler;
 
     private final ChannelInitializer<SocketChannel> tcpChannelInitializer = new ChannelInitializer<SocketChannel>() {
         @Override
@@ -101,7 +98,6 @@ public class ServerImpl extends AbstractIdleService implements Server {
             pipeline.addLast("protobuf Request decoder", new ProtobufDecoder(Messages.Request.getDefaultInstance()));
             pipeline.addLast("protobug Response decoder", new ProtobufDecoder(Messages.Response.getDefaultInstance()));
             pipeline.addLast("request handler", requestHandler);
-            pipeline.addLast("response handler", responseHandler);
         }
     };
 

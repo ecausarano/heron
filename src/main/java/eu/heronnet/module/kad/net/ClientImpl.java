@@ -67,8 +67,6 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
     @Inject
     private RoutingTable<Node, byte[]> routingTable;
     @Inject
-    private ResponseHandler responseHandler;
-    @Inject
     private SelfNodeProvider selfNodeProvider;
     @Inject
     private IdGenerator idGenerator;
@@ -83,8 +81,6 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
 
             pipeline.addLast("protobufResponseDecoder", new ProtobufDecoder(Messages.Response.getDefaultInstance()));
             pipeline.addLast("protobufEncoder", new ProtobufEncoder());
-
-            pipeline.addLast(responseHandler);
         }
     }
 
@@ -92,7 +88,6 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
         @Override
         protected void initChannel(NioDatagramChannel ch) throws Exception {
             ChannelPipeline pipeline = ch.pipeline();
-            pipeline.addLast(new ResponseHandler());
         }
     };
 
@@ -148,7 +143,8 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
     private void broadcastOnInterface(InterfaceAddress interfaceAddress, Messages.Request request) {
         InetAddress broadcast = interfaceAddress.getBroadcast();
         if (broadcast != null) {
-
+            ByteString messageId = request.getMessageId();
+            udpBoostrap.handler(new ResponseHandler(messageId.toByteArray()));
             udpBoostrap.bind(0).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
@@ -276,6 +272,8 @@ public class ClientImpl extends AbstractIdleService implements Persistence {
                 List<byte[]> addresses = node.getAddresses();
                 addresses.forEach(address -> {
                     try {
+                        ByteString messageId = requestBuilder.getMessageId();
+                        tcpBoostrap.handler(new ResponseHandler(messageId.toByteArray()));
                         ChannelFuture connectFuture = tcpBoostrap.connect(InetAddress.getByAddress(address), node.getPort()).sync();
                         connectFuture.addListener(future -> {
                             Messages.Request request = requestBuilder.build();

@@ -1,18 +1,17 @@
 package eu.heronnet.module.kad.net.handler;
 
 import com.google.common.eventbus.EventBus;
+import com.google.protobuf.ByteString;
 import eu.heronnet.model.*;
 import eu.heronnet.module.bus.command.UpdateResults;
 import eu.heronnet.module.kad.model.Node;
 import eu.heronnet.module.storage.util.HexUtil;
 import eu.heronnet.rpc.Messages;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -22,11 +21,14 @@ import java.util.stream.Collectors;
 /**
  * @author edoardocausarano
  */
-@Component
-@ChannelHandler.Sharable
 public class ResponseHandler extends SimpleChannelInboundHandler<Messages.Response> {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
+    private final byte[] correlationId;
+
+    public ResponseHandler(byte[] correlationId) {
+        this.correlationId = correlationId;
+    }
 
     @Inject
     @Qualifier(value = "mainBus")
@@ -34,15 +36,21 @@ public class ResponseHandler extends SimpleChannelInboundHandler<Messages.Respon
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Messages.Response message) throws Exception {
-        switch (message.getBodyCase()) {
-            case FIND_VALUE_RESPONSE:
-                findValueResponseHandler(message);
-                break;
-            case PING_RESPONSE:
-                pingResponse(message);
-                break;
-            default:
-                logger.debug("Received unhandled response of type={}", message.getBodyCase());
+        ByteString requestId = message.getRequestId();
+        logger.debug("received response for requestId={}", requestId);
+        if (requestId.toByteArray().equals(correlationId)) {
+            switch (message.getBodyCase()) {
+                case FIND_VALUE_RESPONSE:
+                    findValueResponseHandler(message);
+                    break;
+                case PING_RESPONSE:
+                    pingResponse(message);
+                    break;
+                default:
+                    logger.debug("Received unhandled response of type={}", message.getBodyCase());
+            }
+        } else {
+            logger.warn("Received alien response for requestId={}", correlationId);
         }
     }
 
@@ -82,6 +90,5 @@ public class ResponseHandler extends SimpleChannelInboundHandler<Messages.Respon
 
         // add node to bucket holder
         logger.debug("Received ping response from node id={}", HexUtil.bytesToHex(node.getId()));
-
     }
 }
