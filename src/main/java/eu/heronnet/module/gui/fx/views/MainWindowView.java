@@ -147,7 +147,7 @@ public class MainWindowView extends VBox implements DelegateAware<UIController> 
         final Scene scene = new Scene(vBox);
 
         stage.setScene(scene);
-        stage.setResizable(false);
+        stage.setResizable(true);
 
         delegate.localSearch("");
         stage.show();

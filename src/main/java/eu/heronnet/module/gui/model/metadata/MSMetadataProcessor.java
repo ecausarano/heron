@@ -1,10 +1,5 @@
 package eu.heronnet.module.gui.model.metadata;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import eu.heronnet.model.Statement;
 import eu.heronnet.model.StringNodeBuilder;
 import eu.heronnet.model.vocabulary.DC;
@@ -13,6 +8,11 @@ import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author edoardocausarano
@@ -29,8 +29,15 @@ public class MSMetadataProcessor implements MetadataProcessor {
 
             PackageProperties properties = opcPackage.getPackageProperties();
 
-            fields.add(new Statement(DC.TITLE, StringNodeBuilder.withString(properties.getTitleProperty().getValue())));
-            fields.add(new Statement(DC.CREATOR, StringNodeBuilder.withString(properties.getCreatorProperty().getValue())));
+            final String title = properties.getTitleProperty().getValue();
+            if (title != null) {
+                fields.add(new Statement(DC.TITLE, StringNodeBuilder.withString(title)));
+            }
+            String creator = properties.getCreatorProperty().getValue();
+            if (creator != null) {
+                fields.add(new Statement(DC.CREATOR, StringNodeBuilder.withString(creator)));
+            }
+
             fields.add(new Statement(DC.FORMAT, StringNodeBuilder.withString("application/vnd.openxmlformats-officedocument.wordprocessingml.document")));
             return fields;
         }
