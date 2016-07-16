@@ -1,15 +1,16 @@
 package eu.heronnet.module.gui;
 
-import javax.inject.Inject;
-import java.util.concurrent.ExecutorService;
-
 import com.google.common.eventbus.EventBus;
 import eu.heronnet.module.gui.fx.controller.UIController;
 import eu.heronnet.module.gui.fx.task.ExtractDocumentMetadataService;
+import eu.heronnet.module.gui.fx.task.PutFileService;
 import eu.heronnet.module.gui.fx.task.SearchByPredicateService;
 import eu.heronnet.module.gui.fx.task.SignBundleService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.inject.Inject;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author edoardocausarano
@@ -42,6 +43,12 @@ public class GuiModuleConfiguration {
     @Bean
     ExtractDocumentMetadataService extractDocumentMetadataService() {
         final ExtractDocumentMetadataService service = new ExtractDocumentMetadataService();
+        service.setExecutor(executor);
+        return service;
+    }
+    @Bean
+    PutFileService putFileService() {
+        PutFileService service = new PutFileService();
         service.setExecutor(executor);
         return service;
     }

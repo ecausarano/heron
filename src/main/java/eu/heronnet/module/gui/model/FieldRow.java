@@ -1,26 +1,64 @@
 package eu.heronnet.module.gui.model;
 
-import javafx.beans.property.SimpleStringProperty;
+import eu.heronnet.model.IRI;
+import eu.heronnet.model.Node;
+import eu.heronnet.model.Statement;
+import javafx.beans.property.adapter.JavaBeanObjectProperty;
+import javafx.beans.property.adapter.JavaBeanObjectPropertyBuilder;
+import javafx.scene.control.TableRow;
 
 /**
+ * Adapter class to display {@link Statement} domain objects in a JavaFX {@link TableRow}
+ *
  * @author edoardocausarano
  */
 public class FieldRow {
 
-    private final SimpleStringProperty name;
-    private final SimpleStringProperty value;
+    private final Statement statement;
 
-    public FieldRow(final String name, final String value) {
-        this.name = new SimpleStringProperty(name);
-        this.value = new SimpleStringProperty(value);
+    private final JavaBeanObjectProperty<IRI> name;
+    private final JavaBeanObjectProperty<Node> value;
+
+    public FieldRow(Statement statement) {
+        this.statement = statement;
+        try {
+            JavaBeanObjectPropertyBuilder<IRI> predicateBuilder = new JavaBeanObjectPropertyBuilder<>();
+            predicateBuilder.bean(statement).name("predicate");
+            this.name = predicateBuilder.build();
+
+            JavaBeanObjectPropertyBuilder<Node> valueBuilder = new JavaBeanObjectPropertyBuilder<>();
+            valueBuilder.bean(statement).name("object");
+            this.value = valueBuilder.build();
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public SimpleStringProperty nameProperty() {
+    public Statement getStatement() {
+        return statement;
+    }
+
+    public IRI getName() {
+        return name.get();
+    }
+
+    public JavaBeanObjectProperty<IRI> nameProperty() {
         return name;
     }
 
+    public void setName(IRI name) {
+        this.name.set(name);
+    }
 
-    public SimpleStringProperty valueProperty() {
+    public Node getValue() {
+        return value.get();
+    }
+
+    public JavaBeanObjectProperty<Node> valueProperty() {
         return value;
+    }
+
+    public void setValue(Node value) {
+        this.value.set(value);
     }
 }

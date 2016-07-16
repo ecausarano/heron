@@ -1,10 +1,9 @@
 package eu.heronnet.module.gui.fx.views;
 
-import eu.heronnet.model.BundleBuilder;
+import eu.heronnet.model.IRI;
 import eu.heronnet.model.IRIBuilder;
 import eu.heronnet.model.Statement;
 import eu.heronnet.model.StringNodeBuilder;
-import eu.heronnet.module.bus.command.Put;
 import eu.heronnet.module.gui.fx.controller.DelegateAware;
 import eu.heronnet.module.gui.fx.controller.UIController;
 import eu.heronnet.module.gui.model.FieldRow;
@@ -14,9 +13,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxTableCell;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +31,6 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author edoardocausarano
@@ -50,9 +52,9 @@ public class FileUploadView extends VBox implements DelegateAware<UIController> 
     @FXML
     private TableView<FieldRow> metaTableView;
     @FXML
-    private TableColumn<FieldRow, String> nameColumn;
+    private TableColumn<FieldRow, IRI> nameColumn;
     @FXML
-    private TableColumn<FieldRow, String> valueColumn;
+    private TableColumn<FieldRow, eu.heronnet.model.Node> valueColumn;
     @FXML
     private TextField newKey;
     @FXML
@@ -61,6 +63,7 @@ public class FileUploadView extends VBox implements DelegateAware<UIController> 
     private Button addMetaButton;
 
     private Path path;
+    private List<Statement> statementList;
 
     private UIController delegate;
 
@@ -78,26 +81,46 @@ public class FileUploadView extends VBox implements DelegateAware<UIController> 
             fileChooser = new FileChooser();
             fileChooser.setTitle("Choose File");
 
-            metaTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-            nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
-            nameColumn.setOnEditCommit(this::onFieldEdit);
-            valueColumn.setCellValueFactory(param -> param.getValue().valueProperty());
-            valueColumn.setOnEditCommit(this::onFieldEdit);
+            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
+            // TODO - provide a list of IRIs
+            nameColumn.setCellFactory(ComboBoxTableCell.forTableColumn());
+            nameColumn.setOnEditCommit(t -> {
+                IRI newName = t.getNewValue();
+
+                ObservableList<FieldRow> items = t.getTableView().getItems();
+                TablePosition<FieldRow, IRI> tablePosition = t.getTablePosition();
+
+                FieldRow fieldRow = items.get(tablePosition.getRow());
+                fieldRow.nameProperty().set(newName);
+            });
+
+            valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+
+            valueColumn.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<eu.heronnet.model.Node>() {
+                @Override
+                public String toString(eu.heronnet.model.Node object) {
+                    return object.getData().toString();
+                }
+
+                @Override
+                public eu.heronnet.model.Node fromString(String string) {
+                    return StringNodeBuilder.withString(string);
+                }
+            }));
+            valueColumn.setOnEditCommit(t -> {
+                eu.heronnet.model.Node newValue = t.getNewValue();
+
+                ObservableList<FieldRow> items = t.getTableView().getItems();
+                TablePosition<FieldRow, eu.heronnet.model.Node> tablePosition = t.getTablePosition();
+
+                FieldRow fieldRow = items.get(tablePosition.getRow());
+                fieldRow.valueProperty().set(newValue);
+            });
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
-    }
-
-    public void onFieldEdit(TableColumn.CellEditEvent<FieldRow, String> event) {
-        String newValue = event.getNewValue();
-
-        ObservableList<FieldRow> items = event.getTableView().getItems();
-        TablePosition<FieldRow, String> tablePosition = event.getTablePosition();
-
-        FieldRow fieldRow = items.get(tablePosition.getRow());
-        fieldRow.valueProperty().set(newValue);
     }
 
     @Override
@@ -124,10 +147,9 @@ public class FileUploadView extends VBox implements DelegateAware<UIController> 
     @FXML
     private void addMetaItem(ActionEvent event) {
         logger.debug("Adding metadata item: {}={}", newKey.getText(), newValue.getText());
-        FieldRow field;
         try {
-            field = new FieldRow(newKey.getText(), newValue.getText());
-            metaTableView.getItems().add(field);
+            Statement statement = new Statement(IRIBuilder.withString(newKey.getText()), StringNodeBuilder.withString(newValue.getText()));
+            metaTableView.getItems().add(new FieldRow(statement));
         } catch (Exception e) {
             logger.error("Error creating field with key={} value={}", newKey.getText(), newValue.getText());
         }
@@ -137,13 +159,7 @@ public class FileUploadView extends VBox implements DelegateAware<UIController> 
     private void confirm(ActionEvent event) throws IOException, NoSuchAlgorithmException {
         logger.debug("confirming file publish");
 
-        BundleBuilder builder = new BundleBuilder();
-        metaTableView.getItems().forEach(fieldRow -> builder.withStatement(new Statement(
-                IRIBuilder.withString(fieldRow.nameProperty().getValue()),
-                StringNodeBuilder.withString(fieldRow.valueProperty().getValue()))));
-
-        Put put = new Put(builder, path);
-        delegate.putFile(put);
+        delegate.putFile(statementList, path);
 
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
@@ -162,10 +178,8 @@ public class FileUploadView extends VBox implements DelegateAware<UIController> 
     }
 
     public void setFields(List<Statement> statements) {
-        final List<FieldRow> fieldRows = statements.stream().map(statement -> new FieldRow(
-                statement.getPredicate().toString(),
-                statement.getObject().toString())).collect(Collectors.toList());
-        metaTableView.getItems().setAll(fieldRows);
-
+        statementList = statements;
+        ObservableList<FieldRow> items = metaTableView.getItems();
+        statements.forEach(statement -> items.add(new FieldRow(statement)));
     }
 }

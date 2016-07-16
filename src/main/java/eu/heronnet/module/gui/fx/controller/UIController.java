@@ -3,10 +3,11 @@ package eu.heronnet.module.gui.fx.controller;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import eu.heronnet.model.Bundle;
+import eu.heronnet.model.Statement;
 import eu.heronnet.model.vocabulary.HRN;
-import eu.heronnet.module.bus.command.Put;
 import eu.heronnet.module.bus.command.UpdateResults;
 import eu.heronnet.module.gui.fx.task.ExtractDocumentMetadataService;
+import eu.heronnet.module.gui.fx.task.PutFileService;
 import eu.heronnet.module.gui.fx.task.SearchByPredicateService;
 import eu.heronnet.module.gui.fx.task.SignBundleService;
 import eu.heronnet.module.gui.fx.views.BundleView;
@@ -22,7 +23,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * @author edoardocausarano
@@ -37,6 +40,8 @@ public class UIController {
     private SearchByPredicateService searchByPredicateService;
     @Inject
     private SignBundleService signBundleService;
+    @Inject
+    private PutFileService putFileService;
     @Inject
     private PGPUtils pgpUtils;
     @Inject
@@ -108,8 +113,14 @@ public class UIController {
         extractDocumentMetadataService.start();
     }
 
-    public void putFile(Put put) {
-        mainBus.post(put);
+    public void putFile(List<Statement> statements, Path path) {
+        putFileService.reset();
+        putFileService.setStatements(statements);
+        putFileService.setPath(path);
+        putFileService.setOnSucceeded(event -> {
+            logger.debug("successfully sent file to network");
+        });
+        putFileService.start();
     }
 
     public void downloadBundle(Bundle item) {

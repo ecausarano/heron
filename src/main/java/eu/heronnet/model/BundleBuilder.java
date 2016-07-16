@@ -1,13 +1,14 @@
 package eu.heronnet.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Builder for bundles
@@ -41,6 +42,11 @@ public class BundleBuilder {
 
     public BundleBuilder withStatement(Statement statement) {
         statements.add(statement);
+        return this;
+    }
+
+    public BundleBuilder addAllStatements(Collection<Statement> statements) {
+        statements.addAll(statements);
         return this;
     }
 

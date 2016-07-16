@@ -8,9 +8,9 @@ package eu.heronnet.model;
  */
 public class Statement {
 
-    private final IRI predicate;
+    private IRI predicate;
 
-    private final Node object;
+    private Node object;
 
     public Statement(
             IRI predicate,
@@ -24,8 +24,16 @@ public class Statement {
         return predicate;
     }
 
+    public void setPredicate(IRI predicate) {
+        this.predicate = predicate;
+    }
+
     public Node getObject() {
         return object;
+    }
+
+    public void setObject(Node object) {
+        this.object = object;
     }
 
     @Override
