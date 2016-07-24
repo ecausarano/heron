@@ -133,7 +133,7 @@ public class PGPUtils {
      * @throws Exception
      */
     public List<Bundle> getKnownPublicKeys() throws Exception {
-        List<Bundle> bundles = persistence.findByPredicate(Collections.singletonList(HRN.PUBLIC_KEY));
+        List<Bundle> bundles = persistence.findByPredicate(Collections.singletonList(HRN.PUBLIC_KEY.getIri()));
         logger.debug("found {} known public keys in storage", bundles.size());
         return bundles;
     }

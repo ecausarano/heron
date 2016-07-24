@@ -4,6 +4,7 @@ import eu.heronnet.model.IRI;
 import eu.heronnet.model.IRIBuilder;
 import eu.heronnet.model.Statement;
 import eu.heronnet.model.StringNodeBuilder;
+import eu.heronnet.model.vocabulary.DC;
 import eu.heronnet.module.gui.fx.controller.DelegateAware;
 import eu.heronnet.module.gui.fx.controller.UIController;
 import eu.heronnet.module.gui.model.FieldRow;
@@ -14,12 +15,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +27,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -81,10 +80,10 @@ public class FileUploadView extends VBox implements DelegateAware<UIController> 
             fileChooser = new FileChooser();
             fileChooser.setTitle("Choose File");
 
-            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+            nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
 
-            // TODO - provide a list of IRIs
-            nameColumn.setCellFactory(ComboBoxTableCell.forTableColumn());
+            IRI[] iris = Arrays.stream(DC.values()).map(dc -> IRIBuilder.withString(dc.toString())).toArray(IRI[]::new);
+            nameColumn.setCellFactory(ComboBoxTableCell.forTableColumn(iris));
             nameColumn.setOnEditCommit(t -> {
                 IRI newName = t.getNewValue();
 
@@ -95,19 +94,8 @@ public class FileUploadView extends VBox implements DelegateAware<UIController> 
                 fieldRow.nameProperty().set(newName);
             });
 
-            valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
-
-            valueColumn.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<eu.heronnet.model.Node>() {
-                @Override
-                public String toString(eu.heronnet.model.Node object) {
-                    return object.getData().toString();
-                }
-
-                @Override
-                public eu.heronnet.model.Node fromString(String string) {
-                    return StringNodeBuilder.withString(string);
-                }
-            }));
+            valueColumn.setCellValueFactory(param -> param.getValue().valueProperty());
+            valueColumn.setCellFactory(param -> new NodeCellAdapter());
             valueColumn.setOnEditCommit(t -> {
                 eu.heronnet.model.Node newValue = t.getNewValue();
 

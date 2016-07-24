@@ -31,14 +31,14 @@ public class MSMetadataProcessor implements MetadataProcessor {
 
             final String title = properties.getTitleProperty().getValue();
             if (title != null) {
-                fields.add(new Statement(DC.TITLE, StringNodeBuilder.withString(title)));
+                fields.add(new Statement(DC.TITLE.getIri(), StringNodeBuilder.withString(title)));
             }
             String creator = properties.getCreatorProperty().getValue();
             if (creator != null) {
-                fields.add(new Statement(DC.CREATOR, StringNodeBuilder.withString(creator)));
+                fields.add(new Statement(DC.CREATOR.getIri(), StringNodeBuilder.withString(creator)));
             }
 
-            fields.add(new Statement(DC.FORMAT, StringNodeBuilder.withString("application/vnd.openxmlformats-officedocument.wordprocessingml.document")));
+            fields.add(new Statement(DC.FORMAT.getIri(), StringNodeBuilder.withString("application/vnd.openxmlformats-officedocument.wordprocessingml.document")));
             return fields;
         }
         catch (InvalidFormatException e) {

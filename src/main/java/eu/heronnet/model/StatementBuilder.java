@@ -1,8 +1,8 @@
 package eu.heronnet.model;
 
-import java.security.NoSuchAlgorithmException;
-
 import eu.heronnet.model.vocabulary.HRN;
+
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Builder for {@link Statement Statements}
@@ -19,6 +19,6 @@ public class StatementBuilder {
      * @throws NoSuchAlgorithmException
      */
     public static Statement pgpSignature(String signature) throws NoSuchAlgorithmException {
-        return new Statement(HRN.SIGNATURE, StringNodeBuilder.withString(signature));
+        return new Statement(HRN.SIGNATURE.getIri(), StringNodeBuilder.withString(signature));
     }
 }

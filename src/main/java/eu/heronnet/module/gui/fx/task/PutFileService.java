@@ -64,7 +64,7 @@ public class PutFileService extends Service<Void> {
                         final byte[] fileHash = digest.digest();
                         bundleBuilder.withSubject(new IdentifierNode(fileHash));
                         bundleBuilder.withStatement(new Statement(
-                                HRN.BINARY,
+                                HRN.BINARY.getIri(),
                                 // TODO - introduce a type that doesn't contain the bytes but a reference to the file to be streamed
                                 new BinaryDataNode(fileHash, Files.readAllBytes(path))));
                     }

@@ -2,7 +2,10 @@ package eu.heronnet.module.gui.model;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import eu.heronnet.model.*;
+import eu.heronnet.model.BinaryDataNode;
+import eu.heronnet.model.Bundle;
+import eu.heronnet.model.Node;
+import eu.heronnet.model.Statement;
 import eu.heronnet.model.vocabulary.DC;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
@@ -82,7 +85,7 @@ public class DocumentListCell extends ListCell<Bundle> {
                 // TODO - add adaptors
                 Node object = statement.getObject();
                 if (!(object instanceof BinaryDataNode)) {
-                    IRI predicate = statement.getPredicate();
+                    DC predicate = DC.fromString(statement.getPredicate().getData());
                     if (DC.TYPE.equals(predicate)) {
                         // TODO set icon
                         icon.setIcon(FontAwesomeIcon.FILE_PDF_ALT);
