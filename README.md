@@ -1,19 +1,17 @@
 heron
 =====
 
-A distributed platform for the dissemination of culture
+a peer 2 peer, distributed, storage and indexing facility
 
 
-Design goal of the tool is to provide a simple platform for the trusted publication, search and manipulation of artifacts over a P2P network in order to facilitate and encourage peer-reviewed dissemination of Culture and Knowledge.
+Heron provides a simple platform for the trusted publication, search and retrieval of data over a P2P network in order to facilitate and encourage peer-reviewed sharing of information.
 
-In broad terms the tool consists of:
+Epics:
 
-1. A DHT implementatin (tentatively Kademlia) to provide the underlying platform for the distribution of the artifacts and of their indexed metadata attributes.
-2. An interface and mechanism to publish and manipulate the metadata contained in the DHT.
-3. A mechanism to issue distributed search queries on the distributed metadata index.  
-4. A mechanism (tentatively GPG) to cryptographically apply a "seal" to metadata attributes and transactions affecting them (such as PUBLISH, RETRACT, ENDORSE, UNENDORSE) published to the DHT.
-5. A mechanism - similar in principle to the PGP WOT or Liquid Feedback - to build, maintain and publish a social graph of the cryptographic keys associated to the P2P network users.
-6. A mechanism to build and publish metadata maps, overlays and stories.
-
-Key to the platform design and goal is the trust assigned by each participant to their immediate and transitive peers. This trust is embedded into the metadata published on the DHT by means of the aforementioned cryptographic seals.
-
+1. A distributed hash table (DHT) to store data, metadata and indexes over a peer 2 peer network.
+2. A UI to upload, annotate, extract metadata and publish to the DHT.
+3. A UI to issue distributed search queries on the distributed metadata index (filtered by peer signature)  
+4. Cryptographic routines (GPG) to create digital identities, trust relations and manage the social graph of the platform Web of Trust (WOT.)
+5. A UI to cryptographically "sign" uploads (metadata attributes and transactions affecting them) to the DHT. 
+6. UI elements and a metadata item to represent the peer review process (such as PUBLISH, RETRACT, ENDORSE, UNENDORSE)
+7. A UI to draft and publish new metadata collections and format definitions, maps, overlays, comments, stories... 
