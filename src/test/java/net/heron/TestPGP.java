@@ -18,10 +18,6 @@
 package net.heron;
 
 
-import java.io.IOException;
-
-import org.junit.Test;
-
 /**
  *
  * Spunti...
@@ -31,18 +27,15 @@ import org.junit.Test;
  */
 public class TestPGP {
 
-    @Test
     public void generatePGPKey() {
 
     }
 
-    @Test
-    public void generatePGPKeyring() throws IOException {
+    public void generatePGPKeyring() {
 //        PGPKeyPair keyPair = new BcPGPKeyPair(PGPPublicKey.ECDSA, )
 
     }
 
-    @Test
     public void signData() {
 
     }

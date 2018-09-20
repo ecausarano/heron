@@ -29,14 +29,11 @@ public class MSMetadataProcessor implements MetadataProcessor {
 
             PackageProperties properties = opcPackage.getPackageProperties();
 
-            final String title = properties.getTitleProperty().getValue();
-            if (title != null) {
-                fields.add(new Statement(DC.TITLE.getIri(), StringNodeBuilder.withString(title)));
-            }
-            String creator = properties.getCreatorProperty().getValue();
-            if (creator != null) {
-                fields.add(new Statement(DC.CREATOR.getIri(), StringNodeBuilder.withString(creator)));
-            }
+            properties.getTitleProperty().ifPresent(title ->
+                    fields.add(new Statement(DC.TITLE.getIri(), StringNodeBuilder.withString(title))));
+
+            properties.getCreatorProperty().ifPresent(creator ->
+                    fields.add(new Statement(DC.CREATOR.getIri(), StringNodeBuilder.withString(creator))));
 
             fields.add(new Statement(DC.FORMAT.getIri(), StringNodeBuilder.withString("application/vnd.openxmlformats-officedocument.wordprocessingml.document")));
             return fields;
