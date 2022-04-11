@@ -10,6 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -37,21 +38,36 @@ public class SpringConfiguration {
     @Bean
     String heronDataRoot() throws IOException {
         String dataFolder;
-
         switch (System.getProperty("os.name")) {
             case "Mac OS X":
                 dataFolder = System.getProperty("user.home") + "/Library/eu.heronnet.Heron";
+                Files.createDirectories(
+                        Paths.get(dataFolder),
+                        PosixFilePermissions.asFileAttribute(
+                                EnumSet.of(
+                                        PosixFilePermission.OWNER_READ,
+                                        PosixFilePermission.OWNER_WRITE,
+                                        PosixFilePermission.OWNER_EXECUTE)));
+                break;
+            case "Windows 10":
+            case "Windows 11":
+                dataFolder = System.getProperty("user.home") + "/heron";
+                File file = new File(dataFolder);
+                file.mkdir();
+                file.setReadable(true);
+                file.setWritable(true);
                 break;
             default:
-                dataFolder = System.getProperty("user.home") + "/heron";
+                dataFolder = System.getProperty("user.home") + ".heron";
+                Files.createDirectories(
+                        Paths.get(dataFolder),
+                        PosixFilePermissions.asFileAttribute(
+                                EnumSet.of(
+                                        PosixFilePermission.OWNER_READ,
+                                        PosixFilePermission.OWNER_WRITE,
+                                        PosixFilePermission.OWNER_EXECUTE)));
+
         }
-        Files.createDirectories(
-                Paths.get(dataFolder),
-                PosixFilePermissions.asFileAttribute(
-                        EnumSet.of(
-                                PosixFilePermission.OWNER_READ,
-                                PosixFilePermission.OWNER_WRITE,
-                                PosixFilePermission.OWNER_EXECUTE)));
         return dataFolder;
     }
 
