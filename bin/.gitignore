@@ -10,7 +10,3 @@ target/
 *.jar
 *.war
 *.ear
-
-.jqwik-database
-
-identity.*

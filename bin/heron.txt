@@ -1,0 +1,37 @@
+Hello all,
+
+I would like to describe a project I have been working on over the past couple months, hoping it will inspire you as much as it does for me.
+
+The objective is to deliver a software platform to assist the fair diffusion of knowledge, while guaranteeing its quality and attribution to the participants to its growth.
+
+To this day several information repositories are available online, some are libre like WikiPedia or ArXiv, other free like Wolfram's MathWorld, while other offer varying deegrees of access often requiring the payment of a fee. While I don't want to imply an ethical ranking of these services, I feel that open, unfettered access to information should be among the most sought for qualities.
+
+I also understant that organizing a community around an information repository and the effort to guarantee its quality come at a cost, and the burden shouldn't be solely on the shoulders of the - often pro bono - contributors (authors, reviewers, administrators.) One of the most significant characteristics of these efforts, is that they are are built around a centralized client-server paradigm, and require a substantial investment in infrastructure, both for startup and subsequent maintenance of such a repository.
+
+This amounts to a de-facto growth barrier, limiting the scope and capacity to that of the organization managing the information repository and its community.
+
+I have a proposal to diffuse such cost to such an extent, as to make the economic effort of each participant insignificant.
+
+It consists of a computer network platform, over which knowledge-sharing communities can self-organize, determining the most useful data-exchange formats, while miniziming infrastructural costs. It's essential components are:
+
+1. a distributed information repository (Distributed Hash Table, DHT) spread over all participating network nodes, for the purpose of (redundantly) disseminating original, triples, and derived data information items. The implementation is based on the Kademlia algorithm commonly used in P2P networks such as eMule.
+
+2. a peer identification mechanism necessary for the cryptographic certification of all distributed content. The implementation is based on PGP, backed by the DHT and consists of cryptographic metadata related to the other information items distributed on the P2P network. This arrangement will allow for the unequivocal identification of sources and easy assessment of the quality of information items, based on the reliability of their sources.
+
+3. a tool for the construction and maintenance of "social graphs" based on the establishment of transitive trust relationships (defined in the PGP model as "Web of Trust", WOT) between platform users, disseminated over the DHT as metadata.
+
+4. the emergence of community-driven formats (RDF) that become commonly accepted to identify significant attributes of the distributed content, such as primitive information items, collections of derived data, information scoring an so on. Definitions are to be disseminated over the same DHT, cryptographically signed, while the evolution into standards is to be entirely driven by the community, on a volutary basis.
+
+5. a distributed query tool to search and filter the DHT based on: the primitive items contents, their derived and triples data attributes. Criteria for filtering are in principle arbitrary, but accepted on a voluntary basis by each participating peer as a result of the community-driven standardization process.
+
+This is Heron, in very broad and abstract terms. A more practical application of if would be the following:
+
+A desktop application, not so different from many P2P clients, that lets scientific researches sign and distribute their papers, while other peer scientists review and comment the drafts. Eventually a consensus is reached on a version and a "seal of endorsement" is signed and distributed by peer reviewers. Other users can then search for papers that match their search criteria, among which is the condition that the documents carry this "seal of endorsement" signed by a trusted scientist, who is either directly trusted or endorsed by the community at large. Aggregated collections of documents could be "sealed and published" by Scientific Society representatives or Universities, creating the equivalent of proceedings, journals, indexes, etc...
+
+All this activity is sustained by the decentralized Heron platform, minimizing the infrastructure investment of all participants, yet providing a mechanism to guarantee trustworthiness and fidelity of the published material.
+
+I hope this lengthy description of Heron has inspired you with the same excitement that I have. I'm looking for fellows to progress this project into reality.
+
+
+Sincerely,
+Edoardo Causarano 

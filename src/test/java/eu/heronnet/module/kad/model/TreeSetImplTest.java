@@ -1,12 +1,13 @@
 package eu.heronnet.module.kad.model;
 
-import static org.testng.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+
 
 /**
  * @author edoardocausarano

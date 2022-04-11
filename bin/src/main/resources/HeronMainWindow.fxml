@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" type="VBox" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
+            <menus>
+                <Menu mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="New" />
+                        <MenuItem mnemonicParsing="false" text="Open…" />
+                        <Menu mnemonicParsing="false" text="Open Recent" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="Close" />
+                        <MenuItem mnemonicParsing="false" text="Save" />
+                        <MenuItem mnemonicParsing="false" text="Save As…" />
+                        <MenuItem mnemonicParsing="false" text="Revert" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="Preferences…" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="Quit" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Debug">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#openLocalStoreView" text="Show local store" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="About MyHelloApp" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+              <BorderPane maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+                  <center>
+                      <ListView fx:id="resultList" BorderPane.alignment="CENTER">
+                          <BorderPane.margin>
+                              <Insets bottom="14.0" left="14.0" right="14.0" />
+                          </BorderPane.margin>
+                      </ListView>
+                  </center>
+                  <top>
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="14.0" BorderPane.alignment="CENTER">
+               <children>
+                            <AnchorPane>
+                     <children>
+                                    <Button fx:id="addBtn" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#addFile" text="+" textAlignment="CENTER" textOverrun="CLIP" AnchorPane.leftAnchor="0.0" />
+                        <Button fx:id="idBtn" mnemonicParsing="false" onAction="#revealIdPopover" style="-fx-font-family: FontAwesome; -fx-font-size: 16.0;" styleClass="awesome" text="+" AnchorPane.rightAnchor="0.0" />
+                     </children>
+                            </AnchorPane>
+                              <HBox spacing="14.0">
+                                  <children>
+                                      <TextField fx:id="searchField" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minWidth="-Infinity" onAction="#search" HBox.hgrow="ALWAYS" />
+                                      <Button fx:id="searchButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#search" text="Search" />
+                                  </children>
+                              </HBox>
+               </children>
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
+               <padding>
+                  <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+               </padding>
+            </VBox>
+                  </top>
+         <bottom>
+         </bottom>
+              </BorderPane>
+    </children>
+</fx:root>

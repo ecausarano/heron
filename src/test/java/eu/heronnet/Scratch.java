@@ -32,18 +32,17 @@ import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyEncryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.bc.BcPGPKeyPair;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.Test;
 
 /**
  * @author edoardocausarano
  */
 @ContextConfiguration(classes = {Scratch.TestConfig.class})
 
-public class Scratch extends AbstractTestNGSpringContextTests {
+public class Scratch {
 
     @Inject
     private PGPUtils pgpUtils;

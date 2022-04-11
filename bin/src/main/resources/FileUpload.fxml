@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" type="VBox" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="SOMETIMES">
+         <children>
+            <VBox maxHeight="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" spacing="14.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <HBox minHeight="-Infinity" minWidth="-Infinity" spacing="14.0">
+                     <children>
+                        <Button fx:id="chooseBtn" contentDisplay="CENTER" mnemonicParsing="false" onAction="#chooseFile" text="Choose File" />
+                        <Label fx:id="filePathLabel" contentDisplay="CENTER" minWidth="-Infinity" text="File Path" HBox.hgrow="ALWAYS" />
+                     </children>
+                  </HBox>
+                  <TableView fx:id="metaTableView" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" tableMenuButtonVisible="true" VBox.vgrow="SOMETIMES">
+                     <columns>
+                        <TableColumn fx:id="nameColumn" text="Key" />
+                        <TableColumn fx:id="valueColumn" text="Value" />
+                     </columns>
+                     <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                     </columnResizePolicy>
+                  </TableView>
+                  <HBox minHeight="-Infinity" minWidth="-Infinity" spacing="14.0">
+                     <children>
+                        <TextField fx:id="newKey" promptText="key" />
+                        <TextField fx:id="newValue" promptText="value" />
+                        <Button fx:id="addMetaBtn" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#addMetaItem" text="Add" />
+                     </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+               </padding>
+            </VBox>
+         </children>
+      </AnchorPane>
+      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity">
+         <children>
+            <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" spacing="14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
+               <children>
+                  <Button fx:id="cancelBtn" cancelButton="true" mnemonicParsing="false" onAction="#cancel" text="Cancel" />
+                  <Button fx:id="confirmBtn" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#confirm" text="Confirm" />
+               </children>
+               <padding>
+                  <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+               </padding>
+            </HBox>
+         </children>
+      </AnchorPane>
+   </children>
+</fx:root>
